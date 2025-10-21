@@ -1,0 +1,212 @@
+import 'dart:ui';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../providers/auth_provider.dart';
+import '../../providers/habit_provider.dart';
+import '../../providers/social_provider.dart';
+import 'habits_tab.dart';
+import 'social_tab.dart';
+import 'profile_tab.dart';
+
+class HomeScreen extends ConsumerStatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen>
+    with TickerProviderStateMixin {
+  int _currentIndex = 0;
+  late AnimationController _animationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    // Load data after the first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadData();
+    });
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadData() async {
+    final authState = ref.read(authProvider);
+
+    if (authState.user != null) {
+      await Future.wait([
+        ref.read(habitProvider.notifier).loadHabits(authState.user!.id),
+        ref.read(socialProvider.notifier).loadFriends(authState.user!.id),
+        ref.read(socialProvider.notifier).loadActivityFeed(authState.user!.id),
+      ]);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final List<Widget> tabs = [
+      const HabitsTab(),
+      const SocialTab(),
+      const ProfileTab(),
+    ];
+
+    return Scaffold(
+      extendBody: true,
+      backgroundColor: isDark ? Colors.grey[900] : Colors.grey[100],
+      body: Stack(
+        children: [
+          // Background gradient for depth
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: isDark
+                    ? [
+                        Colors.grey[900]!,
+                        Colors.grey[850]!,
+                      ]
+                    : [
+                        Colors.grey[100]!,
+                        Colors.blue[50]!,
+                      ],
+              ),
+            ),
+          ),
+          // Content
+          IndexedStack(
+            index: _currentIndex,
+            children: tabs,
+          ),
+        ],
+      ),
+      bottomNavigationBar: _buildGlassBottomNav(isDark),
+    );
+  }
+
+  Widget _buildGlassBottomNav(bool isDark) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            height: 70,
+            decoration: BoxDecoration(
+              color: isDark
+                  ? Colors.black.withOpacity(0.6)
+                  : Colors.white.withOpacity(0.7),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: isDark
+                    ? Colors.white.withOpacity(0.15)
+                    : Colors.white.withOpacity(0.5),
+                width: 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(isDark ? 0.5 : 0.15),
+                  blurRadius: 30,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildNavItem(
+                  index: 0,
+                  icon: Icons.check_circle_outline,
+                  selectedIcon: Icons.check_circle,
+                  label: 'Habits',
+                  isDark: isDark,
+                ),
+                _buildNavItem(
+                  index: 1,
+                  icon: Icons.people_outline,
+                  selectedIcon: Icons.people,
+                  label: 'Social',
+                  isDark: isDark,
+                ),
+                _buildNavItem(
+                  index: 2,
+                  icon: Icons.person_outline,
+                  selectedIcon: Icons.person,
+                  label: 'Profile',
+                  isDark: isDark,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem({
+    required int index,
+    required IconData icon,
+    required IconData selectedIcon,
+    required String label,
+    required bool isDark,
+  }) {
+    final isSelected = _currentIndex == index;
+    final color = isSelected
+        ? Theme.of(context).colorScheme.primary
+        : (isDark ? Colors.grey[400] : Colors.grey[600]);
+
+    return Expanded(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            setState(() {
+              _currentIndex = index;
+            });
+            _animationController.forward(from: 0);
+          },
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AnimatedScale(
+                  scale: isSelected ? 1.1 : 1.0,
+                  duration: const Duration(milliseconds: 200),
+                  child: Icon(
+                    isSelected ? selectedIcon : icon,
+                    color: color,
+                    size: 26,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                AnimatedDefaultTextStyle(
+                  duration: const Duration(milliseconds: 200),
+                  style: TextStyle(
+                    fontSize: isSelected ? 12 : 11,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                    color: color,
+                  ),
+                  child: Text(label),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
