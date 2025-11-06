@@ -1,7 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
-class GlassCard extends StatelessWidget {
+/// A reusable glass morphism card widget following Apple's liquid glass UI/UX design
+class GlassCard extends StatefulWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? margin;
@@ -13,6 +14,7 @@ class GlassCard extends StatelessWidget {
   final BoxBorder? border;
   final VoidCallback? onTap;
   final List<BoxShadow>? shadows;
+  final bool enableGlow;
 
   const GlassCard({
     required this.child,
@@ -26,8 +28,41 @@ class GlassCard extends StatelessWidget {
     this.border,
     this.onTap,
     this.shadows,
+    this.enableGlow = true,
     super.key,
   });
+
+  @override
+  State<GlassCard> createState() => _GlassCardState();
+}
+
+class _GlassCardState extends State<GlassCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _glowController;
+  late Animation<double> _glowAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.enableGlow) {
+      _glowController = AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 2000),
+      )..repeat(reverse: true);
+
+      _glowAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
+        CurvedAnimation(parent: _glowController, curve: Curves.easeInOut),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    if (widget.enableGlow) {
+      _glowController.dispose();
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,24 +70,24 @@ class GlassCard extends StatelessWidget {
     final defaultColor =
         isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.7);
 
-    final content = ClipRRect(
-      borderRadius: BorderRadius.circular(borderRadius),
+    Widget content = ClipRRect(
+      borderRadius: BorderRadius.circular(widget.borderRadius),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+        filter: ImageFilter.blur(sigmaX: widget.blur, sigmaY: widget.blur),
         child: Container(
-          width: width,
-          height: height,
+          width: widget.width,
+          height: widget.height,
           decoration: BoxDecoration(
-            color: color ?? defaultColor,
-            borderRadius: BorderRadius.circular(borderRadius),
-            border: border ??
+            color: widget.color ?? defaultColor,
+            borderRadius: BorderRadius.circular(widget.borderRadius),
+            border: widget.border ??
                 Border.all(
                   color: isDark
                       ? Colors.white.withOpacity(0.2)
                       : Colors.white.withOpacity(0.5),
                   width: 1.5,
                 ),
-            boxShadow: shadows ??
+            boxShadow: widget.shadows ??
                 [
                   BoxShadow(
                     color: isDark
@@ -63,20 +98,46 @@ class GlassCard extends StatelessWidget {
                   ),
                 ],
           ),
-          padding: padding,
-          child: child,
+          padding: widget.padding,
+          child: widget.child,
         ),
       ),
     );
 
-    if (onTap != null) {
+    // Add glow effect if enabled
+    if (widget.enableGlow) {
+      content = AnimatedBuilder(
+        animation: _glowAnimation,
+        builder: (context, child) {
+          return Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(widget.borderRadius),
+              boxShadow: [
+                BoxShadow(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withOpacity(0.15 * _glowAnimation.value),
+                  blurRadius: 30 * _glowAnimation.value,
+                  spreadRadius: 2 * _glowAnimation.value,
+                ),
+              ],
+            ),
+            child: child,
+          );
+        },
+        child: content,
+      );
+    }
+
+    if (widget.onTap != null) {
       return Container(
-        margin: margin,
+        margin: widget.margin,
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(borderRadius),
+            onTap: widget.onTap,
+            borderRadius: BorderRadius.circular(widget.borderRadius),
             child: content,
           ),
         ),
@@ -84,12 +145,13 @@ class GlassCard extends StatelessWidget {
     }
 
     return Container(
-      margin: margin,
+      margin: widget.margin,
       child: content,
     );
   }
 }
 
+/// A glass app bar with blur effect
 class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final List<Widget>? actions;
@@ -177,8 +239,30 @@ class GlassButton extends StatefulWidget {
   State<GlassButton> createState() => _GlassButtonState();
 }
 
-class _GlassButtonState extends State<GlassButton> {
+class _GlassButtonState extends State<GlassButton>
+    with SingleTickerProviderStateMixin {
   bool _isPressed = false;
+  late AnimationController _pulseController;
+  late Animation<double> _pulseAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
+
+    _pulseAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -192,36 +276,57 @@ class _GlassButtonState extends State<GlassButton> {
       child: AnimatedScale(
         scale: _isPressed ? 0.95 : 1.0,
         duration: const Duration(milliseconds: 100),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(widget.borderRadius),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: Container(
+        child: AnimatedBuilder(
+          animation: _pulseAnimation,
+          builder: (context, child) {
+            return Container(
               decoration: BoxDecoration(
-                color: widget.color ??
-                    (isDark
-                        ? Colors.white.withOpacity(0.15)
-                        : Colors.white.withOpacity(0.8)),
                 borderRadius: BorderRadius.circular(widget.borderRadius),
-                border: Border.all(
-                  color: isDark
-                      ? Colors.white.withOpacity(0.2)
-                      : Colors.white.withOpacity(0.6),
-                  width: 1.5,
-                ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .primary
+                        .withOpacity(0.2 * _pulseAnimation.value),
+                    blurRadius: 20 * _pulseAnimation.value,
+                    spreadRadius: 1 * _pulseAnimation.value,
                   ),
                 ],
               ),
-              padding: widget.padding ??
-                  const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              child: widget.child,
-            ),
-          ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(widget.borderRadius),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: widget.color ??
+                          (isDark
+                              ? Colors.white.withOpacity(0.15)
+                              : Colors.white.withOpacity(0.8)),
+                      borderRadius: BorderRadius.circular(widget.borderRadius),
+                      border: Border.all(
+                        color: isDark
+                            ? Colors.white.withOpacity(0.2)
+                            : Colors.white.withOpacity(0.6),
+                        width: 1.5,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    padding: widget.padding ??
+                        const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12),
+                    child: widget.child,
+                  ),
+                ),
+              ),
+            );
+          },
         ),
       ),
     );

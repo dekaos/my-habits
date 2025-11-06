@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/auth_provider.dart';
@@ -19,6 +20,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     with TickerProviderStateMixin {
   int _currentIndex = 0;
   late AnimationController _animationController;
+  late AnimationController _particlesController;
+  late AnimationController _glowController;
 
   @override
   void initState() {
@@ -27,6 +30,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
+
+    // Particles animation for subtle background movement
+    _particlesController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 20),
+    )..repeat();
+
+    // Glow effect animation
+    _glowController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    )..repeat(reverse: true);
+
     // Load data after the first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadData();
@@ -36,6 +52,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   @override
   void dispose() {
     _animationController.dispose();
+    _particlesController.dispose();
+    _glowController.dispose();
     super.dispose();
   }
 
@@ -62,28 +80,59 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
     return Scaffold(
       extendBody: true,
-      backgroundColor: isDark ? Colors.grey[900] : Colors.grey[100],
+      backgroundColor:
+          isDark ? const Color(0xFF0F0F1E) : const Color(0xFFF8F9FE),
       body: Stack(
         children: [
-          // Background gradient for depth
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: isDark
-                    ? [
-                        Colors.grey[900]!,
-                        Colors.grey[850]!,
-                      ]
-                    : [
-                        Colors.grey[100]!,
-                        Colors.blue[50]!,
-                      ],
-              ),
-            ),
+          // Animated gradient background
+          AnimatedBuilder(
+            animation: _particlesController,
+            builder: (context, child) {
+              return Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: isDark
+                        ? [
+                            const Color(0xFF1E1B4B),
+                            const Color(0xFF312E81),
+                            Color.lerp(
+                              const Color(0xFF1E3A8A),
+                              const Color(0xFF312E81),
+                              (_glowController.value * 0.3),
+                            )!,
+                          ]
+                        : [
+                            const Color(0xFFE0F2FE),
+                            Color.lerp(
+                              const Color(0xFFFAE8FF),
+                              const Color(0xFFE0F2FE),
+                              (_glowController.value * 0.3),
+                            )!,
+                            const Color(0xFFFEF3C7),
+                          ],
+                  ),
+                ),
+              );
+            },
           ),
-          // Content
+
+          // Subtle particles background
+          AnimatedBuilder(
+            animation: _particlesController,
+            builder: (context, child) {
+              return CustomPaint(
+                painter: HomeParticlesPainter(
+                  animation: _particlesController.value,
+                  isDark: isDark,
+                ),
+                size: Size.infinite,
+              );
+            },
+          ),
+
+          // Content with fade-in animation
           IndexedStack(
             index: _currentIndex,
             children: tabs,
@@ -208,5 +257,49 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         ),
       ),
     );
+  }
+}
+
+// Particles painter for subtle animated background
+class HomeParticlesPainter extends CustomPainter {
+  final double animation;
+  final bool isDark;
+
+  HomeParticlesPainter({required this.animation, required this.isDark});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..style = PaintingStyle.fill
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2);
+
+    // Generate fewer, more subtle particles than splash screen
+    for (int i = 0; i < 15; i++) {
+      final random = math.Random(i);
+      final x = random.nextDouble() * size.width;
+      final baseY = random.nextDouble() * size.height;
+
+      // Gentle floating animation
+      final floatOffset =
+          math.sin((animation + random.nextDouble()) * math.pi * 2) * 20;
+      final y = baseY + floatOffset;
+
+      final particleSize = 1.5 + (random.nextDouble() * 2.5);
+      final opacity = 0.1 + (random.nextDouble() * 0.2);
+
+      paint.color = (isDark ? Colors.white : Colors.black87).withOpacity(
+          opacity * (0.4 + (math.sin(animation * math.pi * 2) * 0.3)));
+
+      canvas.drawCircle(
+        Offset(x, y),
+        particleSize,
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(HomeParticlesPainter oldDelegate) {
+    return animation != oldDelegate.animation;
   }
 }

@@ -8,11 +8,16 @@ import '../habits/habit_detail_screen.dart';
 import '../../widgets/habit_card.dart';
 import '../../widgets/glass_card.dart';
 
-class HabitsTab extends ConsumerWidget {
+class HabitsTab extends ConsumerStatefulWidget {
   const HabitsTab({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HabitsTab> createState() => _HabitsTabState();
+}
+
+class _HabitsTabState extends ConsumerState<HabitsTab> {
+  @override
+  Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
     final habitState = ref.watch(habitProvider);
 
@@ -121,8 +126,22 @@ class HabitsTab extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        // Today's progress card
-        _buildProgressCard(context, ref, todaysHabits),
+        // Today's progress card with animation delay
+        TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0.0, end: 1.0),
+          duration: const Duration(milliseconds: 600),
+          curve: Curves.easeOutCubic,
+          builder: (context, value, child) {
+            return Transform.scale(
+              scale: 0.8 + (value * 0.2),
+              child: Opacity(
+                opacity: value,
+                child: child,
+              ),
+            );
+          },
+          child: _buildProgressCard(context, ref, todaysHabits),
+        ),
         const SizedBox(height: 20),
 
         // Today's habits
@@ -138,7 +157,23 @@ class HabitsTab extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 8),
-          ...todaysHabits.map((habit) => Padding(
+          ...todaysHabits.asMap().entries.map((entry) {
+            final index = entry.key;
+            final habit = entry.value;
+            return TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0.0, end: 1.0),
+              duration: Duration(milliseconds: 600 + (index * 100)),
+              curve: Curves.easeOutCubic,
+              builder: (context, value, child) {
+                return Transform.translate(
+                  offset: Offset(0, 20 * (1 - value)),
+                  child: Opacity(
+                    opacity: value,
+                    child: child,
+                  ),
+                );
+              },
+              child: Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: HabitCard(
                   habit: habit,
@@ -150,7 +185,9 @@ class HabitsTab extends ConsumerWidget {
                     );
                   },
                 ),
-              )),
+              ),
+            );
+          }),
           const SizedBox(height: 16),
         ],
 
@@ -167,7 +204,24 @@ class HabitsTab extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 8),
-          ...otherHabits.map((habit) => Padding(
+          ...otherHabits.asMap().entries.map((entry) {
+            final index = entry.key;
+            final habit = entry.value;
+            final delay = todaysHabits.length + index;
+            return TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0.0, end: 1.0),
+              duration: Duration(milliseconds: 600 + (delay * 100)),
+              curve: Curves.easeOutCubic,
+              builder: (context, value, child) {
+                return Transform.translate(
+                  offset: Offset(0, 20 * (1 - value)),
+                  child: Opacity(
+                    opacity: value,
+                    child: child,
+                  ),
+                );
+              },
+              child: Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: HabitCard(
                   habit: habit,
@@ -179,7 +233,9 @@ class HabitsTab extends ConsumerWidget {
                     );
                   },
                 ),
-              )),
+              ),
+            );
+          }),
         ],
 
         const SizedBox(height: 100), // Space for FAB and bottom nav
@@ -217,57 +273,95 @@ class HabitsTab extends ConsumerWidget {
                       letterSpacing: -0.3,
                     ),
               ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  '$completed / $total',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.0, end: 1.0),
+                duration: const Duration(milliseconds: 800),
+                curve: Curves.elasticOut,
+                builder: (context, value, child) {
+                  return Transform.scale(
+                    scale: value,
+                    child: child,
+                  );
+                },
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color:
+                        Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .primary
+                            .withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
                       ),
+                    ],
+                  ),
+                  child: Text(
+                    '$completed / $total',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                  ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 16),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: Stack(
-              children: [
-                Container(
-                  height: 10,
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? Colors.white.withOpacity(0.1)
-                        : Colors.black.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                FractionallySizedBox(
-                  widthFactor: progress,
-                  child: Container(
-                    height: 10,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Theme.of(context).colorScheme.primary,
-                          Theme.of(context)
-                              .colorScheme
-                              .primary
-                              .withOpacity(0.7),
-                        ],
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.0, end: progress),
+            duration: const Duration(milliseconds: 1200),
+            curve: Curves.easeOutCubic,
+            builder: (context, animatedProgress, child) {
+              return ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Stack(
+                  children: [
+                    Container(
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? Colors.white.withOpacity(0.1)
+                            : Colors.black.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      borderRadius: BorderRadius.circular(10),
                     ),
-                  ),
+                    FractionallySizedBox(
+                      widthFactor: animatedProgress,
+                      child: Container(
+                        height: 10,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Theme.of(context).colorScheme.primary,
+                              Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withOpacity(0.7),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withOpacity(0.5),
+                              blurRadius: 8,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              );
+            },
           ),
           const SizedBox(height: 12),
           Row(
