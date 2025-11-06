@@ -38,8 +38,8 @@ class GlassCard extends StatefulWidget {
 
 class _GlassCardState extends State<GlassCard>
     with SingleTickerProviderStateMixin {
-  late AnimationController _glowController;
-  late Animation<double> _glowAnimation;
+  AnimationController? _glowController;
+  Animation<double>? _glowAnimation;
 
   @override
   void initState() {
@@ -51,16 +51,14 @@ class _GlassCardState extends State<GlassCard>
       )..repeat(reverse: true);
 
       _glowAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
-        CurvedAnimation(parent: _glowController, curve: Curves.easeInOut),
+        CurvedAnimation(parent: _glowController!, curve: Curves.easeInOut),
       );
     }
   }
 
   @override
   void dispose() {
-    if (widget.enableGlow) {
-      _glowController.dispose();
-    }
+    _glowController?.dispose();
     super.dispose();
   }
 
@@ -105,9 +103,9 @@ class _GlassCardState extends State<GlassCard>
     );
 
     // Add glow effect if enabled
-    if (widget.enableGlow) {
+    if (widget.enableGlow && _glowAnimation != null) {
       content = AnimatedBuilder(
-        animation: _glowAnimation,
+        animation: _glowAnimation!,
         builder: (context, child) {
           return Container(
             decoration: BoxDecoration(
@@ -117,9 +115,9 @@ class _GlassCardState extends State<GlassCard>
                   color: Theme.of(context)
                       .colorScheme
                       .primary
-                      .withOpacity(0.15 * _glowAnimation.value),
-                  blurRadius: 30 * _glowAnimation.value,
-                  spreadRadius: 2 * _glowAnimation.value,
+                      .withOpacity(0.15 * _glowAnimation!.value),
+                  blurRadius: 30 * _glowAnimation!.value,
+                  spreadRadius: 2 * _glowAnimation!.value,
                 ),
               ],
             ),
