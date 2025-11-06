@@ -85,30 +85,69 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
       child: Padding(
         padding: const EdgeInsets.all(32.0),
         child: GlassCard(
-          padding: const EdgeInsets.all(32),
+          padding: const EdgeInsets.all(40),
           enableGlow: false,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.stars_outlined,
-                size: 80,
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.6),
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.0, end: 1.0),
+                duration: const Duration(milliseconds: 800),
+                curve: Curves.elasticOut,
+                builder: (context, value, child) {
+                  return Transform.scale(
+                    scale: value,
+                    child: child,
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color:
+                        Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  ),
+                  child: Icon(
+                    Icons.trending_up,
+                    size: 60,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
               Text(
-                'No Habits Yet',
+                'Begin Your Journey',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
+                      letterSpacing: -0.5,
                     ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
               Text(
-                'Start building better habits today!\nTap the button below to create your first habit.',
+                'Every great journey begins with a single step.\nCreate your first habit and start building\nthe life you want, one day at a time.',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Colors.grey[600],
+                      height: 1.5,
                     ),
                 textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    '🌱',
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Small steps, big changes',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontStyle: FontStyle.italic,
+                          color: Colors.grey[500],
+                        ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -149,15 +188,42 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
         if (todaysHabits.isNotEmpty) ...[
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-            child: Text(
-              'Today',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: -0.5,
+            child: Row(
+              children: [
+                Icon(
+                  Icons.wb_sunny_outlined,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 24,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Today\'s Journey',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: -0.5,
+                      ),
+                ),
+                const Spacer(),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color:
+                        Theme.of(context).colorScheme.primary.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
                   ),
+                  child: Text(
+                    '${todaysHabits.length} habit${todaysHabits.length > 1 ? 's' : ''}',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           ...todaysHabits.asMap().entries.map((entry) {
             final index = entry.key;
             final habit = entry.value;
@@ -196,15 +262,25 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
         if (otherHabits.isNotEmpty) ...[
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-            child: Text(
-              'Other Habits',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: -0.5,
-                  ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.calendar_month_outlined,
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
+                  size: 22,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'All Habits',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: -0.3,
+                      ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           ...otherHabits.asMap().entries.map((entry) {
             final index = entry.key;
             final habit = entry.value;
@@ -268,12 +344,18 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Today\'s Progress',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: -0.3,
-                    ),
+              Row(
+                children: [
+                  const Text('💫', style: TextStyle(fontSize: 20)),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Your Progress Today',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: -0.3,
+                        ),
+                  ),
+                ],
               ),
               TweenAnimationBuilder<double>(
                 tween: Tween(begin: 0.0, end: 1.0),
@@ -372,20 +454,24 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
                 total > 0
                     ? progress == 1.0
                         ? '🎉'
-                        : '💪'
+                        : progress >= 0.5
+                            ? '💪'
+                            : '🌱'
                     : '📅',
-                style: const TextStyle(fontSize: 16),
+                style: const TextStyle(fontSize: 18),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   total > 0
                       ? progress == 1.0
-                          ? 'Amazing! All habits completed!'
-                          : 'Keep going! You\'re doing great!'
-                      : 'No habits scheduled for today',
+                          ? 'Perfect day! All habits built! 🎉'
+                          : progress >= 0.5
+                              ? 'Great momentum! Keep building!'
+                              : 'Every step counts. Keep going!'
+                      : 'Ready to build new habits?',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w600,
                       ),
                 ),
               ),

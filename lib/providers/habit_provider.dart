@@ -55,7 +55,6 @@ class HabitNotifier extends Notifier<HabitState> {
       state = state.copyWith(habits: habits, isLoading: false);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
-      debugPrint('Error loading habits: $e');
     }
   }
 

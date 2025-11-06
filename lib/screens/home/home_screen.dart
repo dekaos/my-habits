@@ -20,6 +20,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     with SingleTickerProviderStateMixin {
   int _currentIndex = 0;
   late AnimationController _animationController;
+  bool _hasLoadedData = false;
 
   @override
   void initState() {
@@ -28,11 +29,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
-
-    // Load data after the first frame
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadData();
-    });
   }
 
   @override
@@ -41,21 +37,45 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     super.dispose();
   }
 
-  Future<void> _loadData() async {
-    final authState = ref.read(authProvider);
+  Future<void> _loadData(String userId) async {
+    if (_hasLoadedData) return;
+    _hasLoadedData = true;
 
-    if (authState.user != null) {
+    debugPrint('🏠 HomeScreen - Loading data for user: $userId');
+    try {
       await Future.wait([
-        ref.read(habitProvider.notifier).loadHabits(authState.user!.id),
-        ref.read(socialProvider.notifier).loadFriends(authState.user!.id),
-        ref.read(socialProvider.notifier).loadActivityFeed(authState.user!.id),
+        ref.read(habitProvider.notifier).loadHabits(userId),
+        ref.read(socialProvider.notifier).loadFriends(userId),
+        ref.read(socialProvider.notifier).loadActivityFeed(userId),
       ]);
+      debugPrint('✅ HomeScreen - Data loaded successfully');
+    } catch (e) {
+      debugPrint('❌ HomeScreen - Error loading data: $e');
+      _hasLoadedData = false; // Allow retry on error
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final authState = ref.watch(authProvider);
+
+    // Load data when user becomes available
+    ref.listen(authProvider, (previous, next) {
+      if (next.user != null &&
+          (previous?.user == null || previous?.user?.id != next.user?.id)) {
+        _hasLoadedData = false;
+        _loadData(next.user!.id);
+      }
+    });
+
+    // Load data on first build if user is already authenticated
+    if (authState.user != null && !_hasLoadedData) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _loadData(authState.user!.id);
+      });
+    }
+
     final List<Widget> tabs = [
       const HabitsTab(),
       const SocialTab(),

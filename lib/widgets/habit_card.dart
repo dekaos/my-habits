@@ -28,7 +28,12 @@ class _HabitCardState extends ConsumerState<HabitCard> {
   void initState() {
     super.initState();
     // Cache color calculation - avoids recalculation on every build
-    _color = Color(PerformanceUtils.getColorInt(widget.habit.color));
+    try {
+      _color = Color(PerformanceUtils.getColorInt(widget.habit.color));
+    } catch (e) {
+      debugPrint('Error parsing color ${widget.habit.color}: $e');
+      _color = Colors.blue; // Fallback color
+    }
   }
 
   Color _getColor() => _color;
@@ -72,233 +77,290 @@ class _HabitCardState extends ConsumerState<HabitCard> {
     final habitNotifier = ref.watch(habitProvider.notifier);
     final isCompleted = habitNotifier.isHabitCompletedToday(widget.habit);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final streakProgress = widget.habit.currentStreak /
+        (widget.habit.longestStreak > 0 ? widget.habit.longestStreak : 1);
 
     return RepaintBoundary(
-      child: Dismissible(
-        key: Key(widget.habit.id),
-        direction: DismissDirection.horizontal,
-        confirmDismiss: (direction) async {
-          // Don't actually dismiss, just trigger the action
-          if (!_isCompleting) {
-            await _handleComplete(isCompleted);
-          }
-          return false; // Never dismiss
-        },
-        background: _buildSwipeBackground(true, context),
-        secondaryBackground: _buildSwipeBackground(false, context),
+      child: GestureDetector(
+        onTap: widget.onTap,
         child: GlassCard(
-          padding: EdgeInsets.zero,
+          padding: const EdgeInsets.all(20),
           enableGlow: false,
           color: isCompleted
               ? Colors.green.withOpacity(isDark ? 0.1 : 0.05)
               : null,
-          border: Border.all(
-            color: isCompleted
-                ? Colors.green.withOpacity(0.4)
-                : _getColor().withOpacity(0.3),
-            width: 2,
-          ),
-          onTap: widget.onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                // Status indicator - Loading or checkmark
-                if (_isCompleting)
-                  SizedBox(
-                    width: 40,
-                    height: 40,
-                    child: Center(
-                      child: SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(_getColor()),
-                        ),
-                      ),
-                    ),
-                  )
-                else if (isCompleted)
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.2),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.check_circle,
-                      color: Colors.green,
-                      size: 24,
-                    ),
-                  ),
-                if (_isCompleting || isCompleted) const SizedBox(width: 12),
-
-                // Icon
-                if (widget.habit.icon != null)
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: _getColor().withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      IconData(
-                        int.parse(widget.habit.icon!),
-                        fontFamily: 'MaterialIcons',
-                      ),
-                      color: _getColor(),
-                      size: 24,
-                    ),
-                  ),
-                const SizedBox(width: 12),
-
-                // Title and description
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  // Icon with circular progress indicator showing streak
+                  Stack(
+                    alignment: Alignment.center,
                     children: [
-                      Text(
-                        widget.habit.title,
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  letterSpacing: -0.2,
-                                  decoration: isCompleted
-                                      ? TextDecoration.lineThrough
-                                      : null,
-                                ),
-                      ),
-                      if (widget.habit.description != null) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          widget.habit.description!,
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: isDark
-                                        ? Colors.grey[400]
-                                        : Colors.grey[600],
-                                  ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                      // Progress ring
+                      if (widget.habit.currentStreak > 0)
+                        SizedBox(
+                          width: 64,
+                          height: 64,
+                          child: CircularProgressIndicator(
+                            value: streakProgress.clamp(0.0, 1.0),
+                            strokeWidth: 3,
+                            backgroundColor: _getColor().withOpacity(0.1),
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(_getColor()),
+                          ),
                         ),
-                      ],
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          if (widget.habit.currentStreak > 0) ...[
+                      // Icon container
+                      GestureDetector(
+                        onTap: () async {
+                          if (!_isCompleting) {
+                            await _handleComplete(isCompleted);
+                          }
+                        },
+                        child: Container(
+                          width: 56,
+                          height: 56,
+                          decoration: BoxDecoration(
+                            color: isCompleted
+                                ? Colors.green.withOpacity(0.2)
+                                : _getColor().withOpacity(0.15),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: isCompleted
+                                  ? Colors.green
+                                  : _getColor().withOpacity(0.5),
+                              width: 2,
+                            ),
+                          ),
+                          child: _isCompleting
+                              ? const Center(
+                                  child: SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
+                                )
+                              : isCompleted
+                                  ? const Icon(
+                                      Icons.check,
+                                      color: Colors.green,
+                                      size: 28,
+                                    )
+                                  : Icon(
+                                      widget.habit.icon != null
+                                          ? IconData(
+                                              int.parse(widget.habit.icon!),
+                                              fontFamily: 'MaterialIcons',
+                                            )
+                                          : Icons.star,
+                                      color: _getColor(),
+                                      size: 28,
+                                    ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(width: 16),
+
+                  // Habit info
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                widget.habit.title,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: -0.3,
+                                    ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (widget.habit.isPublic)
+                              Container(
+                                margin: const EdgeInsets.only(left: 8),
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: const Icon(
+                                  Icons.public,
+                                  size: 14,
+                                  color: Colors.blue,
+                                ),
+                              ),
+                          ],
+                        ),
+                        if (widget.habit.description != null) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            widget.habit.description!,
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: isDark
+                                          ? Colors.grey[400]
+                                          : Colors.grey[600],
+                                    ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                        const SizedBox(height: 12),
+
+                        // Streak and stats row
+                        Row(
+                          children: [
+                            if (widget.habit.currentStreak > 0) ...[
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Colors.orange.shade600,
+                                      Colors.orange.shade400,
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.orange.withOpacity(0.3),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Text(
+                                      '🔥',
+                                      style: TextStyle(fontSize: 14),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      '${widget.habit.currentStreak} day${widget.habit.currentStreak > 1 ? 's' : ''}',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                            ],
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
+                                horizontal: 10,
+                                vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.orange.withOpacity(0.15),
+                                color: isDark
+                                    ? Colors.white.withOpacity(0.1)
+                                    : Colors.black.withOpacity(0.05),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(
-                                    Icons.local_fire_department,
+                                  Icon(
+                                    Icons.done_all,
                                     size: 14,
-                                    color: Colors.orange,
+                                    color: _getColor(),
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    '${widget.habit.currentStreak}',
+                                    '${widget.habit.totalCompletions} total',
                                     style: Theme.of(context)
                                         .textTheme
                                         .bodySmall
                                         ?.copyWith(
-                                          color: Colors.orange,
-                                          fontWeight: FontWeight.bold,
+                                          fontWeight: FontWeight.w600,
                                         ),
                                   ),
                                 ],
                               ),
                             ),
                           ],
-                          if (widget.habit.isPublic) ...[
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                color: Colors.blue.withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(
-                                Icons.public,
-                                size: 14,
-                                color: Colors.blue,
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
+                ],
+              ),
 
-                // Chevron
-                Icon(
-                  Icons.chevron_right,
-                  color: isDark ? Colors.grey[600] : Colors.grey[400],
-                  size: 20,
+              // Visual progress bar for consistency
+              if (widget.habit.totalCompletions > 0) ...[
+                const SizedBox(height: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Consistency',
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: isDark
+                                        ? Colors.grey[400]
+                                        : Colors.grey[600],
+                                  ),
+                        ),
+                        Text(
+                          widget.habit.currentStreak > 0
+                              ? 'On Fire! 🔥'
+                              : 'Keep Building',
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: widget.habit.currentStreak > 0
+                                        ? Colors.orange
+                                        : (isDark
+                                            ? Colors.grey[400]
+                                            : Colors.grey[600]),
+                                  ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: LinearProgressIndicator(
+                        value: (widget.habit.currentStreak /
+                                (widget.habit.longestStreak > 0
+                                    ? widget.habit.longestStreak
+                                    : 7))
+                            .clamp(0.0, 1.0),
+                        minHeight: 6,
+                        backgroundColor: isDark
+                            ? Colors.white.withOpacity(0.1)
+                            : Colors.black.withOpacity(0.1),
+                        valueColor: AlwaysStoppedAnimation<Color>(_getColor()),
+                      ),
+                    ),
+                  ],
                 ),
               ],
-            ),
+            ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildSwipeBackground(bool isLeftSwipe, BuildContext context) {
-    final habitNotifier = ref.read(habitProvider.notifier);
-    final isCompleted = habitNotifier.isHabitCompletedToday(widget.habit);
-
-    // Left swipe = complete, Right swipe = uncomplete
-    final isCompletingAction = isLeftSwipe ? !isCompleted : isCompleted;
-    final backgroundColor = isCompletingAction ? Colors.green : Colors.orange;
-    final icon = isCompletingAction ? Icons.check_circle : Icons.cancel;
-    final text = isCompletingAction ? 'Complete' : 'Undo';
-
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            backgroundColor.withOpacity(0.3),
-            backgroundColor,
-          ],
-          begin: isLeftSwipe ? Alignment.centerLeft : Alignment.centerRight,
-          end: isLeftSwipe ? Alignment.centerRight : Alignment.centerLeft,
-        ),
-      ),
-      alignment: isLeftSwipe ? Alignment.centerLeft : Alignment.centerRight,
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            color: Colors.white,
-            size: 32,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            text,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 12,
-            ),
-          ),
-        ],
       ),
     );
   }
