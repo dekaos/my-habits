@@ -58,11 +58,20 @@ class SocialTab extends ConsumerWidget {
             : ListView.builder(
                 padding: const EdgeInsets.all(16),
                 itemCount: socialState.activityFeed.length,
+                // Add keys for better performance
+                addAutomaticKeepAlives: true,
+                addRepaintBoundaries: true,
+                addSemanticIndexes: true,
+                // Optimize cache extent for smoother scrolling
+                cacheExtent: 500,
                 itemBuilder: (context, index) {
                   final activity = socialState.activityFeed[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: ActivityCard(activity: activity),
+                  return RepaintBoundary(
+                    key: ValueKey(activity.id),
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: ActivityCard(activity: activity),
+                    ),
                   );
                 },
               ),

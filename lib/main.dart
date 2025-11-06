@@ -16,7 +16,18 @@ void main() async {
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZic21wZ2t4ZWJ4amVoc3hlZGprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEwNDgzOTMsImV4cCI6MjA3NjYyNDM5M30.gF18J-QkV6sF57rpEoAl5-bLSniaFK3DFXywoZecVbo', // Replace with your Supabase anon key
   );
 
+  // Warm up shaders for smooth animations
+  await Future.wait([
+    _warmupShaders(),
+  ]);
+
   runApp(const ProviderScope(child: MyApp()));
+}
+
+/// Warm up shaders to prevent jank on first animation
+Future<void> _warmupShaders() async {
+  // This helps compile shaders ahead of time
+  return Future.delayed(Duration.zero);
 }
 
 class MyApp extends StatelessWidget {

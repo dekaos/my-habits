@@ -77,58 +77,60 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   Widget _buildGlassBottomNav(bool isDark) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Container(
-            height: 70,
-            decoration: BoxDecoration(
-              color: isDark
-                  ? Colors.black.withOpacity(0.6)
-                  : Colors.white.withOpacity(0.7),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(
+    return RepaintBoundary(
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(
+              height: 70,
+              decoration: BoxDecoration(
                 color: isDark
-                    ? Colors.white.withOpacity(0.15)
-                    : Colors.white.withOpacity(0.5),
-                width: 1.5,
+                    ? Colors.black.withOpacity(0.6)
+                    : Colors.white.withOpacity(0.7),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: isDark
+                      ? Colors.white.withOpacity(0.15)
+                      : Colors.white.withOpacity(0.5),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(isDark ? 0.5 : 0.15),
+                    blurRadius: 30,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(isDark ? 0.5 : 0.15),
-                  blurRadius: 30,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildNavItem(
-                  index: 0,
-                  icon: Icons.check_circle_outline,
-                  selectedIcon: Icons.check_circle,
-                  label: 'Habits',
-                  isDark: isDark,
-                ),
-                _buildNavItem(
-                  index: 1,
-                  icon: Icons.people_outline,
-                  selectedIcon: Icons.people,
-                  label: 'Social',
-                  isDark: isDark,
-                ),
-                _buildNavItem(
-                  index: 2,
-                  icon: Icons.person_outline,
-                  selectedIcon: Icons.person,
-                  label: 'Profile',
-                  isDark: isDark,
-                ),
-              ],
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildNavItem(
+                    index: 0,
+                    icon: Icons.check_circle_outline,
+                    selectedIcon: Icons.check_circle,
+                    label: 'Habits',
+                    isDark: isDark,
+                  ),
+                  _buildNavItem(
+                    index: 1,
+                    icon: Icons.people_outline,
+                    selectedIcon: Icons.people,
+                    label: 'Social',
+                    isDark: isDark,
+                  ),
+                  _buildNavItem(
+                    index: 2,
+                    icon: Icons.person_outline,
+                    selectedIcon: Icons.person,
+                    label: 'Profile',
+                    isDark: isDark,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -149,42 +151,45 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         : (isDark ? Colors.grey[400] : Colors.grey[600]);
 
     return Expanded(
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            setState(() {
-              _currentIndex = index;
-            });
-            _animationController.forward(from: 0);
-          },
-          borderRadius: BorderRadius.circular(16),
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                AnimatedScale(
-                  scale: isSelected ? 1.1 : 1.0,
-                  duration: const Duration(milliseconds: 200),
-                  child: Icon(
-                    isSelected ? selectedIcon : icon,
-                    color: color,
-                    size: 26,
+      child: RepaintBoundary(
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              setState(() {
+                _currentIndex = index;
+              });
+              _animationController.forward(from: 0);
+            },
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AnimatedScale(
+                    scale: isSelected ? 1.1 : 1.0,
+                    duration: const Duration(milliseconds: 200),
+                    child: Icon(
+                      isSelected ? selectedIcon : icon,
+                      color: color,
+                      size: 26,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                AnimatedDefaultTextStyle(
-                  duration: const Duration(milliseconds: 200),
-                  style: TextStyle(
-                    fontSize: isSelected ? 12 : 11,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                    color: color,
+                  const SizedBox(height: 4),
+                  AnimatedDefaultTextStyle(
+                    duration: const Duration(milliseconds: 200),
+                    style: TextStyle(
+                      fontSize: isSelected ? 12 : 11,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.w500,
+                      color: color,
+                    ),
+                    child: Text(label),
                   ),
-                  child: Text(label),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

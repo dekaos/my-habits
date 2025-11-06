@@ -102,29 +102,31 @@ class _GlassCardState extends State<GlassCard>
       ),
     );
 
-    // Add glow effect if enabled
+    // Add glow effect if enabled - optimized for raster thread
     if (widget.enableGlow && _glowAnimation != null) {
-      content = AnimatedBuilder(
-        animation: _glowAnimation!,
-        builder: (context, child) {
-          return Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(widget.borderRadius),
-              boxShadow: [
-                BoxShadow(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .primary
-                      .withOpacity(0.15 * _glowAnimation!.value),
-                  blurRadius: 30 * _glowAnimation!.value,
-                  spreadRadius: 2 * _glowAnimation!.value,
-                ),
-              ],
-            ),
-            child: child,
-          );
-        },
-        child: content,
+      content = RepaintBoundary(
+        child: AnimatedBuilder(
+          animation: _glowAnimation!,
+          builder: (context, child) {
+            return Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(widget.borderRadius),
+                boxShadow: [
+                  BoxShadow(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .primary
+                        .withOpacity(0.15 * _glowAnimation!.value),
+                    blurRadius: 30 * _glowAnimation!.value,
+                    spreadRadius: 2 * _glowAnimation!.value,
+                  ),
+                ],
+              ),
+              child: child,
+            );
+          },
+          child: content,
+        ),
       );
     }
 
@@ -274,57 +276,60 @@ class _GlassButtonState extends State<GlassButton>
       child: AnimatedScale(
         scale: _isPressed ? 0.95 : 1.0,
         duration: const Duration(milliseconds: 100),
-        child: AnimatedBuilder(
-          animation: _pulseAnimation,
-          builder: (context, child) {
-            return Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(widget.borderRadius),
-                boxShadow: [
-                  BoxShadow(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .primary
-                        .withOpacity(0.2 * _pulseAnimation.value),
-                    blurRadius: 20 * _pulseAnimation.value,
-                    spreadRadius: 1 * _pulseAnimation.value,
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(widget.borderRadius),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: widget.color ??
-                          (isDark
-                              ? Colors.white.withOpacity(0.15)
-                              : Colors.white.withOpacity(0.8)),
-                      borderRadius: BorderRadius.circular(widget.borderRadius),
-                      border: Border.all(
-                        color: isDark
-                            ? Colors.white.withOpacity(0.2)
-                            : Colors.white.withOpacity(0.6),
-                        width: 1.5,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+        child: RepaintBoundary(
+          child: AnimatedBuilder(
+            animation: _pulseAnimation,
+            builder: (context, child) {
+              return Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(widget.borderRadius),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .primary
+                          .withOpacity(0.2 * _pulseAnimation.value),
+                      blurRadius: 20 * _pulseAnimation.value,
+                      spreadRadius: 1 * _pulseAnimation.value,
                     ),
-                    padding: widget.padding ??
-                        const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 12),
-                    child: widget.child,
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(widget.borderRadius),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: widget.color ??
+                            (isDark
+                                ? Colors.white.withOpacity(0.15)
+                                : Colors.white.withOpacity(0.8)),
+                        borderRadius:
+                            BorderRadius.circular(widget.borderRadius),
+                        border: Border.all(
+                          color: isDark
+                              ? Colors.white.withOpacity(0.2)
+                              : Colors.white.withOpacity(0.6),
+                          width: 1.5,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      padding: widget.padding ??
+                          const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
+                      child: widget.child,
+                    ),
                   ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );

@@ -55,54 +55,60 @@ class _AnimatedGradientBackgroundState extends State<AnimatedGradientBackground>
 
     return Stack(
       children: [
-        // Animated gradient background
-        AnimatedBuilder(
-          animation: _glowController,
-          builder: (context, child) {
-            return Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: isDark
-                      ? [
-                          const Color(0xFF1E1B4B),
-                          const Color(0xFF312E81),
-                          Color.lerp(
-                            const Color(0xFF1E3A8A),
-                            const Color(0xFF312E81),
-                            (_glowController.value * 0.3),
-                          )!,
-                        ]
-                      : [
-                          const Color(0xFFE0F2FE),
-                          Color.lerp(
-                            const Color(0xFFFAE8FF),
-                            const Color(0xFFE0F2FE),
-                            (_glowController.value * 0.3),
-                          )!,
-                          const Color(0xFFFEF3C7),
-                        ],
-                ),
-              ),
-            );
-          },
-        ),
-
-        // Subtle particles background
-        if (widget.enableParticles)
-          AnimatedBuilder(
-            animation: _particlesController,
+        // Animated gradient background - runs on raster thread
+        RepaintBoundary(
+          child: AnimatedBuilder(
+            animation: _glowController,
             builder: (context, child) {
-              return CustomPaint(
-                painter: ParticlesPainter(
-                  animation: _particlesController.value,
-                  isDark: isDark,
-                  particleCount: widget.particleCount,
+              return Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: isDark
+                        ? [
+                            const Color(0xFF1E1B4B),
+                            const Color(0xFF312E81),
+                            Color.lerp(
+                              const Color(0xFF1E3A8A),
+                              const Color(0xFF312E81),
+                              (_glowController.value * 0.3),
+                            )!,
+                          ]
+                        : [
+                            const Color(0xFFE0F2FE),
+                            Color.lerp(
+                              const Color(0xFFFAE8FF),
+                              const Color(0xFFE0F2FE),
+                              (_glowController.value * 0.3),
+                            )!,
+                            const Color(0xFFFEF3C7),
+                          ],
+                  ),
                 ),
-                size: Size.infinite,
               );
             },
+          ),
+        ),
+
+        // Subtle particles background - isolated rendering
+        if (widget.enableParticles)
+          RepaintBoundary(
+            child: AnimatedBuilder(
+              animation: _particlesController,
+              builder: (context, child) {
+                return CustomPaint(
+                  painter: ParticlesPainter(
+                    animation: _particlesController.value,
+                    isDark: isDark,
+                    particleCount: widget.particleCount,
+                  ),
+                  size: Size.infinite,
+                  isComplex: true,
+                  willChange: true,
+                );
+              },
+            ),
           ),
 
         // Content
@@ -112,7 +118,7 @@ class _AnimatedGradientBackgroundState extends State<AnimatedGradientBackground>
   }
 }
 
-/// Particles painter for animated background
+/// Particles painter for animated background - optimized for raster thread
 class ParticlesPainter extends CustomPainter {
   final double animation;
   final bool isDark;
@@ -126,9 +132,13 @@ class ParticlesPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    // Use a single paint object and reuse it
     final paint = Paint()
       ..style = PaintingStyle.fill
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2);
+
+    // Pre-calculate sine value outside loop
+    final animationSin = math.sin(animation * math.pi * 2);
 
     for (int i = 0; i < particleCount; i++) {
       final random = math.Random(i);
@@ -143,8 +153,8 @@ class ParticlesPainter extends CustomPainter {
       final particleSize = 1.5 + (random.nextDouble() * 2.5);
       final opacity = 0.1 + (random.nextDouble() * 0.2);
 
-      paint.color = (isDark ? Colors.white : Colors.black87).withOpacity(
-          opacity * (0.4 + (math.sin(animation * math.pi * 2) * 0.3)));
+      paint.color = (isDark ? Colors.white : Colors.black87)
+          .withOpacity(opacity * (0.4 + (animationSin * 0.3)));
 
       canvas.drawCircle(
         Offset(x, y),
@@ -156,6 +166,10 @@ class ParticlesPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(ParticlesPainter oldDelegate) {
-    return animation != oldDelegate.animation;
+    // Only repaint if animation value changed significantly (threshold optimization)
+    return (animation - oldDelegate.animation).abs() > 0.01;
   }
+
+  @override
+  bool shouldRebuildSemantics(ParticlesPainter oldDelegate) => false;
 }
