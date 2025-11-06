@@ -82,6 +82,7 @@ class _ProfileTabState extends ConsumerState<ProfileTab>
 
     return GlassCard(
       padding: const EdgeInsets.all(24),
+      enableGlow: false,
       child: Column(
         children: [
           Container(
@@ -285,6 +286,7 @@ class _ProfileTabState extends ConsumerState<ProfileTab>
   Widget _buildActionsSection(BuildContext context, WidgetRef ref) {
     return GlassCard(
       padding: EdgeInsets.zero,
+      enableGlow: false,
       child: Column(
         children: [
           _buildActionTile(

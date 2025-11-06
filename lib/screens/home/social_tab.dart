@@ -85,6 +85,7 @@ class SocialTab extends ConsumerWidget {
         padding: const EdgeInsets.all(32.0),
         child: GlassCard(
           padding: const EdgeInsets.all(32),
+          enableGlow: false,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

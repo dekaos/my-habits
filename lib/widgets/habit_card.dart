@@ -88,6 +88,7 @@ class _HabitCardState extends ConsumerState<HabitCard> {
         secondaryBackground: _buildSwipeBackground(false, context),
         child: GlassCard(
           padding: EdgeInsets.zero,
+          enableGlow: false,
           color: isCompleted
               ? Colors.green.withOpacity(isDark ? 0.1 : 0.05)
               : null,

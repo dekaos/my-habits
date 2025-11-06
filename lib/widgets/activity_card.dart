@@ -62,6 +62,7 @@ class ActivityCard extends ConsumerWidget {
     return RepaintBoundary(
       child: GlassCard(
         padding: const EdgeInsets.all(16.0),
+        enableGlow: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

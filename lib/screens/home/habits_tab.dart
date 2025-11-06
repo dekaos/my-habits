@@ -86,6 +86,7 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
         padding: const EdgeInsets.all(32.0),
         child: GlassCard(
           padding: const EdgeInsets.all(32),
+          enableGlow: false,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -257,6 +258,7 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
 
     return GlassCard(
       padding: const EdgeInsets.all(24),
+      enableGlow: false,
       color: isDark
           ? Theme.of(context).colorScheme.primary.withOpacity(0.15)
           : Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
