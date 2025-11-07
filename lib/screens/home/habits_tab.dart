@@ -81,76 +81,73 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
   }
 
   Widget _buildEmptyState(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: GlassCard(
-          padding: const EdgeInsets.all(40),
-          enableGlow: false,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0.0, end: 1.0),
-                duration: const Duration(milliseconds: 800),
-                curve: Curves.elasticOut,
-                builder: (context, value, child) {
-                  return Transform.scale(
-                    scale: value,
-                    child: child,
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color:
-                        Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                  ),
-                  child: Icon(
-                    Icons.trending_up,
-                    size: 60,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+    return Padding(
+      padding: const EdgeInsets.all(32.0),
+      child: GlassCard(
+        padding: const EdgeInsets.all(40),
+        enableGlow: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0.0, end: 1.0),
+              duration: const Duration(milliseconds: 800),
+              curve: Curves.elasticOut,
+              builder: (context, value, child) {
+                return Transform.scale(
+                  scale: value,
+                  child: child,
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                ),
+                child: Icon(
+                  Icons.trending_up,
+                  size: 60,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
-              const SizedBox(height: 24),
-              Text(
-                'Begin Your Journey',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: -0.5,
-                    ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Every great journey begins with a single step.\nCreate your first habit and start building\nthe life you want, one day at a time.',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey[600],
-                      height: 1.5,
-                    ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    '🌱',
-                    style: TextStyle(fontSize: 20),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Begin Your Journey',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: -0.5,
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Small steps, big changes',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontStyle: FontStyle.italic,
-                          color: Colors.grey[500],
-                        ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Every great journey begins with a single step.\n\nCreate your first habit and start building the life you want, one day at a time.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.grey[600],
+                    height: 1.5,
                   ),
-                ],
-              ),
-            ],
-          ),
+              textAlign: TextAlign.left,
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  '🌱',
+                  style: TextStyle(fontSize: 20),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Small steps, big changes',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontStyle: FontStyle.italic,
+                        color: Colors.grey[500],
+                      ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
