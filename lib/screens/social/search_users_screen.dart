@@ -47,17 +47,50 @@ class _SearchUsersScreenState extends ConsumerState<SearchUsersScreen> {
 
     if (authState.user == null) return;
 
-    await ref
-        .read(socialProvider.notifier)
-        .sendFriendRequest(authState.user!.id, user.id);
+    try {
+      await ref
+          .read(socialProvider.notifier)
+          .sendFriendRequest(authState.user!.id, user.id);
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Friend request sent to ${user.displayName}'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text('Friend request sent to ${user.displayName}'),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.green.shade600,
+            behavior: SnackBarBehavior.floating,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(e.toString().replaceAll('Exception: ', '')),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.red.shade600,
+            behavior: SnackBarBehavior.floating,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      }
     }
   }
 
@@ -76,7 +109,7 @@ class _SearchUsersScreenState extends ConsumerState<SearchUsersScreen> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Search by name...',
+                hintText: 'Search by name or email...',
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -162,8 +195,27 @@ class _SearchUsersScreenState extends ConsumerState<SearchUsersScreen> {
                                       ),
                               ),
                               title: Text(user.displayName),
-                              subtitle:
-                                  user.bio != null ? Text(user.bio!) : null,
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (user.email.isNotEmpty)
+                                    Text(
+                                      user.email,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey.shade600,
+                                      ),
+                                    ),
+                                  if (user.bio != null) ...[
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      user.bio!,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ],
+                              ),
                               trailing: isCurrentUser
                                   ? const Chip(label: Text('You'))
                                   : FilledButton(

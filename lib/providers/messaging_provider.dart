@@ -1,0 +1,293 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../models/message.dart';
+
+// Messaging State
+class MessagingState {
+  final Map<String, List<Message>>
+      conversations; // Key: friend_id, Value: messages
+  final Map<String, int> unreadCounts; // Key: friend_id, Value: unread count
+  final bool isLoading;
+
+  MessagingState({
+    this.conversations = const {},
+    this.unreadCounts = const {},
+    this.isLoading = false,
+  });
+
+  MessagingState copyWith({
+    Map<String, List<Message>>? conversations,
+    Map<String, int>? unreadCounts,
+    bool? isLoading,
+  }) {
+    return MessagingState(
+      conversations: conversations ?? this.conversations,
+      unreadCounts: unreadCounts ?? this.unreadCounts,
+      isLoading: isLoading ?? this.isLoading,
+    );
+  }
+}
+
+// Messaging Notifier
+class MessagingNotifier extends Notifier<MessagingState> {
+  final SupabaseClient _supabase = Supabase.instance.client;
+  RealtimeChannel? _messageChannel;
+
+  @override
+  MessagingState build() {
+    return MessagingState();
+  }
+
+  /// Load conversation with a friend
+  Future<void> loadConversation(String currentUserId, String friendId) async {
+    try {
+      debugPrint('💬 Loading conversation with: $friendId');
+
+      final response = await _supabase
+          .from('messages')
+          .select()
+          .or('and(sender_id.eq.$currentUserId,receiver_id.eq.$friendId),and(sender_id.eq.$friendId,receiver_id.eq.$currentUserId)')
+          .order('created_at', ascending: true);
+
+      final messages = (response as List)
+          .map((data) => Message.fromSupabaseMap(data))
+          .toList();
+
+      debugPrint('💬 Loaded ${messages.length} messages');
+
+      // Update conversations
+      final updatedConversations =
+          Map<String, List<Message>>.from(state.conversations);
+      updatedConversations[friendId] = messages;
+
+      // Calculate unread count
+      final unread = messages
+          .where((m) => m.receiverId == currentUserId && !m.isRead)
+          .length;
+
+      final updatedUnreadCounts = Map<String, int>.from(state.unreadCounts);
+      updatedUnreadCounts[friendId] = unread;
+
+      state = state.copyWith(
+        conversations: updatedConversations,
+        unreadCounts: updatedUnreadCounts,
+      );
+    } catch (e, stackTrace) {
+      debugPrint('❌ Error loading conversation: $e');
+      debugPrint('Stack trace: $stackTrace');
+    }
+  }
+
+  /// Send a message to a friend
+  Future<void> sendMessage(
+    String currentUserId,
+    String friendId,
+    String content,
+  ) async {
+    try {
+      debugPrint('📤 Sending message to: $friendId');
+
+      final message = Message(
+        id: '',
+        senderId: currentUserId,
+        receiverId: friendId,
+        content: content,
+        createdAt: DateTime.now(),
+        isRead: false,
+      );
+
+      final response = await _supabase
+          .from('messages')
+          .insert(message.toSupabaseMap())
+          .select()
+          .single();
+
+      final sentMessage = Message.fromSupabaseMap(response);
+
+      debugPrint('✅ Message sent: ${sentMessage.id}');
+
+      // Add to local conversation
+      final updatedConversations =
+          Map<String, List<Message>>.from(state.conversations);
+      final currentMessages =
+          List<Message>.from(updatedConversations[friendId] ?? []);
+      currentMessages.add(sentMessage);
+      updatedConversations[friendId] = currentMessages;
+
+      state = state.copyWith(conversations: updatedConversations);
+    } catch (e, stackTrace) {
+      debugPrint('❌ Error sending message: $e');
+      debugPrint('Stack trace: $stackTrace');
+      rethrow;
+    }
+  }
+
+  /// Mark messages as read
+  Future<void> markMessagesAsRead(String currentUserId, String friendId) async {
+    try {
+      debugPrint('📖 Marking messages as read from: $friendId');
+
+      await _supabase
+          .from('messages')
+          .update({'is_read': true})
+          .eq('sender_id', friendId)
+          .eq('receiver_id', currentUserId)
+          .eq('is_read', false);
+
+      // Update local state
+      final updatedConversations =
+          Map<String, List<Message>>.from(state.conversations);
+      final messages = updatedConversations[friendId];
+
+      if (messages != null) {
+        updatedConversations[friendId] = messages.map((m) {
+          if (m.senderId == friendId &&
+              m.receiverId == currentUserId &&
+              !m.isRead) {
+            return m.copyWith(isRead: true);
+          }
+          return m;
+        }).toList();
+      }
+
+      // Update unread count
+      final updatedUnreadCounts = Map<String, int>.from(state.unreadCounts);
+      updatedUnreadCounts[friendId] = 0;
+
+      state = state.copyWith(
+        conversations: updatedConversations,
+        unreadCounts: updatedUnreadCounts,
+      );
+
+      debugPrint('✅ Messages marked as read');
+    } catch (e) {
+      debugPrint('❌ Error marking messages as read: $e');
+    }
+  }
+
+  /// Load unread counts for all friends
+  Future<void> loadUnreadCounts(
+      String currentUserId, List<String> friendIds) async {
+    try {
+      debugPrint('📊 Loading unread counts for ${friendIds.length} friends');
+      debugPrint('📊 Current user ID: $currentUserId');
+      debugPrint('📊 Friend IDs: $friendIds');
+
+      final Map<String, int> counts = {};
+
+      for (final friendId in friendIds) {
+        final response = await _supabase
+            .from('messages')
+            .select()
+            .eq('sender_id', friendId)
+            .eq('receiver_id', currentUserId)
+            .eq('is_read', false);
+
+        final count = (response as List).length;
+        counts[friendId] = count;
+
+        if (count > 0) {
+          debugPrint('📊 Friend $friendId has $count unread messages');
+        }
+      }
+
+      debugPrint('📊 Total unread counts loaded: $counts');
+      debugPrint(
+          '📊 Total unread: ${counts.values.fold(0, (sum, c) => sum + c)}');
+
+      state = state.copyWith(unreadCounts: counts);
+
+      debugPrint('✅ Unread counts state updated');
+    } catch (e, stackTrace) {
+      debugPrint('❌ Error loading unread counts: $e');
+      debugPrint('Stack trace: $stackTrace');
+    }
+  }
+
+  /// Subscribe to real-time messages
+  void subscribeToMessages(String currentUserId) {
+    try {
+      debugPrint('🔔 Subscribing to real-time messages');
+
+      _messageChannel = _supabase
+          .channel('messages:$currentUserId')
+          .onPostgresChanges(
+            event: PostgresChangeEvent.insert,
+            schema: 'public',
+            table: 'messages',
+            filter: PostgresChangeFilter(
+              type: PostgresChangeFilterType.eq,
+              column: 'receiver_id',
+              value: currentUserId,
+            ),
+            callback: (payload) {
+              debugPrint('🔔 New message received: ${payload.newRecord}');
+              _handleNewMessage(payload.newRecord, currentUserId);
+            },
+          )
+          .subscribe();
+
+      debugPrint('✅ Subscribed to real-time messages');
+    } catch (e) {
+      debugPrint('❌ Error subscribing to messages: $e');
+    }
+  }
+
+  /// Handle incoming real-time message
+  void _handleNewMessage(Map<String, dynamic> data, String currentUserId) {
+    try {
+      debugPrint('📨 Handling new message: $data');
+      final message = Message.fromSupabaseMap(data);
+      final friendId = message.senderId;
+
+      debugPrint('📨 Message from: $friendId, content: ${message.content}');
+
+      // Add to conversation
+      final updatedConversations =
+          Map<String, List<Message>>.from(state.conversations);
+      final currentMessages =
+          List<Message>.from(updatedConversations[friendId] ?? []);
+      currentMessages.add(message);
+      updatedConversations[friendId] = currentMessages;
+
+      // Increment unread count
+      final updatedUnreadCounts = Map<String, int>.from(state.unreadCounts);
+      final oldCount = updatedUnreadCounts[friendId] ?? 0;
+      updatedUnreadCounts[friendId] = oldCount + 1;
+
+      debugPrint(
+          '📨 Unread count for $friendId: $oldCount → ${updatedUnreadCounts[friendId]}');
+      debugPrint('📨 Total unread counts: $updatedUnreadCounts');
+
+      state = state.copyWith(
+        conversations: updatedConversations,
+        unreadCounts: updatedUnreadCounts,
+      );
+
+      debugPrint('✅ State updated with new message');
+    } catch (e, stackTrace) {
+      debugPrint('❌ Error handling new message: $e');
+      debugPrint('Stack trace: $stackTrace');
+    }
+  }
+
+  /// Unsubscribe from real-time messages
+  void unsubscribeFromMessages() {
+    if (_messageChannel != null) {
+      debugPrint('🔕 Unsubscribing from real-time messages');
+      _supabase.removeChannel(_messageChannel!);
+      _messageChannel = null;
+    }
+  }
+
+  /// Get total unread message count
+  int getTotalUnreadCount() {
+    return state.unreadCounts.values.fold(0, (sum, count) => sum + count);
+  }
+}
+
+// Provider
+final messagingProvider = NotifierProvider<MessagingNotifier, MessagingState>(
+  () => MessagingNotifier(),
+);

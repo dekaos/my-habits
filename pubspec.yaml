@@ -29,6 +29,7 @@ dependencies:
   uuid: ^4.3.3
   shared_preferences: ^2.2.2
   image_picker: ^1.0.7
+  share_plus: ^10.1.2
   
   # Microinteractions
   vibration: ^2.0.0

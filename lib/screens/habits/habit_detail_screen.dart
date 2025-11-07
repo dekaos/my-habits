@@ -11,6 +11,7 @@ import '../../widgets/animated_gradient_background.dart';
 import '../../widgets/glass_card.dart';
 import '../../services/haptic_service.dart';
 import '../../widgets/celebration_animation.dart';
+import '../../widgets/share_progress_sheet.dart';
 
 class HabitDetailScreen extends ConsumerStatefulWidget {
   final Habit habit;
@@ -136,6 +137,17 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
         elevation: 0,
         title: Text(widget.habit.title),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.share_rounded),
+            onPressed: () {
+              showShareProgress(
+                context,
+                widget.habit,
+                widget.habit.currentStreak,
+                widget.habit.totalCompletions,
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.edit),
             onPressed: () {

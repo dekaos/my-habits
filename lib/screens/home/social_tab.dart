@@ -2,18 +2,95 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/social_provider.dart';
-import '../social/friends_screen.dart';
+import '../../providers/messaging_provider.dart';
+import '../social/enhanced_friends_screen.dart';
 import '../social/search_users_screen.dart';
+import '../social/friend_requests_screen.dart';
 import '../../widgets/activity_card.dart';
 import '../../widgets/glass_card.dart';
 
-class SocialTab extends ConsumerWidget {
+class SocialTab extends ConsumerStatefulWidget {
   const SocialTab({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SocialTab> createState() => _SocialTabState();
+}
+
+class _SocialTabState extends ConsumerState<SocialTab> {
+  int _pendingRequestCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeData();
+  }
+
+  Future<void> _initializeData() async {
+    final authState = ref.read(authProvider);
+    if (authState.user == null) return;
+
+    // Load pending requests
+    _loadPendingRequests();
+
+    // Load friends first, then unread messages and activity feed
+    await ref.read(socialProvider.notifier).loadFriends(authState.user!.id);
+    await _loadUnreadMessages();
+
+    // Load activity feed
+    await ref
+        .read(socialProvider.notifier)
+        .loadActivityFeed(authState.user!.id);
+
+    // Subscribe to real-time messages for notifications
+    ref
+        .read(messagingProvider.notifier)
+        .subscribeToMessages(authState.user!.id);
+  }
+
+  @override
+  void dispose() {
+    // Unsubscribe from real-time messages
+    ref.read(messagingProvider.notifier).unsubscribeFromMessages();
+    super.dispose();
+  }
+
+  Future<void> _loadPendingRequests() async {
+    final authState = ref.read(authProvider);
+    if (authState.user == null) return;
+
+    final requestIds = await ref
+        .read(socialProvider.notifier)
+        .getFriendRequestIds(authState.user!.id);
+
+    if (mounted) {
+      setState(() {
+        _pendingRequestCount = requestIds.length;
+      });
+    }
+  }
+
+  Future<void> _loadUnreadMessages() async {
+    final authState = ref.read(authProvider);
+    if (authState.user == null) return;
+
+    // Get friends list
+    final socialState = ref.read(socialProvider);
+    final friendIds = socialState.friends.map((f) => f.id).toList();
+
+    // Load unread counts for all friends
+    await ref.read(messagingProvider.notifier).loadUnreadCounts(
+          authState.user!.id,
+          friendIds,
+        );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
     final socialState = ref.watch(socialProvider);
+    final messagingState = ref.watch(messagingProvider);
+    final unreadMessageCount =
+        messagingState.unreadCounts.values.fold(0, (sum, count) => sum + count);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -22,6 +99,108 @@ class SocialTab extends ConsumerWidget {
         child: GlassAppBar(
           title: 'Social',
           actions: [
+            // Friend requests with badge
+            Stack(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.notifications_outlined),
+                  onPressed: () async {
+                    await Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const FriendRequestsScreen(),
+                      ),
+                    );
+                    // Reload pending requests when returning
+                    _loadPendingRequests();
+                  },
+                ),
+                if (_pendingRequestCount > 0)
+                  Positioned(
+                    right: 8,
+                    top: 8,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.red.withValues(alpha: 0.5),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 18,
+                        minHeight: 18,
+                      ),
+                      child: Center(
+                        child: Text(
+                          _pendingRequestCount > 9
+                              ? '9+'
+                              : '$_pendingRequestCount',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            // Messages with badge
+            Stack(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.message_outlined),
+                  onPressed: () async {
+                    await Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const EnhancedFriendsScreen(),
+                      ),
+                    );
+                    // Reload unread messages when returning
+                    _loadUnreadMessages();
+                  },
+                ),
+                if (unreadMessageCount > 0)
+                  Positioned(
+                    right: 8,
+                    top: 8,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade600,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.blue.withValues(alpha: 0.5),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 18,
+                        minHeight: 18,
+                      ),
+                      child: Center(
+                        child: Text(
+                          unreadMessageCount > 9 ? '9+' : '$unreadMessageCount',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
             IconButton(
               icon: const Icon(Icons.person_add),
               onPressed: () {
@@ -37,7 +216,7 @@ class SocialTab extends ConsumerWidget {
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => const FriendsScreen(),
+                    builder: (context) => const EnhancedFriendsScreen(),
                   ),
                 );
               },
@@ -51,6 +230,10 @@ class SocialTab extends ConsumerWidget {
             await ref
                 .read(socialProvider.notifier)
                 .loadActivityFeed(authState.user!.id);
+            // Also refresh pending requests count
+            await _loadPendingRequests();
+            // Also refresh unread messages count
+            await _loadUnreadMessages();
           }
         },
         child: socialState.activityFeed.isEmpty
