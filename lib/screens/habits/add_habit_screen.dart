@@ -38,17 +38,23 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
     '#F97316', // Orange
   ];
 
-  final List<IconData> _iconOptions = [
-    Icons.fitness_center,
-    Icons.book,
-    Icons.water_drop,
-    Icons.bedtime,
-    Icons.restaurant,
-    Icons.directions_run,
-    Icons.spa,
-    Icons.self_improvement,
-    Icons.brush,
-    Icons.music_note,
+  final List<Map<String, dynamic>> _iconOptions = [
+    {'name': 'fitness', 'icon': Icons.fitness_center},
+    {'name': 'book', 'icon': Icons.book},
+    {'name': 'water', 'icon': Icons.water_drop},
+    {'name': 'sleep', 'icon': Icons.bedtime},
+    {'name': 'restaurant', 'icon': Icons.restaurant},
+    {'name': 'run', 'icon': Icons.directions_run},
+    {'name': 'meditation', 'icon': Icons.spa},
+    {'name': 'yoga', 'icon': Icons.self_improvement},
+    {'name': 'art', 'icon': Icons.palette},
+    {'name': 'music', 'icon': Icons.music_note},
+    {'name': 'work', 'icon': Icons.work},
+    {'name': 'school', 'icon': Icons.school},
+    {'name': 'heart', 'icon': Icons.favorite},
+    {'name': 'walk', 'icon': Icons.directions_walk},
+    {'name': 'bike', 'icon': Icons.directions_bike},
+    {'name': 'code', 'icon': Icons.code},
   ];
 
   @override
@@ -191,13 +197,14 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
                       Wrap(
                         spacing: 8,
                         runSpacing: 8,
-                        children: _iconOptions.map((icon) {
-                          final isSelected =
-                              _selectedIcon == icon.codePoint.toString();
+                        children: _iconOptions.map((iconData) {
+                          final iconName = iconData['name'] as String;
+                          final icon = iconData['icon'] as IconData;
+                          final isSelected = _selectedIcon == iconName;
                           return InkWell(
                             onTap: () {
                               setState(() {
-                                _selectedIcon = icon.codePoint.toString();
+                                _selectedIcon = iconName;
                               });
                             },
                             child: Container(
