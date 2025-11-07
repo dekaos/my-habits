@@ -5,8 +5,9 @@ import '../../providers/habit_provider.dart';
 import '../../models/habit.dart';
 import '../habits/add_habit_screen.dart';
 import '../habits/habit_detail_screen.dart';
-import '../../widgets/habit_card.dart';
+import '../../widgets/slidable_habit_card.dart';
 import '../../widgets/glass_card.dart';
+import '../../widgets/habit_calendar_view.dart';
 
 class HabitsTab extends ConsumerStatefulWidget {
   const HabitsTab({super.key});
@@ -31,7 +32,12 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
             IconButton(
               icon: const Icon(Icons.calendar_today),
               onPressed: () {
-                // TODO: Show calendar view
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (context) => const HabitCalendarView(),
+                );
               },
             ),
           ],
@@ -239,7 +245,7 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
               },
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 12),
-                child: HabitCard(
+                child: SlidableHabitCard(
                   habit: habit,
                   onTap: () {
                     Navigator.of(context).push(
@@ -247,6 +253,10 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
                         builder: (context) => HabitDetailScreen(habit: habit),
                       ),
                     );
+                  },
+                  onActionComplete: () {
+                    // Refresh the list after complete/undo
+                    setState(() {});
                   },
                 ),
               ),
@@ -297,7 +307,7 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
               },
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 12),
-                child: HabitCard(
+                child: SlidableHabitCard(
                   habit: habit,
                   onTap: () {
                     Navigator.of(context).push(
@@ -305,6 +315,10 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
                         builder: (context) => HabitDetailScreen(habit: habit),
                       ),
                     );
+                  },
+                  onActionComplete: () {
+                    // Refresh the list after complete/undo
+                    setState(() {});
                   },
                 ),
               ),
