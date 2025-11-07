@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/habit.dart';
 import '../providers/habit_provider.dart';
 import '../utils/performance_utils.dart';
+import '../utils/habit_icons.dart';
 import 'glass_card.dart';
 
 class HabitCard extends ConsumerStatefulWidget {
@@ -37,6 +38,11 @@ class _HabitCardState extends ConsumerState<HabitCard> {
   }
 
   Color _getColor() => _color;
+
+  IconData _getIcon() {
+    // Use predefined icon map for tree-shaking support
+    return HabitIcons.getIcon(widget.habit.icon);
+  }
 
   Future<void> _handleComplete(bool isCompleted) async {
     if (_isCompleting) return;
@@ -150,12 +156,7 @@ class _HabitCardState extends ConsumerState<HabitCard> {
                                       size: 28,
                                     )
                                   : Icon(
-                                      widget.habit.icon != null
-                                          ? IconData(
-                                              int.parse(widget.habit.icon!),
-                                              fontFamily: 'MaterialIcons',
-                                            )
-                                          : Icons.star,
+                                      _getIcon(),
                                       color: _getColor(),
                                       size: 28,
                                     ),
