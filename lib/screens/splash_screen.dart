@@ -223,7 +223,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                               color: Theme.of(context)
                                                   .colorScheme
                                                   .primary
-                                                  .withOpacity(0.4),
+                                                  .withValues(alpha: 0.4),
                                               blurRadius: 40,
                                               spreadRadius: 20,
                                             ),
@@ -243,12 +243,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                       begin: Alignment.topLeft,
                                       end: Alignment.bottomRight,
                                       colors: [
-                                        Colors.white.withOpacity(0.3),
-                                        Colors.white.withOpacity(0.1),
+                                        Colors.white.withValues(alpha: 0.3),
+                                        Colors.white.withValues(alpha: 0.1),
                                       ],
                                     ),
                                     border: Border.all(
-                                      color: Colors.white.withOpacity(0.5),
+                                      color:
+                                          Colors.white.withValues(alpha: 0.5),
                                       width: 3,
                                     ),
                                   ),
@@ -313,7 +314,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                         .titleMedium
                                         ?.copyWith(
                                           color: isDark
-                                              ? Colors.white.withOpacity(0.8)
+                                              ? Colors.white
+                                                  .withValues(alpha: 0.8)
                                               : Colors.black87,
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -348,13 +350,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: (isDark ? Colors.white : Colors.black87)
-                                  .withOpacity(0.3 + (animation * 0.7)),
+                                  .withValues(alpha: 0.3 + (animation * 0.7)),
                               boxShadow: [
                                 BoxShadow(
                                   color: Theme.of(context)
                                       .colorScheme
                                       .primary
-                                      .withOpacity(animation * 0.5),
+                                      .withValues(alpha: animation * 0.5),
                                   blurRadius: 8,
                                   spreadRadius: animation * 2,
                                 ),
@@ -385,7 +387,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
           child: Icon(
             icon,
             size: 20,
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
           ),
         );
       },
@@ -419,8 +421,8 @@ class ParticlesPainter extends CustomPainter {
       final particleSize = 2 + (random.nextDouble() * 4);
       final opacity = 0.2 + (random.nextDouble() * 0.3);
 
-      paint.color = (isDark ? Colors.white : Colors.black87).withOpacity(
-          opacity * (0.5 + (math.sin(animation * math.pi * 2) * 0.5)));
+      paint.color = (isDark ? Colors.white : Colors.black87).withValues(
+          alpha: opacity * (0.5 + (math.sin(animation * math.pi * 2) * 0.5)));
 
       canvas.drawCircle(
         Offset(x, y),
