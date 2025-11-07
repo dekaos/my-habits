@@ -22,7 +22,10 @@ class _SocialTabState extends ConsumerState<SocialTab> {
   @override
   void initState() {
     super.initState();
-    _initializeData();
+    // Defer initialization until after the widget tree is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeData();
+    });
   }
 
   Future<void> _initializeData() async {
@@ -49,8 +52,12 @@ class _SocialTabState extends ConsumerState<SocialTab> {
 
   @override
   void dispose() {
-    // Unsubscribe from real-time messages
-    ref.read(messagingProvider.notifier).unsubscribeFromMessages();
+    // Unsubscribe from real-time messages - safely handle disposal
+    try {
+      ref.read(messagingProvider.notifier).unsubscribeFromMessages();
+    } catch (e) {
+      debugPrint('⚠️ Error unsubscribing from messages: $e');
+    }
     super.dispose();
   }
 
@@ -100,106 +107,118 @@ class _SocialTabState extends ConsumerState<SocialTab> {
           title: 'Social',
           actions: [
             // Friend requests with badge
-            Stack(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.notifications_outlined),
-                  onPressed: () async {
-                    await Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const FriendRequestsScreen(),
-                      ),
-                    );
-                    // Reload pending requests when returning
-                    _loadPendingRequests();
-                  },
-                ),
-                if (_pendingRequestCount > 0)
-                  Positioned(
-                    right: 8,
-                    top: 8,
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.red.withValues(alpha: 0.5),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      constraints: const BoxConstraints(
-                        minWidth: 18,
-                        minHeight: 18,
-                      ),
-                      child: Center(
-                        child: Text(
-                          _pendingRequestCount > 9
-                              ? '9+'
-                              : '$_pendingRequestCount',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
+            SizedBox(
+              width: 48,
+              height: 48,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.notifications_outlined),
+                    onPressed: () async {
+                      await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const FriendRequestsScreen(),
+                        ),
+                      );
+                      // Reload pending requests when returning
+                      _loadPendingRequests();
+                    },
+                  ),
+                  if (_pendingRequestCount > 0)
+                    Positioned(
+                      right: 8,
+                      top: 8,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.red.withOpacity(0.5),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 18,
+                          minHeight: 18,
+                        ),
+                        child: Center(
+                          child: Text(
+                            _pendingRequestCount > 9
+                                ? '9+'
+                                : '$_pendingRequestCount',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
             // Messages with badge
-            Stack(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.message_outlined),
-                  onPressed: () async {
-                    await Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const EnhancedFriendsScreen(),
-                      ),
-                    );
-                    // Reload unread messages when returning
-                    _loadUnreadMessages();
-                  },
-                ),
-                if (unreadMessageCount > 0)
-                  Positioned(
-                    right: 8,
-                    top: 8,
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade600,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.blue.withValues(alpha: 0.5),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      constraints: const BoxConstraints(
-                        minWidth: 18,
-                        minHeight: 18,
-                      ),
-                      child: Center(
-                        child: Text(
-                          unreadMessageCount > 9 ? '9+' : '$unreadMessageCount',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
+            SizedBox(
+              width: 48,
+              height: 48,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.message_outlined),
+                    onPressed: () async {
+                      await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const EnhancedFriendsScreen(),
+                        ),
+                      );
+                      // Reload unread messages when returning
+                      _loadUnreadMessages();
+                    },
+                  ),
+                  if (unreadMessageCount > 0)
+                    Positioned(
+                      right: 8,
+                      top: 8,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade600,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.blue.withOpacity(0.5),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 18,
+                          minHeight: 18,
+                        ),
+                        child: Center(
+                          child: Text(
+                            unreadMessageCount > 9
+                                ? '9+'
+                                : '$unreadMessageCount',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
             IconButton(
               icon: const Icon(Icons.person_add),

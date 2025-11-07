@@ -24,15 +24,18 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    _loadConversation();
+    // Defer initialization until after the widget tree is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadConversation();
 
-    // Subscribe to real-time messages
-    final authState = ref.read(authProvider);
-    if (authState.user != null) {
-      ref
-          .read(messagingProvider.notifier)
-          .subscribeToMessages(authState.user!.id);
-    }
+      // Subscribe to real-time messages
+      final authState = ref.read(authProvider);
+      if (authState.user != null) {
+        ref
+            .read(messagingProvider.notifier)
+            .subscribeToMessages(authState.user!.id);
+      }
+    });
   }
 
   @override
@@ -40,8 +43,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     _messageController.dispose();
     _scrollController.dispose();
 
-    // Unsubscribe from real-time messages
-    ref.read(messagingProvider.notifier).unsubscribeFromMessages();
+    // Unsubscribe from real-time messages - safely handle disposal
+    try {
+      ref.read(messagingProvider.notifier).unsubscribeFromMessages();
+    } catch (e) {
+      debugPrint('⚠️ Error unsubscribing from messages: $e');
+    }
     super.dispose();
   }
 

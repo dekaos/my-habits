@@ -91,10 +91,25 @@ class ActivityCard extends ConsumerWidget {
                               width: 40,
                               height: 40,
                               fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Text(
+                                  activity.userName.isNotEmpty
+                                      ? activity.userName[0].toUpperCase()
+                                      : '?',
+                                  style: TextStyle(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimaryContainer,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                );
+                              },
                             ),
                           )
                         : Text(
-                            activity.userName[0].toUpperCase(),
+                            activity.userName.isNotEmpty
+                                ? activity.userName[0].toUpperCase()
+                                : '?',
                             style: TextStyle(
                               color: Theme.of(context)
                                   .colorScheme

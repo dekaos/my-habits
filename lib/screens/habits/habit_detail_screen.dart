@@ -34,7 +34,6 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
   @override
   void initState() {
     super.initState();
-    _loadCompletions();
 
     _entranceController = AnimationController(
       vsync: this,
@@ -53,6 +52,11 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
     );
 
     _entranceController.forward();
+
+    // Defer data loading until after the widget tree is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadCompletions();
+    });
   }
 
   @override

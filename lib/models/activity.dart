@@ -22,7 +22,9 @@ class Activity {
     required this.id,
     required this.userId,
     required this.userName,
-    required this.type, required this.createdAt, this.userPhotoUrl,
+    required this.type,
+    required this.createdAt,
+    this.userPhotoUrl,
     this.habitId,
     this.habitTitle,
     this.message,
@@ -66,13 +68,13 @@ class Activity {
   String getActivityMessage() {
     switch (type) {
       case ActivityType.habitCompleted:
-        return '$userName completed "$habitTitle"';
+        return '$userName completed "${habitTitle ?? 'a habit'}"';
       case ActivityType.streakMilestone:
-        return '$userName reached a $streakCount day streak on "$habitTitle"! 🔥';
+        return '$userName reached a ${streakCount ?? 0} day streak on "${habitTitle ?? 'a habit'}"! 🔥';
       case ActivityType.newHabit:
-        return '$userName started a new habit: "$habitTitle"';
+        return '$userName started a new habit: "${habitTitle ?? 'Untitled'}"';
       case ActivityType.encouragement:
-        return message ?? '';
+        return message ?? '$userName sent encouragement';
     }
   }
 }

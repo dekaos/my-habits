@@ -65,7 +65,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       if (next.user != null &&
           (previous?.user == null || previous?.user?.id != next.user?.id)) {
         _hasLoadedData = false;
-        _loadData(next.user!.id);
+        // Defer data loading to avoid modifying provider during build
+        Future.microtask(() => _loadData(next.user!.id));
       }
     });
 
