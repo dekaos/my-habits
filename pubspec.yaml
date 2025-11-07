@@ -22,12 +22,17 @@ dependencies:
   fl_chart: ^1.1.1
   lottie: ^3.0.0
   flutter_slidable: ^3.0.1
+  confetti: ^0.7.0
   
   # Utilities
   intl: ^0.20.2
   uuid: ^4.3.3
   shared_preferences: ^2.2.2
   image_picker: ^1.0.7
+  
+  # Microinteractions
+  vibration: ^2.0.0
+  audioplayers: ^6.1.0
   
   # Networking
   http: ^1.2.0
@@ -45,3 +50,4 @@ flutter:
     - assets/images/
     - assets/animations/
     - assets/icon/
+    - assets/sounds/

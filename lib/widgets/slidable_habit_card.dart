@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import '../models/habit.dart';
 import '../providers/habit_provider.dart';
+import '../services/haptic_service.dart';
 import 'habit_card.dart';
+import 'celebration_animation.dart';
 
 class SlidableHabitCard extends ConsumerStatefulWidget {
   final Habit habit;
@@ -48,90 +50,111 @@ class _SlidableHabitCardState extends ConsumerState<SlidableHabitCard>
   Future<void> _handleComplete() async {
     if (_isProcessing) return;
 
-    setState(() => _isProcessing = true);
+    // Mark as processing but don't block UI
+    _isProcessing = true;
+
+    // Play haptic feedback and sound IMMEDIATELY
+    HapticService.celebrateSuccess();
+
+    // Show celebration animation IMMEDIATELY (non-blocking)
+    if (mounted) {
+      showCelebration(context);
+    }
+
+    // Animate the card
     _successController.forward().then((_) => _successController.reverse());
 
+    // Process habit completion in background (don't await - let it run in parallel)
     final habitNotifier = ref.read(habitProvider.notifier);
-    await habitNotifier.completeHabit(widget.habit);
+    habitNotifier.completeHabit(widget.habit).then((_) {
+      if (mounted) {
+        // Refresh UI after completion
+        setState(() => _isProcessing = false);
+        widget.onActionComplete?.call();
 
-    if (mounted) {
-      setState(() => _isProcessing = false);
-      widget.onActionComplete?.call();
-
-      // Show success feedback
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.check_circle, color: Colors.white),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '${widget.habit.title} completed!',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
+        // Show success feedback
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '${widget.habit.title} completed!',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
                       ),
-                    ),
-                    Text(
-                      '🔥 ${widget.habit.currentStreak + 1} day streak!',
-                      style: const TextStyle(fontSize: 13),
-                    ),
-                  ],
+                      Text(
+                        '🔥 ${widget.habit.currentStreak + 1} day streak!',
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
+            backgroundColor: Colors.green.shade600,
+            behavior: SnackBarBehavior.floating,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            duration: const Duration(seconds: 3),
+            margin: const EdgeInsets.all(16),
           ),
-          backgroundColor: Colors.green.shade600,
-          behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          duration: const Duration(seconds: 3),
-          margin: const EdgeInsets.all(16),
-        ),
-      );
-    }
+        );
+      }
+    });
   }
 
   Future<void> _handleUndo() async {
     if (_isProcessing) return;
 
-    setState(() => _isProcessing = true);
+    // Mark as processing but don't block UI
+    _isProcessing = true;
+
+    // Play undo haptic feedback IMMEDIATELY (just shake, no animation)
+    HapticService.playUndoHaptic();
+
+    // Animate the card
     _successController.forward().then((_) => _successController.reverse());
 
+    // Process habit undo in background (don't await - let it run in parallel)
     final habitNotifier = ref.read(habitProvider.notifier);
-    await habitNotifier.uncompleteHabit(widget.habit);
+    habitNotifier.uncompleteHabit(widget.habit).then((_) {
+      if (mounted) {
+        // Refresh UI after completion
+        setState(() => _isProcessing = false);
+        widget.onActionComplete?.call();
 
-    if (mounted) {
-      setState(() => _isProcessing = false);
-      widget.onActionComplete?.call();
-
-      // Show undo feedback
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.undo_rounded, color: Colors.white),
-              const SizedBox(width: 12),
-              Text(
-                '${widget.habit.title} marked incomplete',
-                style: const TextStyle(fontWeight: FontWeight.w500),
-              ),
-            ],
+        // Show undo feedback
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.undo_rounded, color: Colors.white),
+                const SizedBox(width: 12),
+                Text(
+                  '${widget.habit.title} marked incomplete',
+                  style: const TextStyle(fontWeight: FontWeight.w500),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.orange.shade600,
+            behavior: SnackBarBehavior.floating,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            duration: const Duration(seconds: 2),
+            margin: const EdgeInsets.all(16),
           ),
-          backgroundColor: Colors.orange.shade600,
-          behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          duration: const Duration(seconds: 2),
-          margin: const EdgeInsets.all(16),
-        ),
-      );
-    }
+        );
+      }
+    });
   }
 
   @override

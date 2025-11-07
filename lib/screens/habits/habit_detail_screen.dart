@@ -9,6 +9,8 @@ import '../../models/habit_completion.dart';
 import '../../models/activity.dart';
 import '../../widgets/animated_gradient_background.dart';
 import '../../widgets/glass_card.dart';
+import '../../services/haptic_service.dart';
+import '../../widgets/celebration_animation.dart';
 
 class HabitDetailScreen extends ConsumerStatefulWidget {
   final Habit habit;
@@ -71,49 +73,54 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
   Future<void> _completeHabit() async {
     if (_isCompleting) return;
 
-    setState(() {
-      _isCompleting = true;
-    });
+    // Mark as completing but don't block UI
+    _isCompleting = true;
+
+    // Play haptic feedback and sound IMMEDIATELY
+    HapticService.celebrateSuccess();
+
+    // Show celebration animation IMMEDIATELY (non-blocking)
+    if (mounted) {
+      showCelebration(context);
+    }
 
     final authState = ref.read(authProvider);
+    final note = _noteController.text.trim().isEmpty
+        ? null
+        : _noteController.text.trim();
 
-    await ref.read(habitProvider.notifier).completeHabit(
-          widget.habit,
-          note: _noteController.text.trim().isEmpty
-              ? null
-              : _noteController.text.trim(),
+    // Process everything in background (non-blocking)
+    Future.wait([
+      ref.read(habitProvider.notifier).completeHabit(widget.habit, note: note),
+      if (widget.habit.isPublic)
+        ref.read(socialProvider.notifier).postActivity(
+              Activity(
+                id: '',
+                userId: widget.habit.userId,
+                userName: authState.userProfile?.displayName ?? 'User',
+                userPhotoUrl: authState.userProfile?.photoUrl,
+                type: ActivityType.habitCompleted,
+                habitId: widget.habit.id,
+                habitTitle: widget.habit.title,
+                createdAt: DateTime.now(),
+              ),
+            ),
+    ]).then((_) async {
+      await _loadCompletions();
+      if (mounted) {
+        _noteController.clear();
+        setState(() {
+          _isCompleting = false;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${widget.habit.title} completed! 🎉'),
+            backgroundColor: Colors.green,
+          ),
         );
-
-    // Post activity if habit is public
-    if (widget.habit.isPublic) {
-      final activity = Activity(
-        id: '',
-        userId: widget.habit.userId,
-        userName: authState.userProfile?.displayName ?? 'User',
-        userPhotoUrl: authState.userProfile?.photoUrl,
-        type: ActivityType.habitCompleted,
-        habitId: widget.habit.id,
-        habitTitle: widget.habit.title,
-        createdAt: DateTime.now(),
-      );
-      await ref.read(socialProvider.notifier).postActivity(activity);
-    }
-
-    await _loadCompletions();
-    _noteController.clear();
-
-    setState(() {
-      _isCompleting = false;
+      }
     });
-
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${widget.habit.title} completed! 🎉'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    }
   }
 
   @override
