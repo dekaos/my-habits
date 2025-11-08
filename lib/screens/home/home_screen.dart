@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/habit_provider.dart';
 import '../../providers/social_provider.dart';
+import '../../providers/notification_provider.dart';
 import '../../widgets/animated_gradient_background.dart';
+import '../notifications/notifications_screen.dart';
 import 'habits_tab.dart';
 import 'social_tab.dart';
 import 'profile_tab.dart';
@@ -34,6 +36,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   @override
   void dispose() {
     _animationController.dispose();
+    try {
+      ref.read(notificationProvider.notifier).unsubscribeFromNotifications();
+    } catch (e) {
+      debugPrint('Error unsubscribing from notifications: $e');
+    }
     super.dispose();
   }
 
@@ -47,7 +54,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         ref.read(habitProvider.notifier).loadHabits(userId),
         ref.read(socialProvider.notifier).loadFriends(userId),
         ref.read(socialProvider.notifier).loadActivityFeed(userId),
+        ref.read(notificationProvider.notifier).loadNotifications(userId),
       ]);
+
+      // Subscribe to real-time notifications
+      ref.read(notificationProvider.notifier).subscribeToNotifications(userId);
+
       debugPrint('✅ HomeScreen - Data loaded successfully');
     } catch (e) {
       debugPrint('❌ HomeScreen - Error loading data: $e');
@@ -60,17 +72,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final authState = ref.watch(authProvider);
 
-    // Load data when user becomes available
     ref.listen(authProvider, (previous, next) {
       if (next.user != null &&
           (previous?.user == null || previous?.user?.id != next.user?.id)) {
         _hasLoadedData = false;
-        // Defer data loading to avoid modifying provider during build
         Future.microtask(() => _loadData(next.user!.id));
       }
     });
 
-    // Load data on first build if user is already authenticated
     if (authState.user != null && !_hasLoadedData) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _loadData(authState.user!.id);
@@ -83,6 +92,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       const ProfileTab(),
     ];
 
+    final notificationState = ref.watch(notificationProvider);
+
     return Scaffold(
       extendBody: true,
       backgroundColor:
@@ -94,6 +105,115 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         ),
       ),
       bottomNavigationBar: _buildGlassBottomNav(isDark),
+      floatingActionButton:
+          _buildNotificationButton(context, notificationState, isDark),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
+    );
+  }
+
+  Widget _buildNotificationButton(
+    BuildContext context,
+    NotificationState notificationState,
+    bool isDark,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 48, right: 4),
+      child: Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: notificationState.unreadCount > 0
+                  ? Theme.of(context).colorScheme.primary.withOpacity(0.3)
+                  : Colors.black.withOpacity(0.1),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: ClipOval(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: isDark
+                    ? Colors.black.withOpacity(0.6)
+                    : Colors.white.withOpacity(0.8),
+                border: Border.all(
+                  color: isDark
+                      ? Colors.white.withOpacity(0.15)
+                      : Colors.white.withOpacity(0.5),
+                  width: 1.5,
+                ),
+                shape: BoxShape.circle,
+              ),
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const NotificationsScreen(),
+                          ),
+                        );
+                      },
+                      customBorder: const CircleBorder(),
+                      child: Center(
+                        child: Icon(
+                          notificationState.unreadCount > 0
+                              ? Icons.notifications
+                              : Icons.notifications_outlined,
+                          color: notificationState.unreadCount > 0
+                              ? Theme.of(context).colorScheme.primary
+                              : (isDark ? Colors.grey[400] : Colors.grey[600]),
+                          size: 24,
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (notificationState.unreadCount > 0)
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        constraints: const BoxConstraints(
+                          minWidth: 18,
+                          minHeight: 18,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: isDark ? Colors.black : Colors.white,
+                            width: 2,
+                          ),
+                        ),
+                        child: Center(
+                          child: Text(
+                            notificationState.unreadCount > 9
+                                ? '9+'
+                                : '${notificationState.unreadCount}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 

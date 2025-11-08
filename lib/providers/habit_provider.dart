@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/habit.dart';
 import '../models/habit_completion.dart';
 import '../models/activity.dart';
+import '../models/notification.dart';
 
 // Habit State
 class HabitState {
@@ -163,17 +164,57 @@ class HabitNotifier extends Notifier<HabitState> {
 
       state = state.copyWith(habits: updatedHabits);
 
-      // Create activity for social feed
+      // Create activity for social feed (only once!)
+      debugPrint('📢 About to create habit activity...');
       try {
         await _createHabitActivity(habit, updatedHabit);
       } catch (e) {
-        debugPrint('Error creating activity: $e');
+        debugPrint('❌ Error creating activity: $e');
+      }
+      debugPrint('📢 Finished creating habit activity');
+
+      // Update user's total streaks stats
+      try {
+        await _updateUserStreakStats(habit.userId);
+      } catch (e) {
+        debugPrint('Error updating user streak stats: $e');
       }
 
       // Reload to ensure data consistency
       await loadHabits(habit.userId);
     } catch (e) {
       debugPrint('Error completing habit: $e');
+    }
+  }
+
+  Future<void> _updateUserStreakStats(String userId) async {
+    try {
+      // Get all user's habits
+      final habitsResponse =
+          await _supabase.from('habits').select().eq('user_id', userId);
+
+      final habits = (habitsResponse as List)
+          .map((data) => Habit.fromSupabaseMap(data))
+          .toList();
+
+      // Calculate total active streaks
+      final totalStreaks = habits.where((h) => h.currentStreak > 0).length;
+
+      // Calculate longest streak across all habits
+      final longestStreak = habits.isEmpty
+          ? 0
+          : habits.map((h) => h.longestStreak).reduce((a, b) => a > b ? a : b);
+
+      // Update user profile
+      await _supabase.from('users').update({
+        'total_streaks': totalStreaks,
+        'longest_streak': longestStreak,
+      }).eq('id', userId);
+
+      debugPrint(
+          '✅ Updated user stats: $totalStreaks active streaks, longest: $longestStreak');
+    } catch (e) {
+      debugPrint('Error in _updateUserStreakStats: $e');
     }
   }
 
@@ -208,6 +249,12 @@ class HabitNotifier extends Notifier<HabitState> {
           .insert(completionActivity.toSupabaseMap());
       debugPrint('✅ Created habit completion activity');
 
+      // Notify friends about the completion
+      if (habit.isPublic) {
+        await _notifyFriendsAboutCompletion(
+            habit.userId, userName, habit.title, userPhotoUrl);
+      }
+
       // Check for streak milestones (7, 30, 50, 100 days)
       final milestones = [7, 30, 50, 100, 365];
       if (milestones.contains(updatedHabit.currentStreak)) {
@@ -231,6 +278,75 @@ class HabitNotifier extends Notifier<HabitState> {
       }
     } catch (e) {
       debugPrint('Error in _createHabitActivity: $e');
+    }
+  }
+
+  Future<void> _notifyFriendsAboutCompletion(
+    String userId,
+    String userName,
+    String habitTitle,
+    String? userPhotoUrl,
+  ) async {
+    try {
+      debugPrint(
+          '🔔 _notifyFriendsAboutCompletion called for: $userName - $habitTitle');
+
+      // Get user's friends list
+      final userResponse = await _supabase
+          .from('users')
+          .select('friends')
+          .eq('id', userId)
+          .maybeSingle();
+
+      if (userResponse == null) {
+        debugPrint('⚠️ User profile not found, cannot notify friends');
+        return;
+      }
+
+      final friendIds = List<String>.from(userResponse['friends'] ?? []);
+
+      debugPrint('🔔 User has ${friendIds.length} friends: $friendIds');
+
+      // Remove duplicates from friends list (shouldn't happen, but safety check)
+      final uniqueFriendIds = friendIds.toSet().toList();
+
+      if (uniqueFriendIds.length != friendIds.length) {
+        debugPrint(
+            '⚠️ Found ${friendIds.length - uniqueFriendIds.length} duplicate friend IDs!');
+      }
+
+      if (uniqueFriendIds.isEmpty) {
+        debugPrint('⚠️ No friends to notify');
+        return;
+      }
+
+      debugPrint('🔔 Will notify ${uniqueFriendIds.length} unique friends');
+
+      // Create notification for each friend
+      final notifications = uniqueFriendIds.map((friendId) {
+        debugPrint('🔔 Creating notification for friend: $friendId');
+        return AppNotification(
+          id: '',
+          userId: friendId, // Friend receives the notification
+          fromUserId: userId,
+          fromUserName: userName,
+          fromUserPhotoUrl: userPhotoUrl,
+          type: NotificationType.habitCompleted,
+          habitTitle: habitTitle,
+          createdAt: DateTime.now(),
+        ).toMap();
+      }).toList();
+
+      debugPrint(
+          '🔔 Inserting ${notifications.length} notifications into database');
+
+      // Batch insert notifications
+      await _supabase.from('notifications').insert(notifications);
+
+      debugPrint(
+          '✅ Successfully created ${notifications.length} notifications');
+    } catch (e) {
+      debugPrint('❌ Error notifying friends: $e');
     }
   }
 
@@ -286,6 +402,13 @@ class HabitNotifier extends Notifier<HabitState> {
       }).toList();
 
       state = state.copyWith(habits: updatedHabits);
+
+      // Update user's streak stats
+      try {
+        await _updateUserStreakStats(habit.userId);
+      } catch (e) {
+        debugPrint('Error updating user streak stats: $e');
+      }
 
       // Reload to ensure data consistency
       await loadHabits(habit.userId);

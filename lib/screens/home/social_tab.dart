@@ -22,7 +22,6 @@ class _SocialTabState extends ConsumerState<SocialTab> {
   @override
   void initState() {
     super.initState();
-    // Defer initialization until after the widget tree is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeData();
     });
@@ -32,22 +31,17 @@ class _SocialTabState extends ConsumerState<SocialTab> {
     final authState = ref.read(authProvider);
     if (authState.user == null) return;
 
-    // Load pending requests
     _loadPendingRequests();
 
-    // Load friends first, then unread messages and activity feed
     await ref.read(socialProvider.notifier).loadFriends(authState.user!.id);
     await _loadUnreadMessages();
 
-    // Load activity feed
     await ref
         .read(socialProvider.notifier)
         .loadActivityFeed(authState.user!.id);
 
-    // Subscribe to real-time activities
     ref.read(socialProvider.notifier).subscribeToActivities(authState.user!.id);
 
-    // Subscribe to real-time messages for notifications
     ref
         .read(messagingProvider.notifier)
         .subscribeToMessages(authState.user!.id);
@@ -55,7 +49,6 @@ class _SocialTabState extends ConsumerState<SocialTab> {
 
   @override
   void dispose() {
-    // Unsubscribe from real-time updates - safely handle disposal
     try {
       ref.read(socialProvider.notifier).unsubscribeFromActivities();
       ref.read(messagingProvider.notifier).unsubscribeFromMessages();
@@ -69,14 +62,20 @@ class _SocialTabState extends ConsumerState<SocialTab> {
     final authState = ref.read(authProvider);
     if (authState.user == null) return;
 
-    final requestIds = await ref
-        .read(socialProvider.notifier)
-        .getFriendRequestIds(authState.user!.id);
+    try {
+      final requestIds = await ref
+          .read(socialProvider.notifier)
+          .getFriendRequestIds(authState.user!.id);
 
-    if (mounted) {
-      setState(() {
-        _pendingRequestCount = requestIds.length;
-      });
+      debugPrint('📬 Loaded ${requestIds.length} pending friend requests');
+
+      if (mounted) {
+        setState(() {
+          _pendingRequestCount = requestIds.length;
+        });
+      }
+    } catch (e) {
+      debugPrint('❌ Error loading pending requests: $e');
     }
   }
 
@@ -84,11 +83,9 @@ class _SocialTabState extends ConsumerState<SocialTab> {
     final authState = ref.read(authProvider);
     if (authState.user == null) return;
 
-    // Get friends list
     final socialState = ref.read(socialProvider);
     final friendIds = socialState.friends.map((f) => f.id).toList();
 
-    // Load unread counts for all friends
     await ref.read(messagingProvider.notifier).loadUnreadCounts(
           authState.user!.id,
           friendIds,

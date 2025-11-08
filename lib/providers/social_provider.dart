@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user_profile.dart';
 import '../models/activity.dart';
+import '../models/notification.dart';
 
 // Social State
 class SocialState {
@@ -148,16 +149,22 @@ class SocialNotifier extends Notifier<SocialState> {
     try {
       state = state.copyWith(isLoading: true);
 
-      final userResponse =
-          await _supabase.from('users').select().eq('id', userId).single();
+      final userResponse = await _supabase
+          .from('users')
+          .select('friends')
+          .eq('id', userId)
+          .single();
 
       final friendIds = List<String>.from(userResponse['friends'] ?? []);
 
       if (friendIds.isEmpty) {
         state = state.copyWith(friends: [], isLoading: false);
       } else {
-        final friendsResponse =
-            await _supabase.from('users').select().inFilter('id', friendIds);
+        final friendsResponse = await _supabase
+            .from('users')
+            .select(
+                'id, email, display_name, photo_url, bio, total_streaks, longest_streak')
+            .inFilter('id', friendIds);
 
         final friends = (friendsResponse as List)
             .map((data) => UserProfile.fromMap(data, data['id']))
@@ -175,8 +182,11 @@ class SocialNotifier extends Notifier<SocialState> {
     try {
       debugPrint('🎯 Loading activity feed for user: $userId');
 
-      final userResponse =
-          await _supabase.from('users').select().eq('id', userId).single();
+      final userResponse = await _supabase
+          .from('users')
+          .select('friends')
+          .eq('id', userId)
+          .single();
 
       final friendIds = List<String>.from(userResponse['friends'] ?? []);
       friendIds.add(userId); // Include own activities
@@ -249,40 +259,44 @@ class SocialNotifier extends Notifier<SocialState> {
       debugPrint(
           '📤 Sending friend request from $currentUserId to $targetUserId');
 
-      // Get target user's current friend requests
+      // Check if already friends
       final targetUser = await _supabase
           .from('users')
-          .select('friend_requests, friends')
+          .select('friends')
           .eq('id', targetUserId)
           .single();
 
-      debugPrint('📥 Target user data: $targetUser');
-
-      // Check if already friends
       final friends = List<String>.from(targetUser['friends'] ?? []);
       if (friends.contains(currentUserId)) {
         debugPrint('⚠️ Already friends!');
         throw Exception('Already friends with this user');
       }
 
-      // Check if request already sent
-      final requests = List<String>.from(targetUser['friend_requests'] ?? []);
-      if (requests.contains(currentUserId)) {
+      // Check if request already exists
+      final existingRequest = await _supabase
+          .from('friend_requests')
+          .select()
+          .eq('from_user_id', currentUserId)
+          .eq('to_user_id', targetUserId)
+          .eq('status', 'pending')
+          .maybeSingle();
+
+      if (existingRequest != null) {
         debugPrint('⚠️ Friend request already sent!');
         throw Exception('Friend request already sent');
       }
 
-      // Add current user to target's friend requests
-      requests.add(currentUserId);
-      debugPrint('✍️ Updating friend_requests to: $requests');
+      // Insert friend request
+      await _supabase.from('friend_requests').insert({
+        'from_user_id': currentUserId,
+        'to_user_id': targetUserId,
+        'status': 'pending',
+      });
 
-      final response = await _supabase
-          .from('users')
-          .update({'friend_requests': requests})
-          .eq('id', targetUserId)
-          .select();
+      debugPrint('✅ Friend request sent successfully');
 
-      debugPrint('✅ Friend request sent successfully: $response');
+      // Create notification for the recipient
+      await _createFriendRequestNotification(currentUserId, targetUserId);
     } catch (e, stackTrace) {
       debugPrint('❌ Error sending friend request: $e');
       debugPrint('Stack trace: $stackTrace');
@@ -290,30 +304,58 @@ class SocialNotifier extends Notifier<SocialState> {
     }
   }
 
+  Future<void> _createFriendRequestNotification(
+    String fromUserId,
+    String toUserId,
+  ) async {
+    try {
+      // Get sender's profile
+      final userProfile = await _supabase
+          .from('users')
+          .select()
+          .eq('id', fromUserId)
+          .maybeSingle();
+
+      if (userProfile == null) return;
+
+      final notification = AppNotification(
+        id: '',
+        userId: toUserId,
+        fromUserId: fromUserId,
+        fromUserName: userProfile['display_name'] ?? 'Someone',
+        fromUserPhotoUrl: userProfile['photo_url'],
+        type: NotificationType.friendRequest,
+        createdAt: DateTime.now(),
+      );
+
+      await _supabase.from('notifications').insert(notification.toMap());
+      debugPrint('✅ Created friend request notification');
+    } catch (e) {
+      debugPrint('❌ Error creating friend request notification: $e');
+    }
+  }
+
   Future<void> acceptFriendRequest(
       String currentUserId, String requesterId) async {
     try {
-      // Get current user data
+      debugPrint('✅ Accepting friend request from $requesterId');
+
+      // Get current user friends
       final currentUserData = await _supabase
           .from('users')
-          .select()
+          .select('friends')
           .eq('id', currentUserId)
           .single();
 
       final friends = List<String>.from(currentUserData['friends'] ?? []);
-      final requests =
-          List<String>.from(currentUserData['friend_requests'] ?? []);
-
       friends.add(requesterId);
-      requests.remove(requesterId);
 
-      // Update current user
+      // Update current user's friends list
       await _supabase.from('users').update({
         'friends': friends,
-        'friend_requests': requests,
       }).eq('id', currentUserId);
 
-      // Add current user to requester's friends
+      // Add current user to requester's friends list
       final requesterData = await _supabase
           .from('users')
           .select('friends')
@@ -328,29 +370,36 @@ class SocialNotifier extends Notifier<SocialState> {
           .from('users')
           .update({'friends': requesterFriends}).eq('id', requesterId);
 
+      // Update friend request status to 'accepted' (or delete it)
+      await _supabase
+          .from('friend_requests')
+          .delete()
+          .eq('from_user_id', requesterId)
+          .eq('to_user_id', currentUserId);
+
+      debugPrint('✅ Friend request accepted successfully');
+
       await loadFriends(currentUserId);
     } catch (e) {
-      debugPrint('Error accepting friend request: $e');
+      debugPrint('❌ Error accepting friend request: $e');
     }
   }
 
   Future<void> rejectFriendRequest(
       String currentUserId, String requesterId) async {
     try {
-      final userData = await _supabase
-          .from('users')
-          .select('friend_requests')
-          .eq('id', currentUserId)
-          .single();
+      debugPrint('🚫 Rejecting friend request from $requesterId');
 
-      final requests = List<String>.from(userData['friend_requests'] ?? []);
-      requests.remove(requesterId);
-
+      // Delete the friend request
       await _supabase
-          .from('users')
-          .update({'friend_requests': requests}).eq('id', currentUserId);
+          .from('friend_requests')
+          .delete()
+          .eq('from_user_id', requesterId)
+          .eq('to_user_id', currentUserId);
+
+      debugPrint('✅ Friend request rejected successfully');
     } catch (e) {
-      debugPrint('Error rejecting friend request: $e');
+      debugPrint('❌ Error rejecting friend request: $e');
     }
   }
 
@@ -422,15 +471,19 @@ class SocialNotifier extends Notifier<SocialState> {
     try {
       debugPrint('📬 Fetching friend requests for user: $userId');
 
+      // Query friend_requests table for pending requests TO this user
       final response = await _supabase
-          .from('users')
-          .select('friend_requests')
-          .eq('id', userId)
-          .single();
+          .from('friend_requests')
+          .select('from_user_id')
+          .eq('to_user_id', userId)
+          .eq('status', 'pending');
 
       debugPrint('📬 Raw response: $response');
 
-      final requestIds = List<String>.from(response['friend_requests'] ?? []);
+      final requestIds = (response as List)
+          .map((item) => item['from_user_id'] as String)
+          .toList();
+
       debugPrint(
           '📬 Friend request IDs: $requestIds (count: ${requestIds.length})');
 
@@ -450,7 +503,7 @@ class SocialNotifier extends Notifier<SocialState> {
       final response = await _supabase
           .from('users')
           .select(
-              'id, display_name, email, photo_url, bio, total_streaks, created_at')
+              'id, email, display_name, photo_url, bio, total_streaks, longest_streak')
           .inFilter('id', userIds);
 
       return (response as List)
@@ -467,7 +520,7 @@ class SocialNotifier extends Notifier<SocialState> {
     try {
       final activityData = await _supabase
           .from('activities')
-          .select('reactions')
+          .select()
           .eq('id', activityId)
           .single();
 
@@ -500,8 +553,54 @@ class SocialNotifier extends Notifier<SocialState> {
       }).toList();
 
       state = state.copyWith(activityFeed: updatedActivities);
+
+      // Create notification for activity owner (if not reacting to own activity)
+      final activityOwnerId = activityData['user_id'];
+      if (activityOwnerId != userId) {
+        await _createReactionNotification(
+          activityOwnerId: activityOwnerId,
+          activityId: activityId,
+          fromUserId: userId,
+          emoji: emoji,
+        );
+      }
     } catch (e) {
       debugPrint('Error adding reaction: $e');
+    }
+  }
+
+  Future<void> _createReactionNotification({
+    required String activityOwnerId,
+    required String activityId,
+    required String fromUserId,
+    required String emoji,
+  }) async {
+    try {
+      // Get reactor's profile
+      final userProfile = await _supabase
+          .from('users')
+          .select()
+          .eq('id', fromUserId)
+          .maybeSingle();
+
+      if (userProfile == null) return;
+
+      final notification = AppNotification(
+        id: '',
+        userId: activityOwnerId,
+        fromUserId: fromUserId,
+        fromUserName: userProfile['display_name'] ?? 'Someone',
+        fromUserPhotoUrl: userProfile['photo_url'],
+        type: NotificationType.reactionAdded,
+        activityId: activityId,
+        emoji: emoji,
+        createdAt: DateTime.now(),
+      );
+
+      await _supabase.from('notifications').insert(notification.toMap());
+      debugPrint('✅ Created reaction notification');
+    } catch (e) {
+      debugPrint('Error creating reaction notification: $e');
     }
   }
 
