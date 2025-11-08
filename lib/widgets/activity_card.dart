@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/activity.dart';
 import '../providers/auth_provider.dart';
 import '../providers/social_provider.dart';
@@ -160,36 +161,13 @@ class ActivityCard extends ConsumerWidget {
               ],
             ),
 
-            // Reactions
+            // Reactions grouped by emoji
             if (activity.reactions.isNotEmpty) ...[
               const SizedBox(height: 12),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
-                children: activity.reactions.entries.map((entry) {
-                  return Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? Colors.white.withOpacity(0.1)
-                          : Colors.grey.shade200,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: isDark
-                            ? Colors.white.withOpacity(0.2)
-                            : Colors.transparent,
-                        width: 1,
-                      ),
-                    ),
-                    child: Text(
-                      entry.value,
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                  );
-                }).toList(),
+                children: _buildReactionBubbles(context, ref, isDark),
               ),
             ],
 
@@ -232,6 +210,224 @@ class ActivityCard extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  /// Group reactions by emoji and build bubbles
+  List<Widget> _buildReactionBubbles(
+      BuildContext context, WidgetRef ref, bool isDark) {
+    // Group reactions by emoji
+    final Map<String, List<String>> groupedReactions = {};
+
+    activity.reactions.forEach((userId, emoji) {
+      if (!groupedReactions.containsKey(emoji)) {
+        groupedReactions[emoji] = [];
+      }
+      groupedReactions[emoji]!.add(userId);
+    });
+
+    final authState = ref.read(authProvider);
+    final currentUserId = authState.user?.id;
+
+    return groupedReactions.entries.map((entry) {
+      final emoji = entry.key;
+      final userIds = entry.value;
+      final count = userIds.length;
+      final hasReacted =
+          currentUserId != null && userIds.contains(currentUserId);
+
+      return GestureDetector(
+        onTap: () => _showReactionDetails(context, ref, emoji, userIds),
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 6,
+          ),
+          decoration: BoxDecoration(
+            color: hasReacted
+                ? Theme.of(context).colorScheme.primary.withOpacity(0.15)
+                : (isDark
+                    ? Colors.white.withOpacity(0.1)
+                    : Colors.grey.shade200),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: hasReacted
+                  ? Theme.of(context).colorScheme.primary.withOpacity(0.5)
+                  : (isDark
+                      ? Colors.white.withOpacity(0.2)
+                      : Colors.transparent),
+              width: hasReacted ? 1.5 : 1,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                emoji,
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                count.toString(),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: hasReacted
+                      ? Theme.of(context).colorScheme.primary
+                      : (isDark ? Colors.grey[300] : Colors.grey[700]),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }).toList();
+  }
+
+  Future<void> _showReactionDetails(
+    BuildContext context,
+    WidgetRef ref,
+    String emoji,
+    List<String> userIds,
+  ) async {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? Colors.black.withOpacity(0.9)
+                    : Colors.white.withOpacity(0.95),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header
+                  Row(
+                    children: [
+                      Text(
+                        emoji,
+                        style: const TextStyle(fontSize: 32),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        '${userIds.length} ${userIds.length == 1 ? 'reaction' : 'reactions'}',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  const Divider(),
+                  const SizedBox(height: 8),
+
+                  FutureBuilder<List<Map<String, dynamic>>>(
+                    future: _fetchUserProfiles(userIds),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(20.0),
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      }
+
+                      if (snapshot.hasError || !snapshot.hasData) {
+                        return Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Text(
+                            'Could not load users',
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
+                        );
+                      }
+
+                      final users = snapshot.data!;
+
+                      return ListView.separated(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: users.length,
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: 8),
+                        itemBuilder: (context, index) {
+                          final user = users[index];
+                          final displayName = user['display_name'] ?? 'User';
+                          final photoUrl = user['photo_url'];
+
+                          return ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: CircleAvatar(
+                              radius: 20,
+                              backgroundColor: Theme.of(context)
+                                  .colorScheme
+                                  .primaryContainer,
+                              backgroundImage: photoUrl != null
+                                  ? NetworkImage(photoUrl)
+                                  : null,
+                              child: photoUrl == null
+                                  ? Text(
+                                      displayName[0].toUpperCase(),
+                                      style: TextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onPrimaryContainer,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    )
+                                  : null,
+                            ),
+                            title: Text(
+                              displayName,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            trailing: Text(
+                              emoji,
+                              style: const TextStyle(fontSize: 20),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> _fetchUserProfiles(
+      List<String> userIds) async {
+    try {
+      final supabase = Supabase.instance.client;
+      final response = await supabase
+          .from('users')
+          .select('id, display_name, photo_url')
+          .inFilter('id', userIds);
+
+      return List<Map<String, dynamic>>.from(response as List);
+    } catch (e) {
+      debugPrint('Error fetching user profiles: $e');
+      return [];
+    }
   }
 
   void _showReactionPicker(
