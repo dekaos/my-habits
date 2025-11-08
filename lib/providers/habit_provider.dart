@@ -472,13 +472,21 @@ class HabitNotifier extends Notifier<HabitState> {
   }
 
   List<Habit> getTodaysHabits() {
-    final today = DateTime.now().weekday - 1; // 0 = Monday
+    final today = DateTime.now().weekday - 1; // 0 = Monday, 6 = Sunday
     return state.habits.where((habit) {
       if (habit.frequency == HabitFrequency.daily) return true;
-      if (habit.frequency == HabitFrequency.weekly) return today == 0; // Monday
+
+      if (habit.frequency == HabitFrequency.weekly) {
+        // Weekly habits appear on the same weekday they were created
+        final createdWeekday =
+            habit.createdAt.weekday - 1; // 0-based (0=Mon, 6=Sun)
+        return today == createdWeekday;
+      }
+
       if (habit.frequency == HabitFrequency.custom) {
         return habit.customDays.contains(today);
       }
+
       return false;
     }).toList();
   }

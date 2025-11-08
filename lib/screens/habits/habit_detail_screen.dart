@@ -9,6 +9,7 @@ import '../../widgets/glass_card.dart';
 import '../../services/haptic_service.dart';
 import '../../widgets/celebration_animation.dart';
 import '../../widgets/share_progress_sheet.dart';
+import 'edit_habit_screen.dart';
 
 class HabitDetailScreen extends ConsumerStatefulWidget {
   final Habit habit;
@@ -90,11 +91,18 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
         ? null
         : _noteController.text.trim();
 
+    // Get current habit from provider
+    final habitState = ref.read(habitProvider);
+    final currentHabit = habitState.habits.firstWhere(
+      (h) => h.id == widget.habit.id,
+      orElse: () => widget.habit,
+    );
+
     // Process everything in background (non-blocking)
     // Note: completeHabit() automatically creates activities, no need to post separately
     ref
         .read(habitProvider.notifier)
-        .completeHabit(widget.habit, note: note)
+        .completeHabit(currentHabit, note: note)
         .then((_) async {
       await _loadCompletions();
       if (mounted) {
@@ -105,7 +113,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${widget.habit.title} completed! 🎉'),
+            content: Text('${currentHabit.title} completed! 🎉'),
             backgroundColor: Colors.green,
           ),
         );
@@ -115,8 +123,17 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
 
   @override
   Widget build(BuildContext context) {
-    final habitNotifier = ref.watch(habitProvider.notifier);
-    final isCompletedToday = habitNotifier.isHabitCompletedToday(widget.habit);
+    // Watch the habit provider to get latest habit data
+    final habitState = ref.watch(habitProvider);
+
+    // Get the current habit from state (updates when edited/completed)
+    final currentHabit = habitState.habits.firstWhere(
+      (h) => h.id == widget.habit.id,
+      orElse: () => widget.habit, // Fallback to original if not found
+    );
+
+    final habitNotifier = ref.read(habitProvider.notifier);
+    final isCompletedToday = habitNotifier.isHabitCompletedToday(currentHabit);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -124,23 +141,31 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Text(widget.habit.title),
+        title: Text(currentHabit.title),
         actions: [
           IconButton(
             icon: const Icon(Icons.share_rounded),
             onPressed: () {
               showShareProgress(
                 context,
-                widget.habit,
-                widget.habit.currentStreak,
-                widget.habit.totalCompletions,
+                currentHabit,
+                currentHabit.currentStreak,
+                currentHabit.totalCompletions,
               );
             },
           ),
           IconButton(
             icon: const Icon(Icons.edit),
-            onPressed: () {
-              // TODO: Edit habit
+            onPressed: () async {
+              final result = await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => EditHabitScreen(habit: currentHabit),
+                ),
+              );
+              // Reload completions if habit was updated
+              if (result == true && mounted) {
+                await _loadCompletions();
+              }
             },
           ),
           IconButton(
@@ -167,10 +192,11 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
               );
 
               if (confirmed == true && mounted) {
+                final navigator = Navigator.of(context);
                 await ref
                     .read(habitProvider.notifier)
                     .deleteHabit(widget.habit.id);
-                Navigator.of(context).pop();
+                navigator.pop();
               }
             },
           ),
@@ -201,7 +227,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
                           ),
                         );
                       },
-                      child: _buildStreakCard(context),
+                      child: _buildStreakCard(context, currentHabit),
                     ),
                     const SizedBox(height: 16),
 
@@ -317,7 +343,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
     );
   }
 
-  Widget _buildStreakCard(BuildContext context) {
+  Widget _buildStreakCard(BuildContext context, Habit habit) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return RepaintBoundary(
@@ -333,7 +359,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
             _buildStreakStat(
               context,
               emoji: '🔥',
-              value: '${widget.habit.currentStreak}',
+              value: '${habit.currentStreak}',
               label: 'Current',
             ),
             Container(
@@ -346,7 +372,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
             _buildStreakStat(
               context,
               emoji: '🏆',
-              value: '${widget.habit.longestStreak}',
+              value: '${habit.longestStreak}',
               label: 'Best',
             ),
             Container(
@@ -359,7 +385,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
             _buildStreakStat(
               context,
               emoji: '✓',
-              value: '${widget.habit.totalCompletions}',
+              value: '${habit.totalCompletions}',
               label: 'Total',
             ),
           ],
