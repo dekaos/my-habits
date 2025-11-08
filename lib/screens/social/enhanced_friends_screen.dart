@@ -430,6 +430,8 @@ class _EnhancedFriendsScreenState extends ConsumerState<EnhancedFriendsScreen>
     String friendId,
     String friendName,
   ) async {
+    final messenger = ScaffoldMessenger.of(context);
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -462,7 +464,8 @@ class _EnhancedFriendsScreenState extends ConsumerState<EnhancedFriendsScreen>
               friendId,
             );
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          // Use the captured messenger reference instead of looking up context
+          messenger.showSnackBar(
             SnackBar(
               content: Row(
                 children: [

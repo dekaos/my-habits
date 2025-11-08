@@ -14,7 +14,8 @@ class UserProfile {
     required this.id,
     required this.email,
     required this.displayName,
-    required this.joinedAt, this.photoUrl,
+    required this.joinedAt,
+    this.photoUrl,
     this.bio,
     this.friends = const [],
     this.friendRequests = const [],
@@ -51,6 +52,18 @@ class UserProfile {
       'friend_requests': friendRequests,
       'total_streaks': totalStreaks,
       'longest_streak': longestStreak,
+    };
+  }
+
+  /// Returns only the basic fields needed for database insertion
+  /// Excludes fields that might be auto-generated or have default values
+  Map<String, dynamic> toInsertMap() {
+    return {
+      'id': id,
+      'email': email,
+      'display_name': displayName,
+      'photo_url': photoUrl,
+      'bio': bio,
     };
   }
 

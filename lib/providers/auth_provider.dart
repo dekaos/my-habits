@@ -63,12 +63,47 @@ class AuthNotifier extends Notifier<AuthState> {
   Future<void> _loadUserProfile(String userId) async {
     try {
       final response =
-          await _supabase.from('users').select().eq('id', userId).single();
+          await _supabase.from('users').select().eq('id', userId).maybeSingle();
 
-      final userProfile = UserProfile.fromMap(response, userId);
-      state = state.copyWith(userProfile: userProfile);
+      if (response != null) {
+        final userProfile = UserProfile.fromMap(response, userId);
+        state = state.copyWith(userProfile: userProfile);
+      } else {
+        await _createDefaultProfile(userId);
+      }
     } catch (e) {
       debugPrint('Error loading user profile: $e');
+      await _createDefaultProfile(userId);
+    }
+  }
+
+  Future<void> _createDefaultProfile(String userId) async {
+    try {
+      final user = state.user ?? _supabase.auth.currentUser;
+      if (user == null) return;
+
+      final profile = UserProfile(
+        id: userId,
+        email: user.email ?? 'user@example.com',
+        displayName: user.email?.split('@')[0] ?? 'User',
+        joinedAt: DateTime.now(),
+      );
+
+      await _supabase.from('users').insert(profile.toInsertMap());
+      state = state.copyWith(userProfile: profile);
+      debugPrint('Created default profile for user $userId');
+    } catch (e) {
+      debugPrint('Error creating default profile: $e');
+      final user = state.user ?? _supabase.auth.currentUser;
+      if (user != null) {
+        final tempProfile = UserProfile(
+          id: userId,
+          email: user.email ?? 'user@example.com',
+          displayName: user.email?.split('@')[0] ?? 'User',
+          joinedAt: DateTime.now(),
+        );
+        state = state.copyWith(userProfile: tempProfile);
+      }
     }
   }
 
@@ -95,7 +130,7 @@ class AuthNotifier extends Notifier<AuthState> {
         );
 
         try {
-          await _supabase.from('users').insert(profile.toMap());
+          await _supabase.from('users').insert(profile.toInsertMap());
           state = state.copyWith(
             user: authResponse.user,
             userProfile: profile,
@@ -153,20 +188,35 @@ class AuthNotifier extends Notifier<AuthState> {
     if (state.user == null || state.userProfile == null) return;
 
     try {
+      final Map<String, dynamic> updateData = {};
+
+      if (displayName != null) {
+        updateData['display_name'] = displayName;
+      }
+      if (photoUrl != null) {
+        updateData['photo_url'] = photoUrl;
+      }
+      if (bio != null) {
+        updateData['bio'] = bio;
+      }
+
+      if (updateData.isNotEmpty) {
+        await _supabase
+            .from('users')
+            .update(updateData)
+            .eq('id', state.user!.id);
+      }
+
       final updatedProfile = state.userProfile!.copyWith(
         displayName: displayName,
         photoUrl: photoUrl,
         bio: bio,
       );
 
-      await _supabase
-          .from('users')
-          .update(updatedProfile.toMap())
-          .eq('id', state.user!.id);
-
       state = state.copyWith(userProfile: updatedProfile);
     } catch (e) {
       debugPrint('Error updating profile: $e');
+      rethrow;
     }
   }
 }

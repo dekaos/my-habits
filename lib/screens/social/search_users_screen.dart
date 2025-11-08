@@ -47,13 +47,15 @@ class _SearchUsersScreenState extends ConsumerState<SearchUsersScreen> {
 
     if (authState.user == null) return;
 
+    final messenger = ScaffoldMessenger.of(context);
+
     try {
       await ref
           .read(socialProvider.notifier)
           .sendFriendRequest(authState.user!.id, user.id);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           SnackBar(
             content: Row(
               children: [
@@ -73,7 +75,7 @@ class _SearchUsersScreenState extends ConsumerState<SearchUsersScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           SnackBar(
             content: Row(
               children: [

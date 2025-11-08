@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/habit_provider.dart';
 import '../auth/login_screen.dart';
+import '../profile/edit_profile_screen.dart';
 import '../../widgets/glass_card.dart';
 
 class ProfileTab extends ConsumerStatefulWidget {
@@ -55,7 +56,21 @@ class _ProfileTabState extends ConsumerState<ProfileTab>
         ),
       ),
       body: userProfile == null
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Loading profile...',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.grey[600],
+                        ),
+                  ),
+                ],
+              ),
+            )
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -69,7 +84,7 @@ class _ProfileTabState extends ConsumerState<ProfileTab>
                   const SizedBox(height: 20),
 
                   // Actions
-                  _buildActionsSection(context, ref),
+                  _buildActionsSection(context, ref, userProfile),
                   const SizedBox(height: 100), // Space for bottom nav
                 ],
               ),
@@ -219,13 +234,15 @@ class _ProfileTabState extends ConsumerState<ProfileTab>
                           color: Theme.of(context)
                               .colorScheme
                               .primary
-                              .withOpacity(0.1 + (shimmerValue.abs() * 0.15)),
+                              .withValues(
+                                  alpha: 0.1 + (shimmerValue.abs() * 0.15)),
                           blurRadius: 20,
                           spreadRadius: shimmerValue.abs() * 2,
                         ),
                       ],
                     ),
                     child: GlassCard(
+                      enableGlow: false,
                       padding: const EdgeInsets.symmetric(
                           vertical: 20, horizontal: 12),
                       child: Column(
@@ -283,7 +300,8 @@ class _ProfileTabState extends ConsumerState<ProfileTab>
     );
   }
 
-  Widget _buildActionsSection(BuildContext context, WidgetRef ref) {
+  Widget _buildActionsSection(
+      BuildContext context, WidgetRef ref, userProfile) {
     return GlassCard(
       padding: EdgeInsets.zero,
       enableGlow: false,
@@ -294,7 +312,15 @@ class _ProfileTabState extends ConsumerState<ProfileTab>
             icon: Icons.edit,
             title: 'Edit Profile',
             onTap: () {
-              // TODO: Edit profile
+              if (userProfile != null) {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => EditProfileScreen(
+                      userProfile: userProfile,
+                    ),
+                  ),
+                );
+              }
             },
           ),
           _buildDivider(),
@@ -396,7 +422,7 @@ class _ProfileTabState extends ConsumerState<ProfileTab>
       child: Divider(
         height: 1,
         thickness: 0.5,
-        color: Colors.grey.withOpacity(0.2),
+        color: Colors.grey.withValues(alpha: 0.2),
       ),
     );
   }

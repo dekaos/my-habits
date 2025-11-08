@@ -80,13 +80,15 @@ class _FriendRequestsScreenState extends ConsumerState<FriendRequestsScreen>
     final authState = ref.read(authProvider);
     if (authState.user == null) return;
 
+    final messenger = ScaffoldMessenger.of(context);
+
     await ref.read(socialProvider.notifier).acceptFriendRequest(
           authState.user!.id,
           requester.id,
         );
 
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
           content: Row(
             children: [
@@ -112,13 +114,16 @@ class _FriendRequestsScreenState extends ConsumerState<FriendRequestsScreen>
     final authState = ref.read(authProvider);
     if (authState.user == null) return;
 
+    // Capture messenger reference before async operations
+    final messenger = ScaffoldMessenger.of(context);
+
     await ref.read(socialProvider.notifier).rejectFriendRequest(
           authState.user!.id,
           requester.id,
         );
 
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
           content: Row(
             children: [
