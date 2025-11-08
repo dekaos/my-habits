@@ -7,6 +7,7 @@ enum NotificationType {
   reactionAdded,
   streakMilestone,
   encouragement,
+  message,
 }
 
 class AppNotification {
@@ -21,6 +22,7 @@ class AppNotification {
   final String? activityId;
   final String? emoji; // For reaction notifications
   final String? message;
+  final String? messageId; // For message notifications
   final bool isRead;
   final DateTime createdAt;
 
@@ -37,6 +39,7 @@ class AppNotification {
     this.activityId,
     this.emoji,
     this.message,
+    this.messageId,
     this.isRead = false,
   });
 
@@ -53,6 +56,7 @@ class AppNotification {
       activityId: map['activity_id'],
       emoji: map['emoji'],
       message: map['message'],
+      messageId: map['message_id'],
       isRead: map['is_read'] ?? false,
       createdAt: map['created_at'] != null
           ? DateTime.parse(map['created_at']).toLocal()
@@ -72,6 +76,7 @@ class AppNotification {
       'activity_id': activityId,
       'emoji': emoji,
       'message': message,
+      'message_id': messageId,
       'is_read': isRead,
       'created_at': createdAt.toIso8601String(),
     };
@@ -97,6 +102,8 @@ class AppNotification {
         return '$fromUserName reached a milestone on "${habitTitle ?? 'a habit'}"';
       case NotificationType.encouragement:
         return message ?? '$fromUserName sent you encouragement';
+      case NotificationType.message:
+        return message ?? '$fromUserName sent you a message';
     }
   }
 
@@ -114,6 +121,8 @@ class AppNotification {
         return Icons.local_fire_department;
       case NotificationType.encouragement:
         return Icons.chat_bubble;
+      case NotificationType.message:
+        return Icons.message;
     }
   }
 
@@ -131,6 +140,8 @@ class AppNotification {
         return Colors.orange;
       case NotificationType.encouragement:
         return Colors.purple;
+      case NotificationType.message:
+        return Colors.indigo;
     }
   }
 

@@ -5,7 +5,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/habit_provider.dart';
 import '../../providers/social_provider.dart';
 import '../../providers/notification_provider.dart';
-import '../../services/notification_service.dart';
+import '../../providers/messaging_provider.dart';
 import '../../widgets/animated_gradient_background.dart';
 import '../notifications/notifications_screen.dart';
 import 'habits_tab.dart';
@@ -39,8 +39,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     _animationController.dispose();
     try {
       ref.read(notificationProvider.notifier).unsubscribeFromNotifications();
+      ref.read(messagingProvider.notifier).unsubscribeFromMessages();
     } catch (e) {
-      debugPrint('Error unsubscribing from notifications: $e');
+      debugPrint('Error unsubscribing: $e');
     }
     super.dispose();
   }
@@ -58,8 +59,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         ref.read(notificationProvider.notifier).loadNotifications(userId),
       ]);
 
-      // Subscribe to real-time notifications
+      // Get friend IDs for message unread counts
+      final friendIds =
+          ref.read(socialProvider).friends.map((f) => f.id).toList();
+
+      // Load unread message counts
+      if (friendIds.isNotEmpty) {
+        await ref
+            .read(messagingProvider.notifier)
+            .loadUnreadCounts(userId, friendIds);
+      }
+
+      // Subscribe to real-time notifications and messages
+      debugPrint('🏠 HomeScreen - Setting up realtime subscriptions...');
       ref.read(notificationProvider.notifier).subscribeToNotifications(userId);
+      ref.read(messagingProvider.notifier).subscribeToMessages(userId);
+      debugPrint('🏠 HomeScreen - Realtime subscriptions requested');
 
       debugPrint('✅ HomeScreen - Data loaded successfully');
     } catch (e) {

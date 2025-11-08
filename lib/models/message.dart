@@ -34,7 +34,8 @@ class Message {
       'receiver_id': receiverId,
       'content': content,
       'is_read': isRead,
-      'created_at': createdAt.toIso8601String(),
+      // Don't send created_at - let database set it with DEFAULT NOW()
+      // This ensures consistent server-side timestamps
     };
   }
 

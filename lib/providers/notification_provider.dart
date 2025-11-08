@@ -273,6 +273,43 @@ class NotificationNotifier extends Notifier<NotificationState> {
           name: 'NotificationProvider');
     }
   }
+
+  /// Mark all message notifications from a specific user as read
+  Future<void> markMessageNotificationsAsRead(
+      String currentUserId, String fromUserId) async {
+    try {
+      await _supabase
+          .from('notifications')
+          .update({'is_read': true})
+          .eq('user_id', currentUserId)
+          .eq('from_user_id', fromUserId)
+          .eq('type', 6) // NotificationType.message
+          .eq('is_read', false);
+
+      // Update local state
+      final updatedNotifications = state.notifications.map((n) {
+        if (n.type == NotificationType.message &&
+            n.fromUserId == fromUserId &&
+            !n.isRead) {
+          return n.copyWith(isRead: true);
+        }
+        return n;
+      }).toList();
+
+      final unreadCount = updatedNotifications.where((n) => !n.isRead).length;
+
+      state = state.copyWith(
+        notifications: updatedNotifications,
+        unreadCount: unreadCount,
+      );
+
+      developer.log('✅ Marked message notifications as read from: $fromUserId',
+          name: 'NotificationProvider');
+    } catch (e) {
+      developer.log('Error marking message notifications as read: $e',
+          name: 'NotificationProvider');
+    }
+  }
 }
 
 // Provider

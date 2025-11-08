@@ -4,6 +4,7 @@ import '../../models/user_profile.dart';
 import '../../models/message.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/messaging_provider.dart';
+import '../../providers/notification_provider.dart';
 import '../../widgets/animated_gradient_background.dart';
 import '../../widgets/glass_card.dart';
 
@@ -27,14 +28,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     // Defer initialization until after the widget tree is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadConversation();
-
-      // Subscribe to real-time messages
-      final authState = ref.read(authProvider);
-      if (authState.user != null) {
-        ref
-            .read(messagingProvider.notifier)
-            .subscribeToMessages(authState.user!.id);
-      }
     });
   }
 
@@ -42,13 +35,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   void dispose() {
     _messageController.dispose();
     _scrollController.dispose();
-
-    // Unsubscribe from real-time messages - safely handle disposal
-    try {
-      ref.read(messagingProvider.notifier).unsubscribeFromMessages();
-    } catch (e) {
-      debugPrint('⚠️ Error unsubscribing from messages: $e');
-    }
     super.dispose();
   }
 
@@ -63,6 +49,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     // Mark messages as read
     await ref.read(messagingProvider.notifier).markMessagesAsRead(
+          authState.user!.id,
+          widget.friend.id,
+        );
+
+    // Mark message notifications as read
+    await ref
+        .read(notificationProvider.notifier)
+        .markMessageNotificationsAsRead(
           authState.user!.id,
           widget.friend.id,
         );
@@ -126,6 +120,51 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final authState = ref.watch(authProvider);
     final messagingState = ref.watch(messagingProvider);
     final messages = messagingState.conversations[widget.friend.id] ?? [];
+
+    // Listen for new messages and auto-scroll + mark as read
+    ref.listen<MessagingState>(messagingProvider, (previous, next) {
+      final previousMessages = previous?.conversations[widget.friend.id] ?? [];
+      final currentMessages = next.conversations[widget.friend.id] ?? [];
+
+      // Check if new messages arrived
+      if (currentMessages.length > previousMessages.length) {
+        final newMessages = currentMessages.sublist(previousMessages.length);
+
+        // Check if any new message is from the friend (not from current user)
+        final hasNewMessageFromFriend = newMessages.any(
+          (msg) => msg.senderId == widget.friend.id,
+        );
+
+        if (hasNewMessageFromFriend && authState.user != null) {
+          // Mark messages as read
+          Future.microtask(() async {
+            await ref.read(messagingProvider.notifier).markMessagesAsRead(
+                  authState.user!.id,
+                  widget.friend.id,
+                );
+
+            // Mark notifications as read
+            await ref
+                .read(notificationProvider.notifier)
+                .markMessageNotificationsAsRead(
+                  authState.user!.id,
+                  widget.friend.id,
+                );
+          });
+        }
+
+        // Auto-scroll to bottom when new message arrives
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (_scrollController.hasClients && mounted) {
+            _scrollController.animateTo(
+              _scrollController.position.maxScrollExtent,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOut,
+            );
+          }
+        });
+      }
+    });
 
     return Scaffold(
       extendBodyBehindAppBar: true,

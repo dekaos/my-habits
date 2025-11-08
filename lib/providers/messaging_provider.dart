@@ -107,12 +107,16 @@ class MessagingNotifier extends Notifier<MessagingState> {
 
       debugPrint('✅ Message sent: ${sentMessage.id}');
 
-      // Add to local conversation
+      // Add to local conversation and sort by timestamp
       final updatedConversations =
           Map<String, List<Message>>.from(state.conversations);
       final currentMessages =
           List<Message>.from(updatedConversations[friendId] ?? []);
       currentMessages.add(sentMessage);
+
+      // Sort messages by created_at to ensure correct order
+      currentMessages.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+
       updatedConversations[friendId] = currentMessages;
 
       state = state.copyWith(conversations: updatedConversations);
@@ -208,10 +212,14 @@ class MessagingNotifier extends Notifier<MessagingState> {
   /// Subscribe to real-time messages
   void subscribeToMessages(String currentUserId) {
     try {
-      debugPrint('🔔 Subscribing to real-time messages');
+      // Unsubscribe from any existing channel first
+      unsubscribeFromMessages();
+
+      debugPrint(
+          '🔔 Subscribing to real-time messages for user: $currentUserId');
 
       _messageChannel = _supabase
-          .channel('messages:$currentUserId')
+          .channel('messages_$currentUserId')
           .onPostgresChanges(
             event: PostgresChangeEvent.insert,
             schema: 'public',
@@ -222,20 +230,29 @@ class MessagingNotifier extends Notifier<MessagingState> {
               value: currentUserId,
             ),
             callback: (payload) {
-              debugPrint('🔔 New message received: ${payload.newRecord}');
+              debugPrint('🔔 New message received via realtime!');
+              debugPrint('🔔 Payload: ${payload.newRecord}');
               _handleNewMessage(payload.newRecord, currentUserId);
             },
           )
-          .subscribe();
-
-      debugPrint('✅ Subscribed to real-time messages');
-    } catch (e) {
+          .subscribe((status, error) {
+        if (status == 'SUBSCRIBED') {
+          debugPrint('✅ Successfully subscribed to messages channel');
+        } else if (error != null) {
+          debugPrint('❌ Error subscribing to messages: $error');
+        } else {
+          debugPrint('🔄 Subscription status: $status');
+        }
+      });
+    } catch (e, stackTrace) {
       debugPrint('❌ Error subscribing to messages: $e');
+      debugPrint('Stack trace: $stackTrace');
     }
   }
 
   /// Handle incoming real-time message
-  void _handleNewMessage(Map<String, dynamic> data, String currentUserId) {
+  void _handleNewMessage(
+      Map<String, dynamic> data, String currentUserId) async {
     try {
       debugPrint('📨 Handling new message: $data');
       final message = Message.fromSupabaseMap(data);
@@ -243,12 +260,16 @@ class MessagingNotifier extends Notifier<MessagingState> {
 
       debugPrint('📨 Message from: $friendId, content: ${message.content}');
 
-      // Add to conversation
+      // Add to conversation and sort by timestamp
       final updatedConversations =
           Map<String, List<Message>>.from(state.conversations);
       final currentMessages =
           List<Message>.from(updatedConversations[friendId] ?? []);
       currentMessages.add(message);
+
+      // Sort messages by created_at to ensure correct order
+      currentMessages.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+
       updatedConversations[friendId] = currentMessages;
 
       // Increment unread count
@@ -265,12 +286,20 @@ class MessagingNotifier extends Notifier<MessagingState> {
         unreadCounts: updatedUnreadCounts,
       );
 
+      // Note: Notification is automatically created by database trigger
+      // See CHAT_REALTIME_SETUP.sql for the trigger implementation
+
       debugPrint('✅ State updated with new message');
     } catch (e, stackTrace) {
       debugPrint('❌ Error handling new message: $e');
       debugPrint('Stack trace: $stackTrace');
     }
   }
+
+  // Note: Notification creation is handled by database trigger
+  // See create_message_notification() function in CHAT_REALTIME_SETUP.sql
+  // This trigger automatically creates notifications when messages are inserted,
+  // so we don't need to manually create them here.
 
   /// Unsubscribe from real-time messages
   void unsubscribeFromMessages() {

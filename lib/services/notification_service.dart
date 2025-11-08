@@ -177,7 +177,7 @@ class NotificationService {
   ) async {
     // Schedule for the same day of week as creation
     final createdWeekday = habit.createdAt.weekday;
-    var scheduledDate = _getNextWeekday(
+    final scheduledDate = _getNextWeekday(
       now,
       createdWeekday,
       notificationTime.hour,
@@ -207,7 +207,7 @@ class NotificationService {
     // Schedule a notification for each custom day
     for (final dayIndex in habit.customDays) {
       final weekday = dayIndex + 1; // Convert 0-6 to 1-7 (Mon-Sun)
-      var scheduledDate = _getNextWeekday(
+      final scheduledDate = _getNextWeekday(
         now,
         weekday,
         notificationTime.hour,

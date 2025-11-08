@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/notification.dart';
+import '../../models/user_profile.dart';
 import '../../providers/notification_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/social_provider.dart';
 import '../../widgets/glass_card.dart';
+import '../social/chat_screen.dart';
 
 class NotificationsScreen extends ConsumerStatefulWidget {
   const NotificationsScreen({super.key});
@@ -113,120 +115,226 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
           ),
         );
       },
-      child: GlassCard(
-        padding: const EdgeInsets.all(16),
-        enableGlow: false,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // User avatar
-            Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: notification.getColor().withOpacity(0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
+      child: InkWell(
+        onTap: () => _handleNotificationTap(notification),
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          decoration: notification.type == NotificationType.message
+              ? BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: notification.getColor().withOpacity(0.4),
+                    width: 2,
                   ),
-                ],
-              ),
-              child: CircleAvatar(
-                radius: 24,
-                backgroundColor: notification.getColor().withOpacity(0.2),
-                backgroundImage: notification.fromUserPhotoUrl != null
-                    ? NetworkImage(notification.fromUserPhotoUrl!)
-                    : null,
-                child: notification.fromUserPhotoUrl == null
-                    ? Icon(
-                        notification.getIcon(),
-                        color: notification.getColor(),
-                        size: 24,
-                      )
-                    : null,
-              ),
-            ),
-            const SizedBox(width: 12),
-
-            // Content
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          notification.getMessage(),
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: notification.isRead
-                                ? FontWeight.normal
-                                : FontWeight.bold,
-                            color: isDark ? Colors.white : Colors.black87,
-                          ),
-                        ),
-                      ),
-                      if (!notification.isRead)
-                        Container(
-                          width: 8,
-                          height: 8,
-                          margin: const EdgeInsets.only(left: 8),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      notification.getColor().withOpacity(0.05),
+                      notification.getColor().withOpacity(0.02),
                     ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    _getTimeAgo(notification.createdAt),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: isDark ? Colors.grey[400] : Colors.grey[600],
-                        ),
+                )
+              : null,
+          child: GlassCard(
+            padding: const EdgeInsets.all(16),
+            enableGlow: false,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // User avatar
+                Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: notification.getColor().withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
+                  child: CircleAvatar(
+                    radius: 24,
+                    backgroundColor: notification.getColor().withOpacity(0.2),
+                    backgroundImage: notification.fromUserPhotoUrl != null
+                        ? NetworkImage(notification.fromUserPhotoUrl!)
+                        : null,
+                    child: notification.fromUserPhotoUrl == null
+                        ? Icon(
+                            notification.getIcon(),
+                            color: notification.getColor(),
+                            size: 24,
+                          )
+                        : null,
+                  ),
+                ),
+                const SizedBox(width: 12),
 
-                  // Action buttons for friend requests
-                  if (notification.type == NotificationType.friendRequest) ...[
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: FilledButton.icon(
-                            onPressed:
-                                _processingNotificationId == notification.id
-                                    ? null
-                                    : () => _acceptFriendRequest(notification),
-                            icon: _processingNotificationId ==
-                                        notification.id &&
-                                    _processingAction == 'accept'
-                                ? const SizedBox(
-                                    width: 18,
-                                    height: 18,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                          Colors.white),
+                // Content
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  notification.getMessage(),
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: notification.isRead
+                                        ? FontWeight.normal
+                                        : FontWeight.bold,
+                                    color:
+                                        isDark ? Colors.white : Colors.black87,
+                                  ),
+                                ),
+                                // Show message preview for chat notifications
+                                if (notification.type ==
+                                        NotificationType.message &&
+                                    notification.message != null) ...[
+                                  const SizedBox(height: 4),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
                                     ),
-                                  )
-                                : const Icon(Icons.check, size: 18),
-                            label: const Text('Accept'),
-                            style: FilledButton.styleFrom(
-                              backgroundColor: Colors.green,
-                              padding: const EdgeInsets.symmetric(vertical: 8),
+                                    decoration: BoxDecoration(
+                                      color: notification
+                                          .getColor()
+                                          .withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(6),
+                                      border: Border.all(
+                                        color: notification
+                                            .getColor()
+                                            .withOpacity(0.3),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      notification.message!,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontStyle: FontStyle.italic,
+                                        color: notification.getColor(),
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed:
-                                _processingNotificationId == notification.id
+                          if (!notification.isRead)
+                            Container(
+                              width: 8,
+                              height: 8,
+                              margin: const EdgeInsets.only(left: 8),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.primary,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Text(
+                            _getTimeAgo(notification.createdAt),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: isDark
+                                          ? Colors.grey[400]
+                                          : Colors.grey[600],
+                                    ),
+                          ),
+                          // Add "Tap to open" indicator for message notifications
+                          if (notification.type ==
+                              NotificationType.message) ...[
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color:
+                                    notification.getColor().withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.chat_bubble_outline,
+                                    size: 10,
+                                    color: notification.getColor(),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'Tap to reply',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: notification.getColor(),
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+
+                      // Action buttons for friend requests
+                      if (notification.type ==
+                          NotificationType.friendRequest) ...[
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: FilledButton.icon(
+                                onPressed: _processingNotificationId ==
+                                        notification.id
+                                    ? null
+                                    : () => _acceptFriendRequest(notification),
+                                icon: _processingNotificationId ==
+                                            notification.id &&
+                                        _processingAction == 'accept'
+                                    ? const SizedBox(
+                                        width: 18,
+                                        height: 18,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                  Colors.white),
+                                        ),
+                                      )
+                                    : const Icon(Icons.check, size: 18),
+                                label: const Text('Accept'),
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: Colors.green,
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: _processingNotificationId ==
+                                        notification.id
                                     ? null
                                     : () => _rejectFriendRequest(notification),
-                            icon:
-                                _processingNotificationId == notification.id &&
+                                icon: _processingNotificationId ==
+                                            notification.id &&
                                         _processingAction == 'reject'
                                     ? const SizedBox(
                                         width: 18,
@@ -237,24 +345,83 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                                         ),
                                       )
                                     : const Icon(Icons.close, size: 18),
-                            label: const Text('Reject'),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.red,
-                              side: const BorderSide(color: Colors.red),
-                              padding: const EdgeInsets.symmetric(vertical: 8),
+                                label: const Text('Reject'),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: Colors.red,
+                                  side: const BorderSide(color: Colors.red),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8),
+                                ),
+                              ),
                             ),
-                          ),
+                          ],
                         ),
                       ],
-                    ),
-                  ],
-                ],
-              ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
+  }
+
+  Future<void> _handleNotificationTap(AppNotification notification) async {
+    // Mark notification as read
+    await ref.read(notificationProvider.notifier).markAsRead(notification.id);
+
+    if (!mounted) return;
+
+    // Navigate based on notification type
+    switch (notification.type) {
+      case NotificationType.message:
+        // Get the friend's profile and navigate to chat
+        await _openChatFromNotification(notification);
+        break;
+      case NotificationType.friendRequest:
+        // Already handled by inline buttons
+        break;
+      case NotificationType.friendAccepted:
+      case NotificationType.habitCompleted:
+      case NotificationType.reactionAdded:
+      case NotificationType.streakMilestone:
+      case NotificationType.encouragement:
+        // Could add navigation to relevant screens
+        break;
+    }
+  }
+
+  Future<void> _openChatFromNotification(AppNotification notification) async {
+    try {
+      // Get the friend's profile
+      final friendProfile = UserProfile(
+        id: notification.fromUserId,
+        email: '', // Not needed for chat
+        displayName: notification.fromUserName,
+        photoUrl: notification.fromUserPhotoUrl,
+        bio: null,
+        joinedAt: DateTime.now(),
+      );
+
+      if (mounted) {
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => ChatScreen(friend: friendProfile),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error opening chat: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Widget _buildEmptyState(BuildContext context) {
