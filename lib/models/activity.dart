@@ -45,13 +45,14 @@ class Activity {
       streakCount: map['streak_count'],
       createdAt: map['created_at'] != null
           ? DateTime.parse(map['created_at'])
+              .toLocal() // Convert to local timezone
           : DateTime.now(),
       reactions: Map<String, String>.from(map['reactions'] ?? {}),
     );
   }
 
   Map<String, dynamic> toSupabaseMap() {
-    return {
+    final map = <String, dynamic>{
       'user_id': userId,
       'user_name': userName,
       'user_photo_url': userPhotoUrl,
@@ -63,6 +64,13 @@ class Activity {
       'created_at': createdAt.toIso8601String(),
       'reactions': reactions,
     };
+
+    // Only include id if it's not empty (let DB generate it otherwise)
+    if (id.isNotEmpty) {
+      map['id'] = id;
+    }
+
+    return map;
   }
 
   String getActivityMessage() {

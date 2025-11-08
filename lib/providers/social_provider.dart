@@ -36,10 +36,112 @@ class SocialState {
 // Social Notifier
 class SocialNotifier extends Notifier<SocialState> {
   final SupabaseClient _supabase = Supabase.instance.client;
+  RealtimeChannel? _activitiesChannel;
 
   @override
   SocialState build() {
     return SocialState();
+  }
+
+  /// Subscribe to real-time activity updates
+  void subscribeToActivities(String userId) {
+    try {
+      // Unsubscribe from previous channel if exists
+      unsubscribeFromActivities();
+
+      debugPrint('🔴 Subscribing to real-time activities for user: $userId');
+
+      _activitiesChannel = _supabase
+          .channel('activities_realtime')
+          .onPostgresChanges(
+            event: PostgresChangeEvent.insert,
+            schema: 'public',
+            table: 'activities',
+            callback: (payload) {
+              debugPrint('🔴 New activity received: ${payload.newRecord}');
+              _handleNewActivity(payload.newRecord);
+            },
+          )
+          .onPostgresChanges(
+            event: PostgresChangeEvent.update,
+            schema: 'public',
+            table: 'activities',
+            callback: (payload) {
+              debugPrint('🔴 Activity updated: ${payload.newRecord}');
+              _handleUpdatedActivity(payload.newRecord);
+            },
+          )
+          .subscribe();
+
+      debugPrint('✅ Subscribed to real-time activities');
+    } catch (e) {
+      debugPrint('❌ Error subscribing to activities: $e');
+    }
+  }
+
+  /// Unsubscribe from real-time activity updates
+  void unsubscribeFromActivities() {
+    if (_activitiesChannel != null) {
+      _supabase.removeChannel(_activitiesChannel!);
+      _activitiesChannel = null;
+      debugPrint('🔴 Unsubscribed from real-time activities');
+    }
+  }
+
+  /// Handle new activity inserted
+  void _handleNewActivity(Map<String, dynamic> data) {
+    try {
+      final newActivity = Activity.fromSupabaseMap(data);
+
+      debugPrint('🔴 REALTIME: New activity received');
+      debugPrint('   - ID: ${newActivity.id}');
+      debugPrint('   - Habit: ${newActivity.habitTitle}');
+      debugPrint('   - User: ${newActivity.userName}');
+      debugPrint('   - Created: ${newActivity.createdAt}');
+      debugPrint('   - Current feed size: ${state.activityFeed.length}');
+
+      // Check if this activity already exists in the feed (prevent duplicates)
+      final exists =
+          state.activityFeed.any((activity) => activity.id == newActivity.id);
+
+      if (exists) {
+        debugPrint('⚠️ REALTIME: Activity already exists, skipping!');
+        debugPrint(
+            '   - Existing IDs: ${state.activityFeed.map((a) => a.id).take(3).join(", ")}...');
+        return;
+      }
+
+      debugPrint('✅ REALTIME: Adding activity to feed');
+
+      // Add to the beginning of the feed
+      final updatedFeed = [newActivity, ...state.activityFeed];
+
+      // Limit to 50 activities
+      final limitedFeed = updatedFeed.take(50).toList();
+
+      state = state.copyWith(activityFeed: limitedFeed);
+      debugPrint(
+          '✅ REALTIME: Activity added! Feed now has ${limitedFeed.length} items');
+    } catch (e) {
+      debugPrint('❌ Error handling new activity: $e');
+    }
+  }
+
+  /// Handle activity update (for reactions)
+  void _handleUpdatedActivity(Map<String, dynamic> data) {
+    try {
+      final updatedActivity = Activity.fromSupabaseMap(data);
+
+      // Find and update the activity in the feed
+      final updatedFeed = state.activityFeed.map((activity) {
+        return activity.id == updatedActivity.id ? updatedActivity : activity;
+      }).toList();
+
+      state = state.copyWith(activityFeed: updatedFeed);
+      debugPrint('✅ Updated activity reactions: ${updatedActivity.habitTitle}');
+    } catch (e) {
+      debugPrint('❌ Error handling updated activity: $e');
+    }
   }
 
   Future<void> loadFriends(String userId) async {
@@ -92,18 +194,49 @@ class SocialNotifier extends Notifier<SocialState> {
       debugPrint(
           '🎯 Activities query returned: ${(response as List).length} activities');
 
-      final activityFeed = (response as List)
+      final newActivities = (response as List)
           .map((data) => Activity.fromSupabaseMap(data))
           .toList();
 
       debugPrint(
-          '🎯 Activity feed loaded with ${activityFeed.length} activities:');
-      for (var activity in activityFeed.take(5)) {
+          '🎯 DATABASE: Got ${newActivities.length} activities from query');
+
+      // Check for duplicates in the database response itself
+      final dbIds = newActivities.map((a) => a.id).toList();
+      final dbUniqueIds = dbIds.toSet();
+      if (dbIds.length != dbUniqueIds.length) {
         debugPrint(
-            '  - ${activity.userName}: ${activity.type.name} (${activity.habitTitle ?? "no habit"})');
+            '⚠️ DATABASE: Response contains ${dbIds.length - dbUniqueIds.length} duplicate IDs!');
       }
 
-      state = state.copyWith(activityFeed: activityFeed);
+      // Deduplicate by ID using a Map (keeps most recent version)
+      final activitiesMap = <String, Activity>{};
+
+      // Add new activities from database first
+      for (var activity in newActivities) {
+        activitiesMap[activity.id] = activity;
+      }
+
+      debugPrint(
+          '🎯 DATABASE: Deduplicated to ${activitiesMap.length} unique activities');
+
+      // Convert back to list and sort by date
+      final activityFeed = activitiesMap.values.toList();
+      activityFeed.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+      // Limit to 50 most recent
+      final limitedFeed = activityFeed.take(50).toList();
+
+      debugPrint(
+          '🎯 DATABASE: Final feed has ${limitedFeed.length} activities');
+
+      // Show first 3 IDs for debugging
+      if (limitedFeed.isNotEmpty) {
+        debugPrint(
+            '   - First 3 IDs: ${limitedFeed.take(3).map((a) => a.id).join(", ")}');
+      }
+
+      state = state.copyWith(activityFeed: limitedFeed);
     } catch (e, stackTrace) {
       debugPrint('❌ Error loading activity feed: $e');
       debugPrint('Stack trace: $stackTrace');

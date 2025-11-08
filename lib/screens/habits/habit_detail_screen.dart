@@ -2,11 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../providers/habit_provider.dart';
-import '../../providers/social_provider.dart';
-import '../../providers/auth_provider.dart';
 import '../../models/habit.dart';
 import '../../models/habit_completion.dart';
-import '../../models/activity.dart';
 import '../../widgets/animated_gradient_background.dart';
 import '../../widgets/glass_card.dart';
 import '../../services/haptic_service.dart';
@@ -89,28 +86,16 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
       showCelebration(context);
     }
 
-    final authState = ref.read(authProvider);
     final note = _noteController.text.trim().isEmpty
         ? null
         : _noteController.text.trim();
 
     // Process everything in background (non-blocking)
-    Future.wait([
-      ref.read(habitProvider.notifier).completeHabit(widget.habit, note: note),
-      if (widget.habit.isPublic)
-        ref.read(socialProvider.notifier).postActivity(
-              Activity(
-                id: '',
-                userId: widget.habit.userId,
-                userName: authState.userProfile?.displayName ?? 'User',
-                userPhotoUrl: authState.userProfile?.photoUrl,
-                type: ActivityType.habitCompleted,
-                habitId: widget.habit.id,
-                habitTitle: widget.habit.title,
-                createdAt: DateTime.now(),
-              ),
-            ),
-    ]).then((_) async {
+    // Note: completeHabit() automatically creates activities, no need to post separately
+    ref
+        .read(habitProvider.notifier)
+        .completeHabit(widget.habit, note: note)
+        .then((_) async {
       await _loadCompletions();
       if (mounted) {
         _noteController.clear();

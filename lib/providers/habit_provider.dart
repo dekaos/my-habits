@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/habit.dart';
 import '../models/habit_completion.dart';
+import '../models/activity.dart';
 
 // Habit State
 class HabitState {
@@ -162,10 +163,74 @@ class HabitNotifier extends Notifier<HabitState> {
 
       state = state.copyWith(habits: updatedHabits);
 
+      // Create activity for social feed
+      try {
+        await _createHabitActivity(habit, updatedHabit);
+      } catch (e) {
+        debugPrint('Error creating activity: $e');
+      }
+
       // Reload to ensure data consistency
       await loadHabits(habit.userId);
     } catch (e) {
       debugPrint('Error completing habit: $e');
+    }
+  }
+
+  Future<void> _createHabitActivity(Habit habit, Habit updatedHabit) async {
+    try {
+      // Get user profile info
+      final userProfile = await _supabase
+          .from('users')
+          .select()
+          .eq('id', habit.userId)
+          .maybeSingle();
+
+      if (userProfile == null) return;
+
+      final userName = userProfile['display_name'] ?? 'Someone';
+      final userPhotoUrl = userProfile['photo_url'];
+
+      // Create habit completion activity
+      final completionActivity = Activity(
+        id: '',
+        userId: habit.userId,
+        userName: userName,
+        userPhotoUrl: userPhotoUrl,
+        type: ActivityType.habitCompleted,
+        habitId: habit.id,
+        habitTitle: habit.title,
+        createdAt: DateTime.now(),
+      );
+
+      await _supabase
+          .from('activities')
+          .insert(completionActivity.toSupabaseMap());
+      debugPrint('✅ Created habit completion activity');
+
+      // Check for streak milestones (7, 30, 50, 100 days)
+      final milestones = [7, 30, 50, 100, 365];
+      if (milestones.contains(updatedHabit.currentStreak)) {
+        final milestoneActivity = Activity(
+          id: '',
+          userId: habit.userId,
+          userName: userName,
+          userPhotoUrl: userPhotoUrl,
+          type: ActivityType.streakMilestone,
+          habitId: habit.id,
+          habitTitle: habit.title,
+          streakCount: updatedHabit.currentStreak,
+          createdAt: DateTime.now(),
+        );
+
+        await _supabase
+            .from('activities')
+            .insert(milestoneActivity.toSupabaseMap());
+        debugPrint(
+            '🔥 Created streak milestone activity: ${updatedHabit.currentStreak} days!');
+      }
+    } catch (e) {
+      debugPrint('Error in _createHabitActivity: $e');
     }
   }
 

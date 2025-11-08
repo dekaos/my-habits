@@ -44,6 +44,9 @@ class _SocialTabState extends ConsumerState<SocialTab> {
         .read(socialProvider.notifier)
         .loadActivityFeed(authState.user!.id);
 
+    // Subscribe to real-time activities
+    ref.read(socialProvider.notifier).subscribeToActivities(authState.user!.id);
+
     // Subscribe to real-time messages for notifications
     ref
         .read(messagingProvider.notifier)
@@ -52,11 +55,12 @@ class _SocialTabState extends ConsumerState<SocialTab> {
 
   @override
   void dispose() {
-    // Unsubscribe from real-time messages - safely handle disposal
+    // Unsubscribe from real-time updates - safely handle disposal
     try {
+      ref.read(socialProvider.notifier).unsubscribeFromActivities();
       ref.read(messagingProvider.notifier).unsubscribeFromMessages();
     } catch (e) {
-      debugPrint('⚠️ Error unsubscribing from messages: $e');
+      debugPrint('⚠️ Error unsubscribing: $e');
     }
     super.dispose();
   }
