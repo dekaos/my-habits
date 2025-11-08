@@ -36,6 +36,10 @@ dependencies:
   vibration: ^2.0.0
   audioplayers: ^6.1.0
   
+  # Notifications
+  flutter_local_notifications: ^18.0.1
+  timezone: ^0.9.4
+  
   # Networking
   http: ^1.2.0
 

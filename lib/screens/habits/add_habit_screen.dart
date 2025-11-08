@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/habit_provider.dart';
 import '../../models/habit.dart';
+import '../../services/notification_service.dart';
 import '../../widgets/animated_gradient_background.dart';
 import '../../widgets/glass_card.dart';
 
@@ -86,13 +87,37 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
     DateTime? scheduledTime;
     if (_selectedTime != null) {
       final now = DateTime.now();
-      scheduledTime = DateTime(
+      var tempTime = DateTime(
         now.year,
         now.month,
         now.day,
         _selectedTime!.hour,
         _selectedTime!.minute,
       );
+
+      // If the time has already passed today, schedule for tomorrow
+      if (tempTime.isBefore(now)) {
+        tempTime = tempTime.add(const Duration(days: 1));
+      }
+
+      scheduledTime = tempTime;
+
+      // Check if notification time (30 min before) is also valid
+      final notificationTime =
+          scheduledTime.subtract(const Duration(minutes: 30));
+      if (notificationTime.isBefore(now)) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Note: Notification scheduled for tomorrow at ${_selectedTime!.format(context)}',
+              ),
+              duration: const Duration(seconds: 4),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+      }
     }
 
     final habit = Habit(
@@ -113,6 +138,30 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
     );
 
     await ref.read(habitProvider.notifier).addHabit(habit);
+
+    if (habit.scheduledTime != null) {
+      try {
+        final notificationService = NotificationService();
+        await notificationService.initialize();
+
+        final permissionGranted =
+            await notificationService.requestPermissions();
+
+        if (permissionGranted) {
+          await notificationService.scheduleHabitNotification(habit);
+        } else if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                  'Notification permissions denied. You won\'t receive reminders for this habit.'),
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+      } catch (e) {
+        // Silently fail - notification scheduling is optional
+      }
+    }
 
     if (mounted) {
       Navigator.of(context).pop();
