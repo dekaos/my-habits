@@ -16,6 +16,8 @@ class Habit {
   final int targetCount; // Number of times to complete (e.g., daily goal)
   final DateTime createdAt;
   final bool isPublic; // Share with friends
+  final DateTime?
+      scheduledTime; // Optional time when habit should be done (hour and minute only)
   final List<String> accountabilityPartners; // User IDs
   int currentStreak;
   int longestStreak;
@@ -26,12 +28,15 @@ class Habit {
     required this.id,
     required this.userId,
     required this.title,
-    required this.color, required this.createdAt, this.description,
+    required this.color,
+    required this.createdAt,
+    this.description,
     this.icon,
     this.frequency = HabitFrequency.daily,
     this.customDays = const [],
     this.targetCount = 1,
     this.isPublic = false,
+    this.scheduledTime,
     this.accountabilityPartners = const [],
     this.currentStreak = 0,
     this.longestStreak = 0,
@@ -54,6 +59,9 @@ class Habit {
           ? DateTime.parse(map['created_at'])
           : DateTime.now(),
       isPublic: map['is_public'] ?? false,
+      scheduledTime: map['scheduled_time'] != null
+          ? DateTime.parse(map['scheduled_time'])
+          : null,
       accountabilityPartners:
           List<String>.from(map['accountability_partners'] ?? []),
       currentStreak: map['current_streak'] ?? 0,
@@ -78,6 +86,7 @@ class Habit {
       'target_count': targetCount,
       'created_at': createdAt.toIso8601String(),
       'is_public': isPublic,
+      'scheduled_time': scheduledTime?.toIso8601String(),
       'accountability_partners': accountabilityPartners,
       'current_streak': currentStreak,
       'longest_streak': longestStreak,
@@ -95,6 +104,7 @@ class Habit {
     List<int>? customDays,
     int? targetCount,
     bool? isPublic,
+    DateTime? scheduledTime,
     List<String>? accountabilityPartners,
     int? currentStreak,
     int? longestStreak,
@@ -113,6 +123,7 @@ class Habit {
       targetCount: targetCount ?? this.targetCount,
       createdAt: createdAt,
       isPublic: isPublic ?? this.isPublic,
+      scheduledTime: scheduledTime ?? this.scheduledTime,
       accountabilityPartners:
           accountabilityPartners ?? this.accountabilityPartners,
       currentStreak: currentStreak ?? this.currentStreak,

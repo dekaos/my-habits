@@ -26,6 +26,7 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
   String? _selectedIcon;
   bool _isPublic = false;
   final int _targetCount = 1;
+  TimeOfDay? _selectedTime;
 
   final List<String> _colorOptions = [
     '#6366F1', // Indigo
@@ -81,6 +82,19 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
       return;
     }
 
+    // Convert TimeOfDay to DateTime if selected
+    DateTime? scheduledTime;
+    if (_selectedTime != null) {
+      final now = DateTime.now();
+      scheduledTime = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        _selectedTime!.hour,
+        _selectedTime!.minute,
+      );
+    }
+
     final habit = Habit(
       id: const Uuid().v4(),
       userId: authState.user!.id,
@@ -95,6 +109,7 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
       targetCount: _targetCount,
       createdAt: DateTime.now(),
       isPublic: _isPublic,
+      scheduledTime: scheduledTime,
     );
 
     await ref.read(habitProvider.notifier).addHabit(habit);
@@ -368,6 +383,123 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
                     ),
                   ),
                 ],
+
+                const SizedBox(height: 16),
+
+                // Time picker
+                GlassCard(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Scheduled Time',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Optional',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color: Colors.grey.shade600,
+                                    ),
+                              ),
+                            ],
+                          ),
+                          if (_selectedTime != null)
+                            IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                setState(() {
+                                  _selectedTime = null;
+                                });
+                              },
+                              tooltip: 'Clear time',
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      InkWell(
+                        onTap: () async {
+                          final TimeOfDay? picked = await showTimePicker(
+                            context: context,
+                            initialTime: _selectedTime ?? TimeOfDay.now(),
+                          );
+                          if (picked != null) {
+                            setState(() {
+                              _selectedTime = picked;
+                            });
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade200,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: _selectedTime != null
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Colors.grey.shade300,
+                              width: _selectedTime != null ? 2 : 1,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.access_time,
+                                    color: _selectedTime != null
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Colors.grey.shade600,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    _selectedTime != null
+                                        ? _selectedTime!.format(context)
+                                        : 'Select time',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: _selectedTime != null
+                                          ? FontWeight.w600
+                                          : FontWeight.normal,
+                                      color: _selectedTime != null
+                                          ? Theme.of(context)
+                                              .colorScheme
+                                              .primary
+                                          : Colors.grey.shade700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Icon(
+                                Icons.arrow_drop_down,
+                                color: Colors.grey.shade600,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
 
                 const SizedBox(height: 16),
 
