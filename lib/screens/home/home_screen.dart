@@ -5,6 +5,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/habit_provider.dart';
 import '../../providers/social_provider.dart';
 import '../../providers/notification_provider.dart';
+import '../../services/notification_service.dart';
 import '../../widgets/animated_gradient_background.dart';
 import '../notifications/notifications_screen.dart';
 import 'habits_tab.dart';

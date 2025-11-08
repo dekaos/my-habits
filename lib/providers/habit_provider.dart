@@ -5,6 +5,7 @@ import '../models/habit.dart';
 import '../models/habit_completion.dart';
 import '../models/activity.dart';
 import '../models/notification.dart';
+import '../services/notification_service.dart';
 
 // Habit State
 class HabitState {
@@ -84,6 +85,17 @@ class HabitNotifier extends Notifier<HabitState> {
       }).toList();
 
       state = state.copyWith(habits: updatedHabits);
+
+      // Reschedule notification if habit has a scheduled time
+      if (habit.scheduledTime != null) {
+        try {
+          final notificationService = NotificationService();
+          await notificationService.cancelHabitNotification(habit.id);
+          await notificationService.scheduleHabitNotification(habit);
+        } catch (e) {
+          debugPrint('Error rescheduling notification: $e');
+        }
+      }
     } catch (e) {
       debugPrint('Error updating habit: $e');
     }
@@ -91,6 +103,14 @@ class HabitNotifier extends Notifier<HabitState> {
 
   Future<void> deleteHabit(String habitId) async {
     try {
+      // Cancel scheduled notification
+      try {
+        await NotificationService().cancelHabitNotification(habitId);
+      } catch (e) {
+        debugPrint('Error cancelling notification: $e');
+      }
+
+      // Delete from database
       await _supabase.from('habits').delete().eq('id', habitId);
 
       final updatedHabits = state.habits.where((h) => h.id != habitId).toList();

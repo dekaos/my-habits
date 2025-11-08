@@ -97,8 +97,6 @@ class NotificationService {
 
     await initialize();
 
-    if (!_isHabitScheduledForToday(habit)) return;
-
     final scheduledTime = habit.scheduledTime!;
     final notificationTime =
         scheduledTime.subtract(const Duration(minutes: 30));
@@ -107,7 +105,44 @@ class NotificationService {
 
     final now = tz.TZDateTime.now(tz.local);
 
-    final scheduledDate = tz.TZDateTime(
+    // Handle different frequency types
+    switch (habit.frequency) {
+      case HabitFrequency.daily:
+        await _scheduleDailyNotification(
+          habit,
+          notificationTime,
+          notificationDetails,
+          now,
+        );
+        break;
+
+      case HabitFrequency.weekly:
+        await _scheduleWeeklyNotification(
+          habit,
+          notificationTime,
+          notificationDetails,
+          now,
+        );
+        break;
+
+      case HabitFrequency.custom:
+        await _scheduleCustomNotifications(
+          habit,
+          notificationTime,
+          notificationDetails,
+          now,
+        );
+        break;
+    }
+  }
+
+  Future<void> _scheduleDailyNotification(
+    Habit habit,
+    DateTime notificationTime,
+    NotificationDetails notificationDetails,
+    tz.TZDateTime now,
+  ) async {
+    var scheduledDate = tz.TZDateTime(
       tz.local,
       now.year,
       now.month,
@@ -116,7 +151,10 @@ class NotificationService {
       notificationTime.minute,
     );
 
-    if (scheduledDate.isBefore(now)) return;
+    // If time has passed today, schedule for tomorrow
+    if (scheduledDate.isBefore(now)) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    }
 
     await _notifications.zonedSchedule(
       habit.id.hashCode,
@@ -127,24 +165,94 @@ class NotificationService {
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
+      matchDateTimeComponents: DateTimeComponents.time, // Repeat daily
     );
   }
 
-  bool _isHabitScheduledForToday(Habit habit) {
-    final today = DateTime.now();
-    final weekday = today.weekday;
+  Future<void> _scheduleWeeklyNotification(
+    Habit habit,
+    DateTime notificationTime,
+    NotificationDetails notificationDetails,
+    tz.TZDateTime now,
+  ) async {
+    // Schedule for the same day of week as creation
+    final createdWeekday = habit.createdAt.weekday;
+    var scheduledDate = _getNextWeekday(
+      now,
+      createdWeekday,
+      notificationTime.hour,
+      notificationTime.minute,
+    );
 
-    switch (habit.frequency) {
-      case HabitFrequency.daily:
-        return true;
-      case HabitFrequency.weekly:
-        final createdWeekday = habit.createdAt.weekday;
-        return weekday == createdWeekday;
+    await _notifications.zonedSchedule(
+      habit.id.hashCode,
+      _getNotificationTitle(habit),
+      _getNotificationBody(habit),
+      scheduledDate,
+      notificationDetails,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+      matchDateTimeComponents:
+          DateTimeComponents.dayOfWeekAndTime, // Repeat weekly
+    );
+  }
 
-      case HabitFrequency.custom:
-        final todayIndex = weekday - 1;
-        return habit.customDays.contains(todayIndex);
+  Future<void> _scheduleCustomNotifications(
+    Habit habit,
+    DateTime notificationTime,
+    NotificationDetails notificationDetails,
+    tz.TZDateTime now,
+  ) async {
+    // Schedule a notification for each custom day
+    for (final dayIndex in habit.customDays) {
+      final weekday = dayIndex + 1; // Convert 0-6 to 1-7 (Mon-Sun)
+      var scheduledDate = _getNextWeekday(
+        now,
+        weekday,
+        notificationTime.hour,
+        notificationTime.minute,
+      );
+
+      // Use unique ID for each day
+      final notificationId = '${habit.id}_day$dayIndex'.hashCode;
+
+      await _notifications.zonedSchedule(
+        notificationId,
+        _getNotificationTitle(habit),
+        _getNotificationBody(habit),
+        scheduledDate,
+        notificationDetails,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents:
+            DateTimeComponents.dayOfWeekAndTime, // Repeat weekly
+      );
     }
+  }
+
+  tz.TZDateTime _getNextWeekday(
+    tz.TZDateTime from,
+    int weekday,
+    int hour,
+    int minute,
+  ) {
+    var scheduledDate = tz.TZDateTime(
+      tz.local,
+      from.year,
+      from.month,
+      from.day,
+      hour,
+      minute,
+    );
+
+    // Move to the target weekday
+    while (scheduledDate.weekday != weekday || scheduledDate.isBefore(from)) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    }
+
+    return scheduledDate;
   }
 
   String _getNotificationTitle(Habit habit) {
@@ -208,7 +316,14 @@ class NotificationService {
   }
 
   Future<void> cancelHabitNotification(String habitId) async {
+    // Cancel main notification
     await _notifications.cancel(habitId.hashCode);
+
+    // Also cancel custom day notifications (for custom frequency habits)
+    for (int i = 0; i < 7; i++) {
+      final notificationId = '${habitId}_day$i'.hashCode;
+      await _notifications.cancel(notificationId);
+    }
   }
 
   Future<void> cancelAllNotifications() async {

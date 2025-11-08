@@ -25,7 +25,7 @@ android {
 
     defaultConfig {
         applicationId = "br.com.stuhler.habit_hero"
-        minSdk = 21  // Required for local notifications
+        minSdk = flutter.minSdkVersion  // Required for local notifications
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
