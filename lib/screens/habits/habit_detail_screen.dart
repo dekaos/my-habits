@@ -84,7 +84,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
 
     // Show celebration animation IMMEDIATELY (non-blocking)
     if (mounted) {
-      showCelebration(context);
+      showCelebration(context, habitIcon: widget.habit.icon);
     }
 
     final note = _noteController.text.trim().isEmpty

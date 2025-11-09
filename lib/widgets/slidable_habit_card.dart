@@ -58,7 +58,7 @@ class _SlidableHabitCardState extends ConsumerState<SlidableHabitCard>
 
     // Show celebration animation IMMEDIATELY (non-blocking)
     if (mounted) {
-      showCelebration(context);
+      showCelebration(context, habitIcon: widget.habit.icon);
     }
 
     // Animate the card
