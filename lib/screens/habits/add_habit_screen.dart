@@ -7,6 +7,7 @@ import '../../models/habit.dart';
 import '../../services/notification_service.dart';
 import '../../widgets/animated_gradient_background.dart';
 import '../../widgets/glass_card.dart';
+import '../../widgets/habit_icon_selector.dart';
 
 class AddHabitScreen extends ConsumerStatefulWidget {
   const AddHabitScreen({super.key});
@@ -38,25 +39,6 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
     '#EC4899', // Pink
     '#06B6D4', // Cyan
     '#F97316', // Orange
-  ];
-
-  final List<Map<String, dynamic>> _iconOptions = [
-    {'name': 'fitness', 'icon': Icons.fitness_center},
-    {'name': 'book', 'icon': Icons.book},
-    {'name': 'water', 'icon': Icons.water_drop},
-    {'name': 'sleep', 'icon': Icons.bedtime},
-    {'name': 'restaurant', 'icon': Icons.restaurant},
-    {'name': 'run', 'icon': Icons.directions_run},
-    {'name': 'meditation', 'icon': Icons.spa},
-    {'name': 'yoga', 'icon': Icons.self_improvement},
-    {'name': 'art', 'icon': Icons.palette},
-    {'name': 'music', 'icon': Icons.music_note},
-    {'name': 'work', 'icon': Icons.work},
-    {'name': 'school', 'icon': Icons.school},
-    {'name': 'heart', 'icon': Icons.favorite},
-    {'name': 'walk', 'icon': Icons.directions_walk},
-    {'name': 'bike', 'icon': Icons.directions_bike},
-    {'name': 'code', 'icon': Icons.code},
   ];
 
   @override
@@ -247,60 +229,13 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
                 // Icon selection
                 GlassCard(
                   padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Choose an Icon',
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                      ),
-                      const SizedBox(height: 16),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: _iconOptions.map((iconData) {
-                          final iconName = iconData['name'] as String;
-                          final icon = iconData['icon'] as IconData;
-                          final isSelected = _selectedIcon == iconName;
-                          return InkWell(
-                            onTap: () {
-                              setState(() {
-                                _selectedIcon = iconName;
-                              });
-                            },
-                            child: Container(
-                              width: 56,
-                              height: 56,
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? Theme.of(context)
-                                        .colorScheme
-                                        .primaryContainer
-                                    : Colors.grey.shade200,
-                                borderRadius: BorderRadius.circular(12),
-                                border: isSelected
-                                    ? Border.all(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary,
-                                        width: 2,
-                                      )
-                                    : null,
-                              ),
-                              child: Icon(
-                                icon,
-                                color: isSelected
-                                    ? Theme.of(context).colorScheme.primary
-                                    : Colors.grey.shade600,
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ],
+                  child: HabitIconSelector(
+                    selectedIcon: _selectedIcon,
+                    onIconSelected: (iconName) {
+                      setState(() {
+                        _selectedIcon = iconName;
+                      });
+                    },
                   ),
                 ),
                 const SizedBox(height: 16),
