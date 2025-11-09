@@ -17,31 +17,36 @@ class NotificationService {
   Future<void> initialize() async {
     if (_initialized) return;
 
-    tz.initializeTimeZones();
+    try {
+      tz.initializeTimeZones();
 
-    final String timeZoneName = await _getLocalTimeZone();
-    tz.setLocalLocation(tz.getLocation(timeZoneName));
+      final String timeZoneName = await _getLocalTimeZone();
+      tz.setLocalLocation(tz.getLocation(timeZoneName));
 
-    const androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+      const androidSettings =
+          AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    const iosSettings = DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
-    );
+      const iosSettings = DarwinInitializationSettings(
+        requestAlertPermission: true,
+        requestBadgePermission: true,
+        requestSoundPermission: true,
+      );
 
-    const initSettings = InitializationSettings(
-      android: androidSettings,
-      iOS: iosSettings,
-    );
+      const initSettings = InitializationSettings(
+        android: androidSettings,
+        iOS: iosSettings,
+      );
 
-    await _notifications.initialize(
-      initSettings,
-      onDidReceiveNotificationResponse: _onNotificationTapped,
-    );
+      await _notifications.initialize(
+        initSettings,
+        onDidReceiveNotificationResponse: _onNotificationTapped,
+      );
 
-    _initialized = true;
+      _initialized = true;
+    } catch (e) {
+      debugPrint('Error initializing notification service: $e');
+      // Don't rethrow - allow app to continue without notifications
+    }
   }
 
   Future<String> _getLocalTimeZone() async {
@@ -95,44 +100,54 @@ class NotificationService {
   Future<void> scheduleHabitNotification(Habit habit) async {
     if (habit.scheduledTime == null) return;
 
-    await initialize();
+    try {
+      await initialize();
 
-    final scheduledTime = habit.scheduledTime!;
-    final notificationTime =
-        scheduledTime.subtract(const Duration(minutes: 30));
+      if (!_initialized) {
+        debugPrint('Notification service not initialized, skipping scheduling');
+        return;
+      }
 
-    final notificationDetails = await _getNotificationDetails(habit);
+      final scheduledTime = habit.scheduledTime!;
+      final notificationTime =
+          scheduledTime.subtract(const Duration(minutes: 30));
 
-    final now = tz.TZDateTime.now(tz.local);
+      final notificationDetails = await _getNotificationDetails(habit);
 
-    // Handle different frequency types
-    switch (habit.frequency) {
-      case HabitFrequency.daily:
-        await _scheduleDailyNotification(
-          habit,
-          notificationTime,
-          notificationDetails,
-          now,
-        );
-        break;
+      final now = tz.TZDateTime.now(tz.local);
 
-      case HabitFrequency.weekly:
-        await _scheduleWeeklyNotification(
-          habit,
-          notificationTime,
-          notificationDetails,
-          now,
-        );
-        break;
+      // Handle different frequency types
+      switch (habit.frequency) {
+        case HabitFrequency.daily:
+          await _scheduleDailyNotification(
+            habit,
+            notificationTime,
+            notificationDetails,
+            now,
+          );
+          break;
 
-      case HabitFrequency.custom:
-        await _scheduleCustomNotifications(
-          habit,
-          notificationTime,
-          notificationDetails,
-          now,
-        );
-        break;
+        case HabitFrequency.weekly:
+          await _scheduleWeeklyNotification(
+            habit,
+            notificationTime,
+            notificationDetails,
+            now,
+          );
+          break;
+
+        case HabitFrequency.custom:
+          await _scheduleCustomNotifications(
+            habit,
+            notificationTime,
+            notificationDetails,
+            now,
+          );
+          break;
+      }
+    } catch (e) {
+      debugPrint('Error scheduling habit notification: $e');
+      // Don't rethrow - allow app to continue without notifications
     }
   }
 
@@ -142,31 +157,35 @@ class NotificationService {
     NotificationDetails notificationDetails,
     tz.TZDateTime now,
   ) async {
-    var scheduledDate = tz.TZDateTime(
-      tz.local,
-      now.year,
-      now.month,
-      now.day,
-      notificationTime.hour,
-      notificationTime.minute,
-    );
+    try {
+      var scheduledDate = tz.TZDateTime(
+        tz.local,
+        now.year,
+        now.month,
+        now.day,
+        notificationTime.hour,
+        notificationTime.minute,
+      );
 
-    // If time has passed today, schedule for tomorrow
-    if (scheduledDate.isBefore(now)) {
-      scheduledDate = scheduledDate.add(const Duration(days: 1));
+      // If time has passed today, schedule for tomorrow
+      if (scheduledDate.isBefore(now)) {
+        scheduledDate = scheduledDate.add(const Duration(days: 1));
+      }
+
+      await _notifications.zonedSchedule(
+        habit.id.hashCode,
+        _getNotificationTitle(habit),
+        _getNotificationBody(habit),
+        scheduledDate,
+        notificationDetails,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.time, // Repeat daily
+      );
+    } catch (e) {
+      debugPrint('Error scheduling daily notification: $e');
     }
-
-    await _notifications.zonedSchedule(
-      habit.id.hashCode,
-      _getNotificationTitle(habit),
-      _getNotificationBody(habit),
-      scheduledDate,
-      notificationDetails,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time, // Repeat daily
-    );
   }
 
   Future<void> _scheduleWeeklyNotification(
@@ -175,50 +194,18 @@ class NotificationService {
     NotificationDetails notificationDetails,
     tz.TZDateTime now,
   ) async {
-    // Schedule for the same day of week as creation
-    final createdWeekday = habit.createdAt.weekday;
-    final scheduledDate = _getNextWeekday(
-      now,
-      createdWeekday,
-      notificationTime.hour,
-      notificationTime.minute,
-    );
-
-    await _notifications.zonedSchedule(
-      habit.id.hashCode,
-      _getNotificationTitle(habit),
-      _getNotificationBody(habit),
-      scheduledDate,
-      notificationDetails,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents:
-          DateTimeComponents.dayOfWeekAndTime, // Repeat weekly
-    );
-  }
-
-  Future<void> _scheduleCustomNotifications(
-    Habit habit,
-    DateTime notificationTime,
-    NotificationDetails notificationDetails,
-    tz.TZDateTime now,
-  ) async {
-    // Schedule a notification for each custom day
-    for (final dayIndex in habit.customDays) {
-      final weekday = dayIndex + 1; // Convert 0-6 to 1-7 (Mon-Sun)
+    try {
+      // Schedule for the same day of week as creation
+      final createdWeekday = habit.createdAt.weekday;
       final scheduledDate = _getNextWeekday(
         now,
-        weekday,
+        createdWeekday,
         notificationTime.hour,
         notificationTime.minute,
       );
 
-      // Use unique ID for each day
-      final notificationId = '${habit.id}_day$dayIndex'.hashCode;
-
       await _notifications.zonedSchedule(
-        notificationId,
+        habit.id.hashCode,
         _getNotificationTitle(habit),
         _getNotificationBody(habit),
         scheduledDate,
@@ -229,6 +216,50 @@ class NotificationService {
         matchDateTimeComponents:
             DateTimeComponents.dayOfWeekAndTime, // Repeat weekly
       );
+    } catch (e) {
+      debugPrint('Error scheduling weekly notification: $e');
+    }
+  }
+
+  Future<void> _scheduleCustomNotifications(
+    Habit habit,
+    DateTime notificationTime,
+    NotificationDetails notificationDetails,
+    tz.TZDateTime now,
+  ) async {
+    try {
+      // Schedule a notification for each custom day
+      for (final dayIndex in habit.customDays) {
+        try {
+          final weekday = dayIndex + 1; // Convert 0-6 to 1-7 (Mon-Sun)
+          final scheduledDate = _getNextWeekday(
+            now,
+            weekday,
+            notificationTime.hour,
+            notificationTime.minute,
+          );
+
+          // Use unique ID for each day
+          final notificationId = '${habit.id}_day$dayIndex'.hashCode;
+
+          await _notifications.zonedSchedule(
+            notificationId,
+            _getNotificationTitle(habit),
+            _getNotificationBody(habit),
+            scheduledDate,
+            notificationDetails,
+            androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+            uiLocalNotificationDateInterpretation:
+                UILocalNotificationDateInterpretation.absoluteTime,
+            matchDateTimeComponents:
+                DateTimeComponents.dayOfWeekAndTime, // Repeat weekly
+          );
+        } catch (e) {
+          debugPrint('Error scheduling notification for day $dayIndex: $e');
+        }
+      }
+    } catch (e) {
+      debugPrint('Error scheduling custom notifications: $e');
     }
   }
 
@@ -316,34 +347,53 @@ class NotificationService {
   }
 
   Future<void> cancelHabitNotification(String habitId) async {
-    // Cancel main notification
-    await _notifications.cancel(habitId.hashCode);
+    try {
+      // Cancel main notification
+      await _notifications.cancel(habitId.hashCode);
 
-    // Also cancel custom day notifications (for custom frequency habits)
-    for (int i = 0; i < 7; i++) {
-      final notificationId = '${habitId}_day$i'.hashCode;
-      await _notifications.cancel(notificationId);
+      // Also cancel custom day notifications (for custom frequency habits)
+      for (int i = 0; i < 7; i++) {
+        final notificationId = '${habitId}_day$i'.hashCode;
+        await _notifications.cancel(notificationId);
+      }
+    } catch (e) {
+      debugPrint('Error canceling habit notification: $e');
     }
   }
 
   Future<void> cancelAllNotifications() async {
-    await _notifications.cancelAll();
+    try {
+      await _notifications.cancelAll();
+    } catch (e) {
+      debugPrint('Error canceling all notifications: $e');
+    }
   }
 
   Future<List<PendingNotificationRequest>> getPendingNotifications() async {
-    return await _notifications.pendingNotificationRequests();
+    try {
+      return await _notifications.pendingNotificationRequests();
+    } catch (e) {
+      debugPrint('Error getting pending notifications: $e');
+      return [];
+    }
   }
 
   Future<bool> areNotificationsEnabled() async {
-    if (!_initialized) return false;
+    try {
+      if (!_initialized) return false;
 
-    final androidPlugin = _notifications.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
-    if (androidPlugin != null) {
-      final enabled = await androidPlugin.areNotificationsEnabled();
-      return enabled ?? false;
+      final androidPlugin =
+          _notifications.resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>();
+      if (androidPlugin != null) {
+        final enabled = await androidPlugin.areNotificationsEnabled();
+        return enabled ?? false;
+      }
+
+      return true;
+    } catch (e) {
+      debugPrint('Error checking notification status: $e');
+      return false;
     }
-
-    return true;
   }
 }

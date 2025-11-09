@@ -63,3 +63,22 @@
 # Keep data classes used with Supabase
 -keep class br.com.stuhler.habit_hero.** { *; }
 
+# Flutter Local Notifications
+-keep class com.dexterous.** { *; }
+-keep class com.dexterous.flutterlocalnotifications.** { *; }
+-keep interface com.dexterous.flutterlocalnotifications.** { *; }
+-dontwarn com.dexterous.flutterlocalnotifications.**
+
+# AndroidX and core Android components needed by notifications
+-keep class androidx.core.app.NotificationCompat { *; }
+-keep class androidx.core.app.NotificationCompat$* { *; }
+-keep class android.app.Notification { *; }
+-keep class android.app.NotificationChannel { *; }
+-keep class android.app.NotificationManager { *; }
+
+# Timezone library (used by notification scheduling)
+-keep class net.iakovlev.timeshape.** { *; }
+-dontwarn net.iakovlev.timeshape.**
+-keep class com.esri.core.geometry.** { *; }
+-dontwarn com.esri.core.geometry.**
+
