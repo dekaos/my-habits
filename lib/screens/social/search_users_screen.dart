@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/social_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/user_profile.dart';
+import '../../widgets/animated_gradient_background.dart';
 
 class SearchUsersScreen extends ConsumerStatefulWidget {
   const SearchUsersScreen({super.key});
@@ -104,132 +105,135 @@ class _SearchUsersScreenState extends ConsumerState<SearchUsersScreen> {
       appBar: AppBar(
         title: const Text('Find Friends'),
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search by name or email...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+      body: AnimatedGradientBackground(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search by name or email...',
+                  prefixIcon: const Icon(Icons.search),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  suffixIcon: _searchController.text.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() {
+                              _searchResults = [];
+                            });
+                          },
+                        )
+                      : null,
                 ),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          setState(() {
-                            _searchResults = [];
-                          });
-                        },
-                      )
-                    : null,
+                onChanged: (value) {
+                  _searchUsers(value);
+                },
               ),
-              onChanged: (value) {
-                _searchUsers(value);
-              },
             ),
-          ),
-          Expanded(
-            child: _isSearching
-                ? const Center(child: CircularProgressIndicator())
-                : _searchResults.isEmpty
-                    ? Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(32.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.search,
-                                size: 80,
-                                color: Colors.grey.shade300,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                _searchController.text.isEmpty
-                                    ? 'Search for users to add as friends'
-                                    : 'No users found',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyLarge
-                                    ?.copyWith(
-                                      color: Colors.grey,
-                                    ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        itemCount: _searchResults.length,
-                        itemBuilder: (context, index) {
-                          final user = _searchResults[index];
-                          final isCurrentUser = user.id == authState.user?.id;
-
-                          return Card(
-                            child: ListTile(
-                              leading: CircleAvatar(
-                                backgroundColor: Theme.of(context)
-                                    .colorScheme
-                                    .primaryContainer,
-                                child: user.photoUrl != null
-                                    ? ClipOval(
-                                        child: Image.network(
-                                          user.photoUrl!,
-                                          width: 40,
-                                          height: 40,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      )
-                                    : Text(
-                                        user.displayName[0].toUpperCase(),
-                                        style: TextStyle(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onPrimaryContainer,
-                                        ),
+            Expanded(
+              child: _isSearching
+                  ? const Center(child: CircularProgressIndicator())
+                  : _searchResults.isEmpty
+                      ? Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(32.0),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.search,
+                                  size: 80,
+                                  color: Colors.grey.shade300,
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  _searchController.text.isEmpty
+                                      ? 'Search for users to add as friends'
+                                      : 'No users found',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyLarge
+                                      ?.copyWith(
+                                        color: Colors.grey,
                                       ),
-                              ),
-                              title: Text(user.displayName),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  if (user.email.isNotEmpty)
-                                    Text(
-                                      user.email,
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey.shade600,
-                                      ),
-                                    ),
-                                  if (user.bio != null) ...[
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      user.bio!,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
-                                ],
-                              ),
-                              trailing: isCurrentUser
-                                  ? const Chip(label: Text('You'))
-                                  : FilledButton(
-                                      onPressed: () => _sendFriendRequest(user),
-                                      child: const Text('Add'),
-                                    ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
                             ),
-                          );
-                        },
-                      ),
-          ),
-        ],
+                          ),
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          itemCount: _searchResults.length,
+                          itemBuilder: (context, index) {
+                            final user = _searchResults[index];
+                            final isCurrentUser = user.id == authState.user?.id;
+
+                            return Card(
+                              child: ListTile(
+                                leading: CircleAvatar(
+                                  backgroundColor: Theme.of(context)
+                                      .colorScheme
+                                      .primaryContainer,
+                                  child: user.photoUrl != null
+                                      ? ClipOval(
+                                          child: Image.network(
+                                            user.photoUrl!,
+                                            width: 40,
+                                            height: 40,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        )
+                                      : Text(
+                                          user.displayName[0].toUpperCase(),
+                                          style: TextStyle(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onPrimaryContainer,
+                                          ),
+                                        ),
+                                ),
+                                title: Text(user.displayName),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    if (user.email.isNotEmpty)
+                                      Text(
+                                        user.email,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey.shade600,
+                                        ),
+                                      ),
+                                    if (user.bio != null) ...[
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        user.bio!,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                                trailing: isCurrentUser
+                                    ? const Chip(label: Text('You'))
+                                    : FilledButton(
+                                        onPressed: () =>
+                                            _sendFriendRequest(user),
+                                        child: const Text('Add'),
+                                      ),
+                              ),
+                            );
+                          },
+                        ),
+            ),
+          ],
+        ),
       ),
     );
   }
