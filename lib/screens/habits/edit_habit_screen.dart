@@ -75,7 +75,6 @@ class _EditHabitScreenState extends ConsumerState<EditHabitScreen> {
       _isSaving = true;
     });
 
-    // Convert TimeOfDay to DateTime if selected
     DateTime? scheduledTime;
     if (_selectedTime != null) {
       final now = DateTime.now();
@@ -87,14 +86,12 @@ class _EditHabitScreenState extends ConsumerState<EditHabitScreen> {
         _selectedTime!.minute,
       );
 
-      // If the time has already passed today, schedule for tomorrow
       if (tempTime.isBefore(now)) {
         tempTime = tempTime.add(const Duration(days: 1));
       }
 
       scheduledTime = tempTime;
 
-      // Check if notification time (30 min before) is also valid
       final notificationTime =
           scheduledTime.subtract(const Duration(minutes: 30));
       if (notificationTime.isBefore(now)) {
@@ -112,7 +109,6 @@ class _EditHabitScreenState extends ConsumerState<EditHabitScreen> {
       }
     }
 
-    // Create updated habit with new data
     final updatedHabit = widget.habit.copyWith(
       title: _titleController.text.trim(),
       description: _descriptionController.text.trim().isEmpty
@@ -125,7 +121,6 @@ class _EditHabitScreenState extends ConsumerState<EditHabitScreen> {
       isPublic: _isPublic,
     );
 
-    // Handle scheduled time separately since copyWith might not support nullable updates properly
     final habitWithTime = Habit(
       id: updatedHabit.id,
       userId: updatedHabit.userId,
@@ -146,20 +141,18 @@ class _EditHabitScreenState extends ConsumerState<EditHabitScreen> {
       totalCompletions: updatedHabit.totalCompletions,
     );
 
-    // Update in database (this will also handle notification rescheduling)
     await ref.read(habitProvider.notifier).updateHabit(habitWithTime);
 
-    // If scheduled time was removed (was set before, now null), cancel notification
     if (widget.habit.scheduledTime != null && scheduledTime == null) {
       try {
         await NotificationService().cancelHabitNotification(widget.habit.id);
       } catch (e) {
-        // Silently fail - notification cancellation is optional
+        debugPrint('Error cancelling notification: $e');
       }
     }
 
     if (mounted) {
-      Navigator.of(context).pop(true); // Return true to indicate success
+      Navigator.of(context).pop(true);
     }
   }
 
@@ -220,7 +213,6 @@ class _EditHabitScreenState extends ConsumerState<EditHabitScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Description
                 GlassCard(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -239,7 +231,6 @@ class _EditHabitScreenState extends ConsumerState<EditHabitScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Icon selection
                 GlassCard(
                   padding: const EdgeInsets.all(20),
                   child: HabitIconSelector(
@@ -253,7 +244,6 @@ class _EditHabitScreenState extends ConsumerState<EditHabitScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Color selection
                 GlassCard(
                   padding: const EdgeInsets.all(20),
                   child: Column(
@@ -302,7 +292,6 @@ class _EditHabitScreenState extends ConsumerState<EditHabitScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Frequency (Read-only warning if changing would cause issues)
                 GlassCard(
                   padding: const EdgeInsets.all(20),
                   child: Column(
@@ -319,10 +308,10 @@ class _EditHabitScreenState extends ConsumerState<EditHabitScreen> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.orange.withOpacity(0.1),
+                          color: Colors.orange.withValues(alpha: .1),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: Colors.orange.withOpacity(0.3),
+                            color: Colors.orange.withValues(alpha: .3),
                           ),
                         ),
                         child: Row(
