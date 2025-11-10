@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/message.dart';
+import '../utils/performance_utils.dart';
 
 class MessagingState {
   final Map<String, List<Message>> conversations;
@@ -46,9 +47,12 @@ class MessagingNotifier extends Notifier<MessagingState> {
           .or('and(sender_id.eq.$currentUserId,receiver_id.eq.$friendId),and(sender_id.eq.$friendId,receiver_id.eq.$currentUserId)')
           .order('created_at', ascending: true);
 
-      final messages = (response as List)
-          .map((data) => Message.fromSupabaseMap(data))
-          .toList();
+      // Parse in isolate if conversation is large
+      final messages = await PerformanceUtils.parseJsonList<Message>(
+        jsonList: response as List,
+        parser: Message.fromSupabaseMap,
+        threshold: 50,
+      );
 
       debugPrint('💬 Loaded ${messages.length} messages');
 

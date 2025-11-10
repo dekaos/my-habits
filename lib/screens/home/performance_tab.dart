@@ -6,6 +6,7 @@ import '../../providers/habit_provider.dart';
 import '../../models/habit.dart';
 import '../../models/habit_completion.dart';
 import '../../widgets/glass_card.dart';
+import '../../utils/chart_calculator.dart';
 import '../habits/habit_detail_screen.dart';
 
 class PerformanceTab extends ConsumerStatefulWidget {
@@ -20,6 +21,11 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
   Map<String, List<HabitCompletion>> _allCompletions = {};
   bool _isLoadingCompletions = false;
   bool _hasLoadedOnce = false;
+
+  // Cached chart data (calculated in isolate)
+  TrendChartData? _trendChartData;
+  WeeklyPatternData? _weeklyPatternData;
+  bool _isCalculatingCharts = false;
 
   @override
   bool get wantKeepAlive => true;
@@ -71,12 +77,47 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
           _isLoadingCompletions = false;
           _hasLoadedOnce = true;
         });
+
+        // Calculate chart data in background isolate
+        _calculateChartData();
       }
     } catch (e) {
       debugPrint('Error loading completions: $e');
       if (mounted) {
         setState(() {
           _isLoadingCompletions = false;
+        });
+      }
+    }
+  }
+
+  /// Calculate chart data in isolate (runs in background for 100+ completions)
+  Future<void> _calculateChartData() async {
+    if (_isCalculatingCharts || _allCompletions.isEmpty) return;
+
+    setState(() {
+      _isCalculatingCharts = true;
+    });
+
+    try {
+      // Calculate both charts in parallel
+      final results = await Future.wait([
+        ChartCalculator.calculateTrendData(_allCompletions),
+        ChartCalculator.calculateWeeklyPattern(_allCompletions),
+      ]);
+
+      if (mounted) {
+        setState(() {
+          _trendChartData = results[0] as TrendChartData;
+          _weeklyPatternData = results[1] as WeeklyPatternData;
+          _isCalculatingCharts = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error calculating chart data: $e');
+      if (mounted) {
+        setState(() {
+          _isCalculatingCharts = false;
         });
       }
     }
@@ -470,45 +511,44 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
   }
 
   Widget _buildTrendChart() {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
+    // Use pre-calculated data from isolate
+    final data = _trendChartData;
 
-    // Generate last 30 days normalized to midnight
-    final last30Days = List.generate(30, (index) {
-      final date = today.subtract(Duration(days: 29 - index));
-      return DateTime(date.year, date.month, date.day);
-    });
-
-    // Count completions by day
-    final completionsByDay = <DateTime, int>{};
-    for (final habitCompletions in _allCompletions.values) {
-      for (final completion in habitCompletions) {
-        final date = DateTime(
-          completion.completedAt.year,
-          completion.completedAt.month,
-          completion.completedAt.day,
-        );
-        completionsByDay[date] = (completionsByDay[date] ?? 0) + 1;
-      }
+    // Show loading state while calculating
+    if (data == null) {
+      return RepaintBoundary(
+        child: GlassCard(
+          enableGlow: false,
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '30-Day Trend',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              const SizedBox(
+                height: 200,
+                child: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
     }
 
-    final maxCount = completionsByDay.values.isEmpty
-        ? 0
-        : completionsByDay.values.reduce((a, b) => a > b ? a : b);
-
-    double maxY;
-    double yInterval;
-
-    if (maxCount == 0) {
-      maxY = 10.0;
-      yInterval = 2.0;
-    } else if (maxCount <= 5) {
-      maxY = 10.0;
-      yInterval = 2.0;
-    } else {
-      maxY = ((maxCount + 4) / 5).ceil() * 5.0;
-      yInterval = 5.0;
-    }
+    final maxY = data.maxY;
+    final yInterval = data.yInterval;
+    final maxCount = data.maxCount;
 
     return RepaintBoundary(
       child: GlassCard(
@@ -571,16 +611,10 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
                         lineTouchData: const LineTouchData(enabled: true),
                         lineBarsData: [
                           LineChartBarData(
-                            spots: last30Days.asMap().entries.map((entry) {
-                              final date = DateTime(
-                                entry.value.year,
-                                entry.value.month,
-                                entry.value.day,
-                              );
-                              final count = completionsByDay[date] ?? 0;
-                              return FlSpot(
-                                  entry.key.toDouble(), count.toDouble());
-                            }).toList(),
+                            // Use pre-calculated data points from isolate
+                            spots: data.dataPoints
+                                .map((p) => FlSpot(p.x, p.y))
+                                .toList(),
                             isCurved: true,
                             curveSmoothness: 0.3,
                             color: Theme.of(context).colorScheme.primary,
@@ -637,9 +671,9 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
                               getTitlesWidget: (value, meta) {
                                 final index = value.toInt();
                                 if (index >= 0 &&
-                                    index < last30Days.length &&
+                                    index < data.dataPoints.length &&
                                     (index % 7 == 0 || index == 29)) {
-                                  final date = last30Days[index];
+                                  final date = data.dataPoints[index].date;
                                   return Padding(
                                     padding: const EdgeInsets.only(top: 8),
                                     child: Text(
@@ -969,23 +1003,44 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
   }
 
   Widget _buildWeeklyPattern() {
-    final weekdayCompletions = List.filled(7, 0);
+    // Use pre-calculated data from isolate
+    final data = _weeklyPatternData;
 
-    for (final habitCompletions in _allCompletions.values) {
-      for (final completion in habitCompletions) {
-        final weekday = completion.completedAt.weekday - 1; // 0 = Monday
-        weekdayCompletions[weekday]++;
-      }
+    // Show loading state while calculating
+    if (data == null) {
+      return RepaintBoundary(
+        child: GlassCard(
+          enableGlow: false,
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    'Weekly Pattern',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              const SizedBox(
+                height: 200,
+                child: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
     }
 
-    final maxCompletions = weekdayCompletions.isEmpty
-        ? 1
-        : weekdayCompletions.reduce((a, b) => a > b ? a : b);
-
-    // Calculate proper maxY and interval
-    final rawMaxY = maxCompletions > 0 ? maxCompletions * 1.2 : 10.0;
-    final maxY = rawMaxY < 10 ? 10.0 : ((rawMaxY + 4) / 5).ceil() * 5.0;
-    final yInterval = maxY > 10 ? 5.0 : 2.0;
+    final weekdayCompletions = data.weekdayCompletions;
+    final maxY = data.maxY;
+    final yInterval = data.yInterval;
 
     return RepaintBoundary(
       child: GlassCard(

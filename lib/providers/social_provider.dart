@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user_profile.dart';
 import '../models/activity.dart';
 import '../models/notification.dart';
+import '../utils/performance_utils.dart';
 
 // Social State
 class SocialState {
@@ -204,9 +205,12 @@ class SocialNotifier extends Notifier<SocialState> {
       debugPrint(
           '🎯 Activities query returned: ${(response as List).length} activities');
 
-      final newActivities = (response as List)
-          .map((data) => Activity.fromSupabaseMap(data))
-          .toList();
+      // Parse in isolate if we have many activities (50+ threshold)
+      final newActivities = await PerformanceUtils.parseJsonList<Activity>(
+        jsonList: response as List,
+        parser: Activity.fromSupabaseMap,
+        threshold: 50,
+      );
 
       debugPrint(
           '🎯 DATABASE: Got ${newActivities.length} activities from query');

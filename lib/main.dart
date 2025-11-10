@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -8,6 +9,8 @@ import 'services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  _setupPerformanceMonitoring();
 
   // Initialize Supabase
   await Supabase.initialize(
@@ -27,6 +30,27 @@ void main() async {
   ]);
 
   runApp(const ProviderScope(child: MyApp()));
+}
+
+void _setupPerformanceMonitoring() {
+  if (!SchedulerBinding.instance.schedulerPhase.name.contains('idle')) {
+    SchedulerBinding.instance.addTimingsCallback((List<FrameTiming> timings) {
+      for (final timing in timings) {
+        final totalSpan = timing.totalSpan.inMilliseconds;
+
+        const frameDropThreshold = 20; // ms
+
+        if (totalSpan > frameDropThreshold) {
+          debugPrint(
+              '⚠️ PERFORMANCE: Frame drop detected! ${totalSpan}ms (target: 16ms)');
+          debugPrint('   Build: ${timing.buildDuration.inMilliseconds}ms');
+          debugPrint('   Raster: ${timing.rasterDuration.inMilliseconds}ms');
+        }
+      }
+    });
+
+    debugPrint('🔍 Performance monitoring enabled');
+  }
 }
 
 Future<void> _warmupShaders() async {

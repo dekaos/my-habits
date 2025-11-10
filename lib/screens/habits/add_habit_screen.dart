@@ -229,6 +229,7 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
                 // Icon selection
                 GlassCard(
                   padding: const EdgeInsets.all(20),
+                  enableGlow: false,
                   child: HabitIconSelector(
                     selectedIcon: _selectedIcon,
                     onIconSelected: (iconName) {
@@ -243,6 +244,7 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
                 // Color selection
                 GlassCard(
                   padding: const EdgeInsets.all(20),
+                  enableGlow: false,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -292,6 +294,7 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
                 // Frequency
                 GlassCard(
                   padding: const EdgeInsets.all(20),
+                  enableGlow: false,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -335,6 +338,7 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
                   const SizedBox(height: 16),
                   GlassCard(
                     padding: const EdgeInsets.all(20),
+                    enableGlow: false,
                     child: Wrap(
                       spacing: 8,
                       children: List.generate(7, (index) {
@@ -372,6 +376,7 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
                 // Time picker
                 GlassCard(
                   padding: const EdgeInsets.all(20),
+                  enableGlow: false,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

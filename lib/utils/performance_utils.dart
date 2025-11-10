@@ -21,6 +21,37 @@ class PerformanceUtils {
     return await compute((_) => computation(), null);
   }
 
+  /// Parse large JSON lists in a separate isolate
+  /// Use this when parsing 50+ items from API responses
+  static Future<List<T>> parseJsonList<T>({
+    required List<dynamic> jsonList,
+    required T Function(Map<String, dynamic>) parser,
+    int threshold = 50,
+  }) async {
+    // For small lists, parse on main thread (faster than isolate overhead)
+    if (jsonList.length < threshold) {
+      return jsonList
+          .map((json) => parser(json as Map<String, dynamic>))
+          .toList();
+    }
+
+    // For large lists, parse in isolate
+    debugPrint(
+        '🔄 Parsing ${jsonList.length} items in isolate (threshold: $threshold)');
+
+    return await compute(
+      _parseJsonInIsolate<T>,
+      _JsonParseParams<T>(jsonList: jsonList, parser: parser),
+    );
+  }
+
+  /// JSON parsing logic that runs in isolate
+  static List<T> _parseJsonInIsolate<T>(_JsonParseParams<T> params) {
+    return params.jsonList
+        .map((json) => params.parser(json as Map<String, dynamic>))
+        .toList();
+  }
+
   /// Debounce function calls to reduce rebuilds
   static Timer? _debounceTimer;
   static void debounce(
@@ -49,4 +80,15 @@ class PerformanceUtils {
   static void clearCaches() {
     _colorCache.clear();
   }
+}
+
+/// Parameters for JSON parsing in isolate
+class _JsonParseParams<T> {
+  final List<dynamic> jsonList;
+  final T Function(Map<String, dynamic>) parser;
+
+  _JsonParseParams({
+    required this.jsonList,
+    required this.parser,
+  });
 }

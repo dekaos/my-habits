@@ -6,6 +6,7 @@ import '../models/habit_completion.dart';
 import '../models/activity.dart';
 import '../models/notification.dart';
 import '../services/notification_service.dart';
+import '../utils/performance_utils.dart';
 
 // Habit State
 class HabitState {
@@ -51,9 +52,12 @@ class HabitNotifier extends Notifier<HabitState> {
           .eq('user_id', userId)
           .order('created_at', ascending: false);
 
-      final habits = (response as List)
-          .map((data) => Habit.fromSupabaseMap(data))
-          .toList();
+      // Parse habits (usually small list, but use isolate for future-proofing)
+      final habits = await PerformanceUtils.parseJsonList<Habit>(
+        jsonList: response as List,
+        parser: Habit.fromSupabaseMap,
+        threshold: 30, // Lower threshold since habits are simpler
+      );
 
       state = state.copyWith(habits: habits, isLoading: false);
     } catch (e) {
@@ -445,9 +449,11 @@ class HabitNotifier extends Notifier<HabitState> {
           .eq('habit_id', habitId)
           .order('completed_at', ascending: false);
 
-      return (response as List)
-          .map((data) => HabitCompletion.fromSupabaseMap(data))
-          .toList();
+      return await PerformanceUtils.parseJsonList<HabitCompletion>(
+        jsonList: response as List,
+        parser: HabitCompletion.fromSupabaseMap,
+        threshold: 100, // Completions can be many over time
+      );
     } catch (e) {
       debugPrint('Error loading completions: $e');
       return [];
@@ -462,9 +468,11 @@ class HabitNotifier extends Notifier<HabitState> {
           .eq('user_id', userId)
           .order('completed_at', ascending: false);
 
-      return (response as List)
-          .map((data) => HabitCompletion.fromSupabaseMap(data))
-          .toList();
+      return await PerformanceUtils.parseJsonList<HabitCompletion>(
+        jsonList: response as List,
+        parser: HabitCompletion.fromSupabaseMap,
+        threshold: 100, // User may have many completions
+      );
     } catch (e) {
       debugPrint('Error loading all user completions: $e');
       return [];
