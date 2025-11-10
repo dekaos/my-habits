@@ -69,13 +69,13 @@ class ActivityCard extends ConsumerWidget {
           children: [
             Row(
               children: [
-                // User avatar
                 Container(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: _getActivityColor(context).withOpacity(0.3),
+                        color:
+                            _getActivityColor(context).withValues(alpha: 0.3),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -145,11 +145,10 @@ class ActivityCard extends ConsumerWidget {
                   ),
                 ),
 
-                // Activity icon
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: _getActivityColor(context).withOpacity(0.15),
+                    color: _getActivityColor(context).withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
@@ -182,8 +181,8 @@ class ActivityCard extends ConsumerWidget {
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
                   color: isDark
-                      ? Colors.white.withOpacity(0.05)
-                      : Colors.grey.withOpacity(0.1),
+                      ? Colors.white.withValues(alpha: 0.05)
+                      : Colors.grey.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -212,10 +211,8 @@ class ActivityCard extends ConsumerWidget {
     );
   }
 
-  /// Group reactions by emoji and build bubbles
   List<Widget> _buildReactionBubbles(
       BuildContext context, WidgetRef ref, bool isDark) {
-    // Group reactions by emoji
     final Map<String, List<String>> groupedReactions = {};
 
     activity.reactions.forEach((userId, emoji) {
@@ -244,16 +241,16 @@ class ActivityCard extends ConsumerWidget {
           ),
           decoration: BoxDecoration(
             color: hasReacted
-                ? Theme.of(context).colorScheme.primary.withOpacity(0.15)
+                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.15)
                 : (isDark
-                    ? Colors.white.withOpacity(0.1)
+                    ? Colors.white.withValues(alpha: 0.1)
                     : Colors.grey.shade200),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: hasReacted
-                  ? Theme.of(context).colorScheme.primary.withOpacity(0.5)
+                  ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.5)
                   : (isDark
-                      ? Colors.white.withOpacity(0.2)
+                      ? Colors.white.withValues(alpha: 0.2)
                       : Colors.transparent),
               width: hasReacted ? 1.5 : 1,
             ),
@@ -303,8 +300,8 @@ class ActivityCard extends ConsumerWidget {
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: isDark
-                    ? Colors.black.withOpacity(0.9)
-                    : Colors.white.withOpacity(0.95),
+                    ? Colors.black.withValues(alpha: 0.9)
+                    : Colors.white.withValues(alpha: 0.95),
                 borderRadius:
                     const BorderRadius.vertical(top: Radius.circular(24)),
               ),
@@ -312,7 +309,6 @@ class ActivityCard extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header
                   Row(
                     children: [
                       Text(
@@ -331,7 +327,6 @@ class ActivityCard extends ConsumerWidget {
                   const SizedBox(height: 16),
                   const Divider(),
                   const SizedBox(height: 8),
-
                   FutureBuilder<List<Map<String, dynamic>>>(
                     future: _fetchUserProfiles(userIds),
                     builder: (context, snapshot) {
@@ -450,14 +445,14 @@ class ActivityCard extends ConsumerWidget {
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: isDark
-                    ? Colors.black.withOpacity(0.8)
-                    : Colors.white.withOpacity(0.9),
+                    ? Colors.black.withValues(alpha: 0.8)
+                    : Colors.white.withValues(alpha: 0.9),
                 borderRadius:
                     const BorderRadius.vertical(top: Radius.circular(24)),
                 border: Border.all(
                   color: isDark
-                      ? Colors.white.withOpacity(0.1)
-                      : Colors.grey.withOpacity(0.3),
+                      ? Colors.white.withValues(alpha: 0.1)
+                      : Colors.grey.withValues(alpha: 0.3),
                   width: 1,
                 ),
               ),
@@ -469,7 +464,7 @@ class ActivityCard extends ConsumerWidget {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: Colors.grey.withOpacity(0.3),
+                      color: Colors.grey.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -507,12 +502,12 @@ class ActivityCard extends ConsumerWidget {
                           height: 64,
                           decoration: BoxDecoration(
                             color: isDark
-                                ? Colors.white.withOpacity(0.1)
+                                ? Colors.white.withValues(alpha: 0.1)
                                 : Colors.grey.shade200,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
                               color: isDark
-                                  ? Colors.white.withOpacity(0.2)
+                                  ? Colors.white.withValues(alpha: 0.2)
                                   : Colors.transparent,
                               width: 1.5,
                             ),
