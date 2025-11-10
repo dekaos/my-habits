@@ -335,35 +335,33 @@ class _EditHabitScreenState extends ConsumerState<EditHabitScreen> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      SegmentedButton<HabitFrequency>(
-                        segments: const [
-                          ButtonSegment(
-                            value: HabitFrequency.daily,
-                            label: Text('Daily'),
-                            icon: Icon(Icons.calendar_today),
-                          ),
-                          ButtonSegment(
-                            value: HabitFrequency.weekly,
-                            label: Text('Weekly'),
-                            icon: Icon(Icons.calendar_view_week),
-                          ),
-                          ButtonSegment(
-                            value: HabitFrequency.custom,
-                            label: Text('Custom'),
-                            icon: Icon(Icons.edit_calendar),
-                          ),
-                        ],
-                        selected: {_frequency},
-                        onSelectionChanged: (Set<HabitFrequency> newSelection) {
-                          setState(() {
-                            _frequency = newSelection.first;
-                            // Clear custom days if switching away from custom
-                            if (_frequency != HabitFrequency.custom) {
-                              _customDays.clear();
-                            }
-                          });
-                        },
-                      ),
+                      Center(
+                        child: SegmentedButton<HabitFrequency>(
+                          segments: const [
+                            ButtonSegment(
+                              value: HabitFrequency.daily,
+                              label: Text('Daily'),
+                              icon: Icon(Icons.calendar_today),
+                            ),
+                            ButtonSegment(
+                              value: HabitFrequency.custom,
+                              label: Text('Custom'),
+                              icon: Icon(Icons.edit_calendar),
+                            ),
+                          ],
+                          selected: {_frequency},
+                          onSelectionChanged:
+                              (Set<HabitFrequency> newSelection) {
+                            setState(() {
+                              _frequency = newSelection.first;
+                              // Clear custom days if switching away from custom
+                              if (_frequency != HabitFrequency.custom) {
+                                _customDays.clear();
+                              }
+                            });
+                          },
+                        ),
+                      )
                     ],
                   ),
                 ),
@@ -387,6 +385,7 @@ class _EditHabitScreenState extends ConsumerState<EditHabitScreen> {
                         ];
                         final isSelected = _customDays.contains(index);
                         return FilterChip(
+                          showCheckmark: false,
                           label: Text(days[index]),
                           selected: isSelected,
                           onSelected: (selected) {
@@ -425,6 +424,7 @@ class _EditHabitScreenState extends ConsumerState<EditHabitScreen> {
                                     .titleMedium
                                     ?.copyWith(
                                       fontWeight: FontWeight.bold,
+                                      color: Colors.white,
                                     ),
                               ),
                               const SizedBox(height: 4),
@@ -441,7 +441,8 @@ class _EditHabitScreenState extends ConsumerState<EditHabitScreen> {
                           ),
                           if (_selectedTime != null)
                             IconButton(
-                              icon: const Icon(Icons.clear),
+                              icon:
+                                  const Icon(Icons.clear, color: Colors.white),
                               onPressed: () {
                                 setState(() {
                                   _selectedTime = null;
@@ -470,12 +471,18 @@ class _EditHabitScreenState extends ConsumerState<EditHabitScreen> {
                             vertical: 12,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.grey.shade200,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.white.withValues(alpha: 0.05)
+                                    : Colors.white.withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: _selectedTime != null
                                   ? Theme.of(context).colorScheme.primary
-                                  : Colors.grey.shade300,
+                                  : (Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Colors.white.withValues(alpha: 0.2)
+                                      : Colors.grey.withValues(alpha: 0.3)),
                               width: _selectedTime != null ? 2 : 1,
                             ),
                           ),
@@ -488,7 +495,7 @@ class _EditHabitScreenState extends ConsumerState<EditHabitScreen> {
                                     Icons.access_time,
                                     color: _selectedTime != null
                                         ? Theme.of(context).colorScheme.primary
-                                        : Colors.grey.shade600,
+                                        : Colors.white,
                                   ),
                                   const SizedBox(width: 12),
                                   Text(
@@ -504,14 +511,14 @@ class _EditHabitScreenState extends ConsumerState<EditHabitScreen> {
                                           ? Theme.of(context)
                                               .colorScheme
                                               .primary
-                                          : Colors.grey.shade700,
+                                          : Colors.white,
                                     ),
                                   ),
                                 ],
                               ),
-                              Icon(
+                              const Icon(
                                 Icons.arrow_drop_down,
-                                color: Colors.grey.shade600,
+                                color: Colors.white,
                               ),
                             ],
                           ),

@@ -303,31 +303,29 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
                                 ),
                       ),
                       const SizedBox(height: 16),
-                      SegmentedButton<HabitFrequency>(
-                        segments: const [
-                          ButtonSegment(
-                            value: HabitFrequency.daily,
-                            label: Text('Daily'),
-                            icon: Icon(Icons.calendar_today),
-                          ),
-                          ButtonSegment(
-                            value: HabitFrequency.weekly,
-                            label: Text('Weekly'),
-                            icon: Icon(Icons.calendar_view_week),
-                          ),
-                          ButtonSegment(
-                            value: HabitFrequency.custom,
-                            label: Text('Custom'),
-                            icon: Icon(Icons.edit_calendar),
-                          ),
-                        ],
-                        selected: {_frequency},
-                        onSelectionChanged: (Set<HabitFrequency> newSelection) {
-                          setState(() {
-                            _frequency = newSelection.first;
-                          });
-                        },
-                      ),
+                      Center(
+                        child: SegmentedButton<HabitFrequency>(
+                          segments: const [
+                            ButtonSegment(
+                              value: HabitFrequency.daily,
+                              label: Text('Daily'),
+                              icon: Icon(Icons.calendar_today),
+                            ),
+                            ButtonSegment(
+                              value: HabitFrequency.custom,
+                              label: Text('Custom'),
+                              icon: Icon(Icons.edit_calendar),
+                            ),
+                          ],
+                          selected: {_frequency},
+                          onSelectionChanged:
+                              (Set<HabitFrequency> newSelection) {
+                            setState(() {
+                              _frequency = newSelection.first;
+                            });
+                          },
+                        ),
+                      )
                     ],
                   ),
                 ),
@@ -353,6 +351,7 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
                         return FilterChip(
                           label: Text(days[index]),
                           selected: isSelected,
+                          showCheckmark: false,
                           onSelected: (selected) {
                             setState(() {
                               if (selected) {
@@ -389,6 +388,7 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
                                     .titleMedium
                                     ?.copyWith(
                                       fontWeight: FontWeight.bold,
+                                      color: Colors.white,
                                     ),
                               ),
                               const SizedBox(height: 4),
@@ -405,7 +405,8 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
                           ),
                           if (_selectedTime != null)
                             IconButton(
-                              icon: const Icon(Icons.clear),
+                              icon:
+                                  const Icon(Icons.clear, color: Colors.white),
                               onPressed: () {
                                 setState(() {
                                   _selectedTime = null;
@@ -434,12 +435,18 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
                             vertical: 12,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.grey.shade200,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.white.withValues(alpha: 0.05)
+                                    : Colors.white.withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: _selectedTime != null
                                   ? Theme.of(context).colorScheme.primary
-                                  : Colors.grey.shade300,
+                                  : (Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Colors.white.withValues(alpha: 0.2)
+                                      : Colors.grey.withValues(alpha: 0.3)),
                               width: _selectedTime != null ? 2 : 1,
                             ),
                           ),
@@ -452,7 +459,7 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
                                     Icons.access_time,
                                     color: _selectedTime != null
                                         ? Theme.of(context).colorScheme.primary
-                                        : Colors.grey.shade600,
+                                        : Colors.white,
                                   ),
                                   const SizedBox(width: 12),
                                   Text(
@@ -468,14 +475,14 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
                                           ? Theme.of(context)
                                               .colorScheme
                                               .primary
-                                          : Colors.grey.shade700,
+                                          : Colors.white,
                                     ),
                                   ),
                                 ],
                               ),
-                              Icon(
+                              const Icon(
                                 Icons.arrow_drop_down,
-                                color: Colors.grey.shade600,
+                                color: Colors.white,
                               ),
                             ],
                           ),

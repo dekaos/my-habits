@@ -7,7 +7,6 @@ import '../habits/add_habit_screen.dart';
 import '../habits/habit_detail_screen.dart';
 import '../../widgets/slidable_habit_card.dart';
 import '../../widgets/glass_card.dart';
-import '../../widgets/habit_calendar_view.dart';
 
 class HabitsTab extends ConsumerStatefulWidget {
   const HabitsTab({super.key});
