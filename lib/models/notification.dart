@@ -141,7 +141,7 @@ class AppNotification {
       case NotificationType.encouragement:
         return Colors.purple;
       case NotificationType.message:
-        return Colors.indigo;
+        return Colors.blue.shade200;
     }
   }
 

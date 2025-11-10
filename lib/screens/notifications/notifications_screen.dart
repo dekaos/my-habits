@@ -7,6 +7,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/social_provider.dart';
 import '../../widgets/glass_card.dart';
 import '../social/chat_screen.dart';
+import '../../widgets/animated_gradient_background.dart';
 
 class NotificationsScreen extends ConsumerStatefulWidget {
   const NotificationsScreen({super.key});
@@ -37,53 +38,64 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
   Widget build(BuildContext context) {
     final notificationState = ref.watch(notificationProvider);
     final authState = ref.watch(authProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: isDark ? Colors.black : Colors.grey[50],
-      appBar: AppBar(
-        title: const Text('Notifications'),
+    return AnimatedGradientBackground(
+      child: Scaffold(
         backgroundColor: Colors.transparent,
-        elevation: 0,
-        actions: [
-          if (notificationState.unreadCount > 0)
-            TextButton.icon(
-              onPressed: () {
-                if (authState.user != null) {
-                  ref
-                      .read(notificationProvider.notifier)
-                      .markAllAsRead(authState.user!.id);
-                }
-              },
-              icon: const Icon(Icons.done_all, size: 18),
-              label: const Text('Mark all read'),
-            ),
-        ],
-      ),
-      body: notificationState.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : notificationState.notifications.isEmpty
-              ? _buildEmptyState(context)
-              : RefreshIndicator(
-                  onRefresh: () async {
-                    if (authState.user != null) {
-                      await ref
-                          .read(notificationProvider.notifier)
-                          .loadNotifications(authState.user!.id);
-                    }
-                  },
-                  child: ListView.separated(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: notificationState.notifications.length,
-                    separatorBuilder: (context, index) =>
-                        const SizedBox(height: 8),
-                    itemBuilder: (context, index) {
-                      final notification =
-                          notificationState.notifications[index];
-                      return _buildNotificationCard(context, notification);
+        extendBodyBehindAppBar: true,
+        appBar: GlassAppBar(
+          title: 'Notifications',
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          actions: [
+            if (notificationState.unreadCount > 0)
+              TextButton.icon(
+                onPressed: () {
+                  if (authState.user != null) {
+                    ref
+                        .read(notificationProvider.notifier)
+                        .markAllAsRead(authState.user!.id);
+                  }
+                },
+                icon: const Icon(Icons.done_all, size: 18),
+                label: const Text('Mark all read'),
+              ),
+          ],
+        ),
+        body: notificationState.isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : notificationState.notifications.isEmpty
+                ? _buildEmptyState(context)
+                : RefreshIndicator(
+                    onRefresh: () async {
+                      if (authState.user != null) {
+                        await ref
+                            .read(notificationProvider.notifier)
+                            .loadNotifications(authState.user!.id);
+                      }
                     },
+                    child: ListView.separated(
+                      padding: EdgeInsets.only(
+                        top: 16 +
+                            kToolbarHeight +
+                            MediaQuery.of(context).padding.top,
+                        left: 16,
+                        right: 16,
+                        bottom: 16,
+                      ),
+                      itemCount: notificationState.notifications.length,
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 8),
+                      itemBuilder: (context, index) {
+                        final notification =
+                            notificationState.notifications[index];
+                        return _buildNotificationCard(context, notification);
+                      },
+                    ),
                   ),
-                ),
+      ),
     );
   }
 
@@ -121,10 +133,6 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
           decoration: notification.type == NotificationType.message
               ? BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: notification.getColor().withValues(alpha: 0.4),
-                    width: 2,
-                  ),
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
