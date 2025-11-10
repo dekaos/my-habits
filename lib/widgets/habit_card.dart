@@ -92,14 +92,13 @@ class _HabitCardState extends ConsumerState<HabitCard> {
           padding: const EdgeInsets.all(20),
           enableGlow: false,
           color: isCompleted
-              ? Colors.green.withOpacity(isDark ? 0.1 : 0.05)
+              ? Colors.green.withValues(alpha: isDark ? 0.1 : 0.05)
               : null,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  // Icon with circular progress indicator showing streak
                   Stack(
                     alignment: Alignment.center,
                     children: [
@@ -111,12 +110,11 @@ class _HabitCardState extends ConsumerState<HabitCard> {
                           child: CircularProgressIndicator(
                             value: streakProgress.clamp(0.0, 1.0),
                             strokeWidth: 3,
-                            backgroundColor: _getColor().withOpacity(0.1),
+                            backgroundColor: _getColor().withValues(alpha: 0.1),
                             valueColor:
                                 AlwaysStoppedAnimation<Color>(_getColor()),
                           ),
                         ),
-                      // Icon container
                       GestureDetector(
                         onTap: () async {
                           if (!_isCompleting) {
@@ -128,13 +126,13 @@ class _HabitCardState extends ConsumerState<HabitCard> {
                           height: 56,
                           decoration: BoxDecoration(
                             color: isCompleted
-                                ? Colors.green.withOpacity(0.2)
-                                : _getColor().withOpacity(0.15),
+                                ? Colors.green.withValues(alpha: 0.2)
+                                : _getColor().withValues(alpha: 0.15),
                             shape: BoxShape.circle,
                             border: Border.all(
                               color: isCompleted
                                   ? Colors.green
-                                  : _getColor().withOpacity(0.5),
+                                  : _getColor().withValues(alpha: 0.5),
                               width: 2,
                             ),
                           ),
@@ -164,8 +162,6 @@ class _HabitCardState extends ConsumerState<HabitCard> {
                     ],
                   ),
                   const SizedBox(width: 16),
-
-                  // Habit info
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -191,7 +187,7 @@ class _HabitCardState extends ConsumerState<HabitCard> {
                                 margin: const EdgeInsets.only(left: 8),
                                 padding: const EdgeInsets.all(4),
                                 decoration: BoxDecoration(
-                                  color: Colors.blue.withOpacity(0.15),
+                                  color: Colors.blue.withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: const Icon(
@@ -217,8 +213,6 @@ class _HabitCardState extends ConsumerState<HabitCard> {
                           ),
                         ],
                         const SizedBox(height: 12),
-
-                        // Streak and stats row
                         Row(
                           children: [
                             if (widget.habit.currentStreak > 0) ...[
@@ -237,7 +231,8 @@ class _HabitCardState extends ConsumerState<HabitCard> {
                                   borderRadius: BorderRadius.circular(12),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.orange.withOpacity(0.3),
+                                      color:
+                                          Colors.orange.withValues(alpha: 0.3),
                                       blurRadius: 8,
                                       offset: const Offset(0, 2),
                                     ),
@@ -271,8 +266,8 @@ class _HabitCardState extends ConsumerState<HabitCard> {
                               ),
                               decoration: BoxDecoration(
                                 color: isDark
-                                    ? Colors.white.withOpacity(0.1)
-                                    : Colors.black.withOpacity(0.05),
+                                    ? Colors.white.withValues(alpha: 0.1)
+                                    : Colors.black.withValues(alpha: 0.05),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Row(
@@ -303,8 +298,6 @@ class _HabitCardState extends ConsumerState<HabitCard> {
                   ),
                 ],
               ),
-
-              // Visual progress bar for consistency
               if (widget.habit.totalCompletions > 0) ...[
                 const SizedBox(height: 16),
                 Column(
@@ -350,8 +343,8 @@ class _HabitCardState extends ConsumerState<HabitCard> {
                             .clamp(0.0, 1.0),
                         minHeight: 6,
                         backgroundColor: isDark
-                            ? Colors.white.withOpacity(0.1)
-                            : Colors.black.withOpacity(0.1),
+                            ? Colors.white.withValues(alpha: 0.1)
+                            : Colors.black.withValues(alpha: 0.1),
                         valueColor: AlwaysStoppedAnimation<Color>(_getColor()),
                       ),
                     ),
