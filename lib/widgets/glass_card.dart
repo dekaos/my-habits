@@ -65,8 +65,9 @@ class _GlassCardState extends State<GlassCard>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final defaultColor =
-        isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.7);
+    final defaultColor = isDark
+        ? Colors.white.withValues(alpha: 0.1)
+        : Colors.white.withValues(alpha: 0.7);
 
     Widget content = ClipRRect(
       borderRadius: BorderRadius.circular(widget.borderRadius),
@@ -81,16 +82,16 @@ class _GlassCardState extends State<GlassCard>
             border: widget.border ??
                 Border.all(
                   color: isDark
-                      ? Colors.white.withOpacity(0.2)
-                      : Colors.white.withOpacity(0.5),
+                      ? Colors.white.withValues(alpha: 0.2)
+                      : Colors.white.withValues(alpha: 0.5),
                   width: 1.5,
                 ),
             boxShadow: widget.shadows ??
                 [
                   BoxShadow(
                     color: isDark
-                        ? Colors.black.withOpacity(0.3)
-                        : Colors.black.withOpacity(0.1),
+                        ? Colors.black.withValues(alpha: 0.3)
+                        : Colors.black.withValues(alpha: 0.1),
                     blurRadius: 20,
                     offset: const Offset(0, 8),
                   ),
@@ -116,7 +117,7 @@ class _GlassCardState extends State<GlassCard>
                     color: Theme.of(context)
                         .colorScheme
                         .primary
-                        .withOpacity(0.15 * _glowAnimation!.value),
+                        .withValues(alpha: 0.15 * _glowAnimation!.value),
                     blurRadius: 30 * _glowAnimation!.value,
                     spreadRadius: 2 * _glowAnimation!.value,
                   ),
@@ -151,7 +152,6 @@ class _GlassCardState extends State<GlassCard>
   }
 }
 
-/// A glass app bar with blur effect
 class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final List<Widget>? actions;
@@ -176,13 +176,13 @@ class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
         child: Container(
           decoration: BoxDecoration(
             color: isDark
-                ? Colors.black.withOpacity(0.5)
-                : Colors.white.withOpacity(0.7),
+                ? Colors.black.withValues(alpha: 0.5)
+                : Colors.white.withValues(alpha: 0.7),
             border: Border(
               bottom: BorderSide(
                 color: isDark
-                    ? Colors.white.withOpacity(0.1)
-                    : Colors.black.withOpacity(0.1),
+                    ? Colors.white.withValues(alpha: 0.1)
+                    : Colors.black.withValues(alpha: 0.1),
                 width: 0.5,
               ),
             ),
@@ -218,7 +218,6 @@ class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => const Size.fromHeight(60);
 }
 
-/// A glass button with hover and press effects
 class GlassButton extends StatefulWidget {
   final Widget child;
   final VoidCallback onPressed;
@@ -288,7 +287,7 @@ class _GlassButtonState extends State<GlassButton>
                       color: Theme.of(context)
                           .colorScheme
                           .primary
-                          .withOpacity(0.2 * _pulseAnimation.value),
+                          .withValues(alpha: 0.2 * _pulseAnimation.value),
                       blurRadius: 20 * _pulseAnimation.value,
                       spreadRadius: 1 * _pulseAnimation.value,
                     ),
@@ -302,19 +301,19 @@ class _GlassButtonState extends State<GlassButton>
                       decoration: BoxDecoration(
                         color: widget.color ??
                             (isDark
-                                ? Colors.white.withOpacity(0.15)
-                                : Colors.white.withOpacity(0.8)),
+                                ? Colors.white.withValues(alpha: 0.15)
+                                : Colors.white.withValues(alpha: 0.8)),
                         borderRadius:
                             BorderRadius.circular(widget.borderRadius),
                         border: Border.all(
                           color: isDark
-                              ? Colors.white.withOpacity(0.2)
-                              : Colors.white.withOpacity(0.6),
+                              ? Colors.white.withValues(alpha: 0.2)
+                              : Colors.white.withValues(alpha: 0.6),
                           width: 1.5,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
+                            color: Colors.black.withValues(alpha: 0.1),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
