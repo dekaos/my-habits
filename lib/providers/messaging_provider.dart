@@ -3,11 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/message.dart';
 
-// Messaging State
 class MessagingState {
-  final Map<String, List<Message>>
-      conversations; // Key: friend_id, Value: messages
-  final Map<String, int> unreadCounts; // Key: friend_id, Value: unread count
+  final Map<String, List<Message>> conversations;
+  final Map<String, int> unreadCounts;
   final bool isLoading;
 
   MessagingState({
@@ -29,7 +27,6 @@ class MessagingState {
   }
 }
 
-// Messaging Notifier
 class MessagingNotifier extends Notifier<MessagingState> {
   final SupabaseClient _supabase = Supabase.instance.client;
   RealtimeChannel? _messageChannel;
@@ -39,7 +36,6 @@ class MessagingNotifier extends Notifier<MessagingState> {
     return MessagingState();
   }
 
-  /// Load conversation with a friend
   Future<void> loadConversation(String currentUserId, String friendId) async {
     try {
       debugPrint('💬 Loading conversation with: $friendId');
@@ -56,12 +52,10 @@ class MessagingNotifier extends Notifier<MessagingState> {
 
       debugPrint('💬 Loaded ${messages.length} messages');
 
-      // Update conversations
       final updatedConversations =
           Map<String, List<Message>>.from(state.conversations);
       updatedConversations[friendId] = messages;
 
-      // Calculate unread count
       final unread = messages
           .where((m) => m.receiverId == currentUserId && !m.isRead)
           .length;
@@ -79,7 +73,6 @@ class MessagingNotifier extends Notifier<MessagingState> {
     }
   }
 
-  /// Send a message to a friend
   Future<void> sendMessage(
     String currentUserId,
     String friendId,
@@ -107,14 +100,12 @@ class MessagingNotifier extends Notifier<MessagingState> {
 
       debugPrint('✅ Message sent: ${sentMessage.id}');
 
-      // Add to local conversation and sort by timestamp
       final updatedConversations =
           Map<String, List<Message>>.from(state.conversations);
       final currentMessages =
           List<Message>.from(updatedConversations[friendId] ?? []);
       currentMessages.add(sentMessage);
 
-      // Sort messages by created_at to ensure correct order
       currentMessages.sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
       updatedConversations[friendId] = currentMessages;
@@ -127,7 +118,6 @@ class MessagingNotifier extends Notifier<MessagingState> {
     }
   }
 
-  /// Mark messages as read
   Future<void> markMessagesAsRead(String currentUserId, String friendId) async {
     try {
       debugPrint('📖 Marking messages as read from: $friendId');
@@ -139,7 +129,6 @@ class MessagingNotifier extends Notifier<MessagingState> {
           .eq('receiver_id', currentUserId)
           .eq('is_read', false);
 
-      // Update local state
       final updatedConversations =
           Map<String, List<Message>>.from(state.conversations);
       final messages = updatedConversations[friendId];
@@ -155,7 +144,6 @@ class MessagingNotifier extends Notifier<MessagingState> {
         }).toList();
       }
 
-      // Update unread count
       final updatedUnreadCounts = Map<String, int>.from(state.unreadCounts);
       updatedUnreadCounts[friendId] = 0;
 
@@ -170,7 +158,6 @@ class MessagingNotifier extends Notifier<MessagingState> {
     }
   }
 
-  /// Load unread counts for all friends
   Future<void> loadUnreadCounts(
       String currentUserId, List<String> friendIds) async {
     try {
@@ -236,7 +223,7 @@ class MessagingNotifier extends Notifier<MessagingState> {
             },
           )
           .subscribe((status, error) {
-        if (status == 'SUBSCRIBED') {
+        if (status == RealtimeSubscribeStatus.subscribed) {
           debugPrint('✅ Successfully subscribed to messages channel');
         } else if (error != null) {
           debugPrint('❌ Error subscribing to messages: $error');
@@ -250,7 +237,6 @@ class MessagingNotifier extends Notifier<MessagingState> {
     }
   }
 
-  /// Handle incoming real-time message
   void _handleNewMessage(
       Map<String, dynamic> data, String currentUserId) async {
     try {
@@ -260,19 +246,16 @@ class MessagingNotifier extends Notifier<MessagingState> {
 
       debugPrint('📨 Message from: $friendId, content: ${message.content}');
 
-      // Add to conversation and sort by timestamp
       final updatedConversations =
           Map<String, List<Message>>.from(state.conversations);
       final currentMessages =
           List<Message>.from(updatedConversations[friendId] ?? []);
       currentMessages.add(message);
 
-      // Sort messages by created_at to ensure correct order
       currentMessages.sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
       updatedConversations[friendId] = currentMessages;
 
-      // Increment unread count
       final updatedUnreadCounts = Map<String, int>.from(state.unreadCounts);
       final oldCount = updatedUnreadCounts[friendId] ?? 0;
       updatedUnreadCounts[friendId] = oldCount + 1;
@@ -286,9 +269,6 @@ class MessagingNotifier extends Notifier<MessagingState> {
         unreadCounts: updatedUnreadCounts,
       );
 
-      // Note: Notification is automatically created by database trigger
-      // See CHAT_REALTIME_SETUP.sql for the trigger implementation
-
       debugPrint('✅ State updated with new message');
     } catch (e, stackTrace) {
       debugPrint('❌ Error handling new message: $e');
@@ -296,12 +276,6 @@ class MessagingNotifier extends Notifier<MessagingState> {
     }
   }
 
-  // Note: Notification creation is handled by database trigger
-  // See create_message_notification() function in CHAT_REALTIME_SETUP.sql
-  // This trigger automatically creates notifications when messages are inserted,
-  // so we don't need to manually create them here.
-
-  /// Unsubscribe from real-time messages
   void unsubscribeFromMessages() {
     if (_messageChannel != null) {
       debugPrint('🔕 Unsubscribing from real-time messages');
@@ -310,13 +284,11 @@ class MessagingNotifier extends Notifier<MessagingState> {
     }
   }
 
-  /// Get total unread message count
   int getTotalUnreadCount() {
     return state.unreadCounts.values.fold(0, (sum, count) => sum + count);
   }
 }
 
-// Provider
 final messagingProvider = NotifierProvider<MessagingNotifier, MessagingState>(
   () => MessagingNotifier(),
 );
