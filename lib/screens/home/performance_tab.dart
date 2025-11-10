@@ -232,6 +232,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
   ) {
     return RepaintBoundary(
       child: GlassCard(
+        enableGlow: false,
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -296,6 +297,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
 
     return RepaintBoundary(
       child: GlassCard(
+        enableGlow: false,
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -510,6 +512,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
 
     return RepaintBoundary(
       child: GlassCard(
+        enableGlow: false,
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -701,6 +704,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
 
     return RepaintBoundary(
       child: GlassCard(
+        enableGlow: false,
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -827,6 +831,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
 
     return RepaintBoundary(
       child: GlassCard(
+        enableGlow: false,
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -984,6 +989,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
 
     return RepaintBoundary(
       child: GlassCard(
+        enableGlow: false,
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
