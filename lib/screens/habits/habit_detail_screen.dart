@@ -76,13 +76,10 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
   Future<void> _completeHabit() async {
     if (_isCompleting) return;
 
-    // Mark as completing but don't block UI
     _isCompleting = true;
 
-    // Play haptic feedback and sound IMMEDIATELY
     HapticService.celebrateSuccess();
 
-    // Show celebration animation IMMEDIATELY (non-blocking)
     if (mounted) {
       showCelebration(context, habitIcon: widget.habit.icon);
     }
@@ -91,45 +88,33 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
         ? null
         : _noteController.text.trim();
 
-    // Get current habit from provider
     final habitState = ref.read(habitProvider);
     final currentHabit = habitState.habits.firstWhere(
       (h) => h.id == widget.habit.id,
       orElse: () => widget.habit,
     );
-
-    // Process everything in background (non-blocking)
-    // Note: completeHabit() automatically creates activities, no need to post separately
     ref
         .read(habitProvider.notifier)
         .completeHabit(currentHabit, note: note)
         .then((_) async {
       await _loadCompletions();
+
       if (mounted) {
         _noteController.clear();
         setState(() {
           _isCompleting = false;
         });
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${currentHabit.title} completed! 🎉'),
-            backgroundColor: Colors.green,
-          ),
-        );
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // Watch the habit provider to get latest habit data
     final habitState = ref.watch(habitProvider);
 
-    // Get the current habit from state (updates when edited/completed)
     final currentHabit = habitState.habits.firstWhere(
       (h) => h.id == widget.habit.id,
-      orElse: () => widget.habit, // Fallback to original if not found
+      orElse: () => widget.habit,
     );
 
     final habitNotifier = ref.read(habitProvider.notifier);
@@ -162,7 +147,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
                   builder: (context) => EditHabitScreen(habit: currentHabit),
                 ),
               );
-              // Reload completions if habit was updated
+
               if (result == true && mounted) {
                 await _loadCompletions();
               }
@@ -193,6 +178,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
 
               if (confirmed == true && mounted) {
                 final navigator = Navigator.of(context);
+
                 await ref
                     .read(habitProvider.notifier)
                     .deleteHabit(widget.habit.id);
@@ -213,7 +199,6 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Streak card with animation
                     TweenAnimationBuilder<double>(
                       tween: Tween(begin: 0.0, end: 1.0),
                       duration: const Duration(milliseconds: 600),
@@ -263,9 +248,9 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
                         child: GlassCard(
                           padding: const EdgeInsets.all(20),
                           enableGlow: false,
-                          color: Colors.green.withOpacity(0.1),
+                          color: Colors.green.withValues(alpha: 0.1),
                           border: Border.all(
-                            color: Colors.green.withOpacity(0.4),
+                            color: Colors.green.withValues(alpha: 0.4),
                             width: 2,
                           ),
                           child: Row(
@@ -273,7 +258,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
                               Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: Colors.green.withOpacity(0.2),
+                                  color: Colors.green.withValues(alpha: 0.2),
                                   shape: BoxShape.circle,
                                 ),
                                 child: const Icon(Icons.check_circle,
@@ -351,8 +336,11 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
         padding: const EdgeInsets.all(24),
         enableGlow: false,
         color: isDark
-            ? Theme.of(context).colorScheme.primary.withOpacity(0.15)
-            : Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+            ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.15)
+            : Theme.of(context)
+                .colorScheme
+                .primaryContainer
+                .withValues(alpha: 0.3),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -366,8 +354,8 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
               width: 1,
               height: 60,
               color: isDark
-                  ? Colors.white.withOpacity(0.2)
-                  : Colors.black.withOpacity(0.1),
+                  ? Colors.white.withValues(alpha: 0.2)
+                  : Colors.black.withValues(alpha: 0.1),
             ),
             _buildStreakStat(
               context,
@@ -379,8 +367,8 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
               width: 1,
               height: 60,
               color: isDark
-                  ? Colors.white.withOpacity(0.2)
-                  : Colors.black.withOpacity(0.1),
+                  ? Colors.white.withValues(alpha: 0.2)
+                  : Colors.black.withValues(alpha: 0.1),
             ),
             _buildStreakStat(
               context,
@@ -612,7 +600,10 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
               Icon(
                 Icons.history,
                 size: 60,
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                color: Theme.of(context)
+                    .colorScheme
+                    .primary
+                    .withValues(alpha: 0.5),
               ),
               const SizedBox(height: 16),
               Text(
@@ -665,11 +656,11 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: isDark
-                        ? Colors.white.withOpacity(0.05)
-                        : Colors.black.withOpacity(0.03),
+                        ? Colors.white.withValues(alpha: 0.05)
+                        : Colors.black.withValues(alpha: 0.03),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: Colors.green.withOpacity(0.3),
+                      color: Colors.green.withValues(alpha: 0.3),
                       width: 1,
                     ),
                   ),
@@ -678,7 +669,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: Colors.green.withOpacity(0.15),
+                          color: Colors.green.withValues(alpha: 0.15),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
