@@ -454,6 +454,23 @@ class HabitNotifier extends Notifier<HabitState> {
     }
   }
 
+  Future<List<HabitCompletion>> getAllUserCompletions(String userId) async {
+    try {
+      final response = await _supabase
+          .from('habit_completions')
+          .select()
+          .eq('user_id', userId)
+          .order('completed_at', ascending: false);
+
+      return (response as List)
+          .map((data) => HabitCompletion.fromSupabaseMap(data))
+          .toList();
+    } catch (e) {
+      debugPrint('Error loading all user completions: $e');
+      return [];
+    }
+  }
+
   bool isHabitCompletedToday(Habit habit) {
     // Find the current habit from the list to get latest state
     final currentHabit = state.habits.firstWhere(

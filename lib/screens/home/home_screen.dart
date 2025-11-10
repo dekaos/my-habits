@@ -9,6 +9,7 @@ import '../../providers/messaging_provider.dart';
 import '../../widgets/animated_gradient_background.dart';
 import '../notifications/notifications_screen.dart';
 import 'habits_tab.dart';
+import 'performance_tab.dart';
 import 'social_tab.dart';
 import 'profile_tab.dart';
 
@@ -105,6 +106,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final List<Widget> tabs = [
       const HabitsTab(),
       const SocialTab(),
+      const PerformanceTab(),
       const ProfileTab(),
     ];
 
@@ -281,6 +283,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   ),
                   _buildNavItem(
                     index: 2,
+                    icon: Icons.trending_up_rounded,
+                    selectedIcon: Icons.trending_up_rounded,
+                    label: 'Performance',
+                    isDark: isDark,
+                  ),
+                  _buildNavItem(
+                    index: 3,
                     icon: Icons.person_outline,
                     selectedIcon: Icons.person,
                     label: 'Profile',
