@@ -162,7 +162,7 @@ class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
     required this.title,
     this.actions,
     this.leading,
-    this.blur = 10,
+    this.blur = 20,
     super.key,
   });
 
@@ -176,8 +176,8 @@ class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
         child: Container(
           decoration: BoxDecoration(
             color: isDark
-                ? Colors.black.withValues(alpha: 0.5)
-                : Colors.white.withValues(alpha: 0.7),
+                ? Colors.black.withValues(alpha: 0.1)
+                : Colors.white.withValues(alpha: 0.1),
             border: Border(
               bottom: BorderSide(
                 color: isDark

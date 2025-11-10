@@ -24,23 +24,10 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(60),
+      appBar: const PreferredSize(
+        preferredSize: Size.fromHeight(60),
         child: GlassAppBar(
           title: 'My Habits',
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.calendar_today),
-              onPressed: () {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: Colors.transparent,
-                  builder: (context) => const HabitCalendarView(),
-                );
-              },
-            ),
-          ],
         ),
       ),
       body: RefreshIndicator(

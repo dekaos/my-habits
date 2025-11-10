@@ -107,7 +107,6 @@ class _SocialTabState extends ConsumerState<SocialTab> {
         child: GlassAppBar(
           title: 'Social',
           actions: [
-            // Friend requests with badge
             SizedBox(
               width: 48,
               height: 48,
@@ -122,7 +121,6 @@ class _SocialTabState extends ConsumerState<SocialTab> {
                           builder: (context) => const FriendRequestsScreen(),
                         ),
                       );
-                      // Reload pending requests when returning
                       _loadPendingRequests();
                     },
                   ),
@@ -164,7 +162,6 @@ class _SocialTabState extends ConsumerState<SocialTab> {
                 ],
               ),
             ),
-            // Messages with badge
             SizedBox(
               width: 48,
               height: 48,
@@ -179,7 +176,6 @@ class _SocialTabState extends ConsumerState<SocialTab> {
                           builder: (context) => const EnhancedFriendsScreen(),
                         ),
                       );
-                      // Reload unread messages when returning
                       _loadUnreadMessages();
                     },
                   ),
