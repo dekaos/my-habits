@@ -79,14 +79,14 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
       if (mounted) {
         _confettiController.play();
         _scaleController.forward();
-        print('🎊 ${_theme.emoji} celebration launched!');
+        debugPrint('🎊 ${_theme.emoji} celebration launched!');
       }
     });
 
     // Auto-dismiss after animation
     Future.delayed(const Duration(milliseconds: 4000), () {
       if (mounted) {
-        print('✅ Celebration complete, dismissing...');
+        debugPrint('✅ Celebration complete, dismissing...');
         widget.onComplete();
       }
     });
@@ -230,7 +230,6 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
           particles: ['🚴', '💨', '⚡', '🌟'],
         );
       default:
-        // Default confetti theme
         return const CelebrationTheme(
           colors: [
             Color(0xFF6366F1),
@@ -369,7 +368,6 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
               ),
             ),
 
-            // Themed message text
             Positioned(
               bottom: MediaQuery.of(context).size.height * 0.35,
               child: FadeTransition(
@@ -417,7 +415,6 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
   }
 
   Path _drawStar(Size size) {
-    // Helper method to draw star shapes for confetti
     final path = Path();
     final double width = size.width;
     final double height = size.height;
@@ -438,7 +435,6 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
   }
 
   Widget _buildFloatingEmoji(int index) {
-    // Create floating emoji particles with random positions and delays
     final random = Random(index);
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
@@ -488,19 +484,18 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
   }
 }
 
-/// Show celebration animation overlay with optional habit icon theme
 void showCelebration(BuildContext context, {String? habitIcon}) {
-  print('🎯 showCelebration called with icon: ${habitIcon ?? "default"}');
+  debugPrint('🎯 showCelebration called with icon: ${habitIcon ?? "default"}');
 
   try {
-    // Use Navigator overlay to ensure it's always accessible
     final overlay = Navigator.of(context).overlay;
     if (overlay == null) {
-      print('❌ Warning: Could not access overlay for celebration animation');
+      debugPrint(
+          '❌ Warning: Could not access overlay for celebration animation');
       return;
     }
 
-    print('✅ Overlay accessed, creating themed celebration');
+    debugPrint('✅ Overlay accessed, creating themed celebration');
 
     late OverlayEntry overlayEntry;
 
@@ -509,7 +504,7 @@ void showCelebration(BuildContext context, {String? habitIcon}) {
         child: CelebrationAnimation(
           habitIcon: habitIcon,
           onComplete: () {
-            print('🧹 Removing celebration overlay');
+            debugPrint('🧹 Removing celebration overlay');
             overlayEntry.remove();
           },
         ),
@@ -517,8 +512,8 @@ void showCelebration(BuildContext context, {String? habitIcon}) {
     );
 
     overlay.insert(overlayEntry);
-    print('🎊 Themed celebration overlay inserted');
+    debugPrint('🎊 Themed celebration overlay inserted');
   } catch (e) {
-    print('❌ Error showing celebration: $e');
+    debugPrint('❌ Error showing celebration: $e');
   }
 }
