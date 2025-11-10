@@ -137,7 +137,7 @@ class _SocialTabState extends ConsumerState<SocialTab> {
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.red.withOpacity(0.5),
+                              color: Colors.red.withValues(alpha: 0.5),
                               blurRadius: 4,
                               offset: const Offset(0, 2),
                             ),
@@ -194,7 +194,7 @@ class _SocialTabState extends ConsumerState<SocialTab> {
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.blue.withOpacity(0.5),
+                              color: Colors.blue.withValues(alpha: 0.5),
                               blurRadius: 4,
                               offset: const Offset(0, 2),
                             ),
@@ -250,9 +250,7 @@ class _SocialTabState extends ConsumerState<SocialTab> {
             await ref
                 .read(socialProvider.notifier)
                 .loadActivityFeed(authState.user!.id);
-            // Also refresh pending requests count
             await _loadPendingRequests();
-            // Also refresh unread messages count
             await _loadUnreadMessages();
           }
         },
@@ -261,11 +259,9 @@ class _SocialTabState extends ConsumerState<SocialTab> {
             : ListView.builder(
                 padding: const EdgeInsets.all(16),
                 itemCount: socialState.activityFeed.length,
-                // Add keys for better performance
                 addAutomaticKeepAlives: true,
                 addRepaintBoundaries: true,
                 addSemanticIndexes: true,
-                // Optimize cache extent for smoother scrolling
                 cacheExtent: 500,
                 itemBuilder: (context, index) {
                   final activity = socialState.activityFeed[index];
@@ -295,7 +291,10 @@ class _SocialTabState extends ConsumerState<SocialTab> {
               Icon(
                 Icons.people_outline,
                 size: 80,
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.6),
+                color: Theme.of(context)
+                    .colorScheme
+                    .primary
+                    .withValues(alpha: 0.6),
               ),
               const SizedBox(height: 20),
               Text(
