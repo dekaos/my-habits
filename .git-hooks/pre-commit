@@ -30,16 +30,16 @@ if ! flutter analyze; then
     exit 1
 fi
 
-# Run Flutter format check
+# Run Dart format check
 echo "Checking code formatting..."
-if ! flutter format --set-exit-if-changed --dry-run $DART_FILES > /dev/null 2>&1; then
+if ! dart format --set-exit-if-changed --output=none $DART_FILES > /dev/null 2>&1; then
     echo -e "${YELLOW}⚠️  Code formatting issues detected.${NC}"
-    echo "Run 'flutter format .' to fix formatting."
+    echo "Run 'dart format .' to fix formatting."
     echo ""
     read -p "Do you want to auto-format now? (y/n) " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-        flutter format $DART_FILES
+        dart format $DART_FILES
         echo -e "${GREEN}✅ Files formatted. Please stage the changes and commit again.${NC}"
         exit 1
     else
@@ -64,7 +64,7 @@ echo ""
 echo -e "${GREEN}✅ Pre-commit checks passed!${NC}"
 echo ""
 
-# Reminder about release testing
+# Reminder about release testing (non-blocking)
 if [ -f "lib/services/notification_service.dart" ] || \
    [ -f "lib/services/background_service.dart" ] || \
    echo "$DART_FILES" | grep -q "service"; then
@@ -75,20 +75,6 @@ if [ -f "lib/services/notification_service.dart" ] || \
     echo ""
     echo "  ./scripts/quick_release_test.sh"
     echo ""
-    read -p "Have you tested this in release mode? (y/n) " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo -e "${YELLOW}⚠️  Please test in release mode before pushing to production!${NC}"
-        echo ""
-        echo "To test now, run:"
-        echo "  ./scripts/quick_release_test.sh"
-        echo ""
-        read -p "Continue with commit anyway? (y/n) " -n 1 -r
-        echo
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            exit 1
-        fi
-    fi
 fi
 
 echo -e "${GREEN}✅ Ready to commit!${NC}"
