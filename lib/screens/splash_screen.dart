@@ -287,7 +287,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                   ],
                                 ).createShader(bounds),
                                 child: Text(
-                                  'Habit Hero',
+                                  'My Habits',
                                   style: Theme.of(context)
                                       .textTheme
                                       .displayMedium
