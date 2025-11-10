@@ -339,32 +339,39 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
             // Success icon with scale animation
             ScaleTransition(
               scale: _scaleAnimation,
-              child: Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      _theme.colors.first,
-                      _theme.colors.last,
-                    ],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: _theme.colors.first.withValues(alpha: 0.5),
-                      blurRadius: 40,
-                      spreadRadius: 10,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          _theme.colors.first,
+                          _theme.colors.last,
+                        ],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: _theme.colors.first.withValues(alpha: 0.5),
+                          blurRadius: 40,
+                          spreadRadius: 10,
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                child: Icon(
-                  _theme.icon,
-                  size: 40,
-                  color: Colors.white,
-                ),
+                    child: Icon(
+                      _theme.icon,
+                      size: 36,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                ],
               ),
             ),
 
