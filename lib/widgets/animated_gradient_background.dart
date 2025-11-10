@@ -55,7 +55,6 @@ class _AnimatedGradientBackgroundState extends State<AnimatedGradientBackground>
 
     return Stack(
       children: [
-        // Animated gradient background - runs on raster thread
         RepaintBoundary(
           child: AnimatedBuilder(
             animation: _glowController,
@@ -91,7 +90,6 @@ class _AnimatedGradientBackgroundState extends State<AnimatedGradientBackground>
           ),
         ),
 
-        // Subtle particles background - isolated rendering
         if (widget.enableParticles)
           RepaintBoundary(
             child: AnimatedBuilder(
@@ -118,7 +116,6 @@ class _AnimatedGradientBackgroundState extends State<AnimatedGradientBackground>
   }
 }
 
-/// Particles painter for animated background - optimized for raster thread
 class ParticlesPainter extends CustomPainter {
   final double animation;
   final bool isDark;
@@ -132,12 +129,10 @@ class ParticlesPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Use a single paint object and reuse it
     final paint = Paint()
       ..style = PaintingStyle.fill
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2);
 
-    // Pre-calculate sine value outside loop
     final animationSin = math.sin(animation * math.pi * 2);
 
     for (int i = 0; i < particleCount; i++) {
@@ -145,7 +140,6 @@ class ParticlesPainter extends CustomPainter {
       final x = random.nextDouble() * size.width;
       final baseY = random.nextDouble() * size.height;
 
-      // Gentle floating animation
       final floatOffset =
           math.sin((animation + random.nextDouble()) * math.pi * 2) * 20;
       final y = baseY + floatOffset;
@@ -154,7 +148,7 @@ class ParticlesPainter extends CustomPainter {
       final opacity = 0.1 + (random.nextDouble() * 0.2);
 
       paint.color = (isDark ? Colors.white : Colors.black87)
-          .withOpacity(opacity * (0.4 + (animationSin * 0.3)));
+          .withValues(alpha: opacity * (0.4 + (animationSin * 0.3)));
 
       canvas.drawCircle(
         Offset(x, y),
@@ -166,7 +160,6 @@ class ParticlesPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(ParticlesPainter oldDelegate) {
-    // Only repaint if animation value changed significantly (threshold optimization)
     return (animation - oldDelegate.animation).abs() > 0.01;
   }
 
