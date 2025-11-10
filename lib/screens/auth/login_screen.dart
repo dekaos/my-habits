@@ -4,6 +4,7 @@ import '../../providers/auth_provider.dart';
 import 'signup_screen.dart';
 import '../home/home_screen.dart';
 import '../../widgets/animated_gradient_background.dart';
+import '../../widgets/habit_hero_logo.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -64,11 +65,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const SizedBox(height: 60),
-                  Icon(
-                    Icons.stars,
-                    size: 80,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+                  const HabitHeroLogo(),
                   const SizedBox(height: 24),
                   Text(
                     'Welcome Back!',
