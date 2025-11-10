@@ -109,7 +109,10 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withValues(alpha: 0.1),
                 ),
                 child: Icon(
                   Icons.trending_up,
@@ -169,7 +172,6 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        // Today's progress card with animation delay
         TweenAnimationBuilder<double>(
           tween: Tween(begin: 0.0, end: 1.0),
           duration: const Duration(milliseconds: 600),
@@ -211,8 +213,10 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color:
-                        Theme.of(context).colorScheme.primary.withOpacity(0.15),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .primary
+                        .withValues(alpha: .15),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -255,7 +259,6 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
                     );
                   },
                   onActionComplete: () {
-                    // Refresh the list after complete/undo
                     setState(() {});
                   },
                 ),
@@ -273,7 +276,10 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
               children: [
                 Icon(
                   Icons.calendar_month_outlined,
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withValues(alpha: .7),
                   size: 22,
                 ),
                 const SizedBox(width: 8),
@@ -317,7 +323,6 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
                     );
                   },
                   onActionComplete: () {
-                    // Refresh the list after complete/undo
                     setState(() {});
                   },
                 ),
@@ -326,7 +331,7 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
           }),
         ],
 
-        const SizedBox(height: 100), // Space for FAB and bottom nav
+        const SizedBox(height: 100),
       ],
     );
   }
@@ -347,8 +352,11 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
       padding: const EdgeInsets.all(24),
       enableGlow: false,
       color: isDark
-          ? Theme.of(context).colorScheme.primary.withOpacity(0.15)
-          : Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+          ? Theme.of(context).colorScheme.primary.withValues(alpha: .15)
+          : Theme.of(context)
+              .colorScheme
+              .primaryContainer
+              .withValues(alpha: .3),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -382,15 +390,17 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color:
-                        Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .primary
+                        .withValues(alpha: .2),
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
                         color: Theme.of(context)
                             .colorScheme
                             .primary
-                            .withOpacity(0.3),
+                            .withValues(alpha: .3),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -421,8 +431,8 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
                       height: 10,
                       decoration: BoxDecoration(
                         color: isDark
-                            ? Colors.white.withOpacity(0.1)
-                            : Colors.black.withOpacity(0.1),
+                            ? Colors.white.withValues(alpha: .1)
+                            : Colors.black.withValues(alpha: .1),
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
@@ -437,7 +447,7 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
                               Theme.of(context)
                                   .colorScheme
                                   .primary
-                                  .withOpacity(0.7),
+                                  .withValues(alpha: .7),
                             ],
                           ),
                           borderRadius: BorderRadius.circular(10),
@@ -446,7 +456,7 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
                               color: Theme.of(context)
                                   .colorScheme
                                   .primary
-                                  .withOpacity(0.5),
+                                  .withValues(alpha: .5),
                               blurRadius: 8,
                             ),
                           ],
