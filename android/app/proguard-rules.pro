@@ -82,3 +82,34 @@
 -keep class com.esri.core.geometry.** { *; }
 -dontwarn com.esri.core.geometry.**
 
+# SharedPreferences (commonly used)
+-keep class androidx.preference.** { *; }
+
+# SQLite / Database
+-keep class androidx.sqlite.** { *; }
+-keep class androidx.room.** { *; }
+
+# WorkManager (for background tasks)
+-keep class androidx.work.** { *; }
+-keep class * extends androidx.work.Worker
+-keep class * extends androidx.work.ListenableWorker
+
+# Lifecycle components
+-keep class androidx.lifecycle.** { *; }
+
+# Image loading libraries
+-keep class com.bumptech.glide.** { *; }
+-dontwarn com.bumptech.glide.**
+
+# Reflection-based serialization (common in many packages)
+-keepclassmembers class * {
+    @com.google.gson.annotations.SerializedName <fields>;
+}
+
+# Keep line numbers for better crash reports
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
+
+# Keep custom exceptions for debugging
+-keep public class * extends java.lang.Exception
+
