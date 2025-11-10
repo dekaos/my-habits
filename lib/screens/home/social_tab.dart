@@ -5,7 +5,6 @@ import '../../providers/social_provider.dart';
 import '../../providers/messaging_provider.dart';
 import '../social/enhanced_friends_screen.dart';
 import '../social/search_users_screen.dart';
-import '../social/friend_requests_screen.dart';
 import '../../widgets/activity_card.dart';
 import '../../widgets/glass_card.dart';
 
@@ -17,8 +16,6 @@ class SocialTab extends ConsumerStatefulWidget {
 }
 
 class _SocialTabState extends ConsumerState<SocialTab> {
-  int _pendingRequestCount = 0;
-
   @override
   void initState() {
     super.initState();
@@ -31,10 +28,7 @@ class _SocialTabState extends ConsumerState<SocialTab> {
     final authState = ref.read(authProvider);
     if (authState.user == null) return;
 
-    _loadPendingRequests();
-
     await ref.read(socialProvider.notifier).loadFriends(authState.user!.id);
-    await _loadUnreadMessages();
 
     await ref
         .read(socialProvider.notifier)
@@ -58,47 +52,10 @@ class _SocialTabState extends ConsumerState<SocialTab> {
     super.dispose();
   }
 
-  Future<void> _loadPendingRequests() async {
-    final authState = ref.read(authProvider);
-    if (authState.user == null) return;
-
-    try {
-      final requestIds = await ref
-          .read(socialProvider.notifier)
-          .getFriendRequestIds(authState.user!.id);
-
-      debugPrint('📬 Loaded ${requestIds.length} pending friend requests');
-
-      if (mounted) {
-        setState(() {
-          _pendingRequestCount = requestIds.length;
-        });
-      }
-    } catch (e) {
-      debugPrint('❌ Error loading pending requests: $e');
-    }
-  }
-
-  Future<void> _loadUnreadMessages() async {
-    final authState = ref.read(authProvider);
-    if (authState.user == null) return;
-
-    final socialState = ref.read(socialProvider);
-    final friendIds = socialState.friends.map((f) => f.id).toList();
-
-    await ref.read(messagingProvider.notifier).loadUnreadCounts(
-          authState.user!.id,
-          friendIds,
-        );
-  }
-
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
     final socialState = ref.watch(socialProvider);
-    final messagingState = ref.watch(messagingProvider);
-    final unreadMessageCount =
-        messagingState.unreadCounts.values.fold(0, (sum, count) => sum + count);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -107,116 +64,6 @@ class _SocialTabState extends ConsumerState<SocialTab> {
         child: GlassAppBar(
           title: 'Social',
           actions: [
-            SizedBox(
-              width: 48,
-              height: 48,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.notifications_outlined),
-                    onPressed: () async {
-                      await Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const FriendRequestsScreen(),
-                        ),
-                      );
-                      _loadPendingRequests();
-                    },
-                  ),
-                  if (_pendingRequestCount > 0)
-                    Positioned(
-                      right: 8,
-                      top: 8,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.red.withValues(alpha: 0.5),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        constraints: const BoxConstraints(
-                          minWidth: 18,
-                          minHeight: 18,
-                        ),
-                        child: Center(
-                          child: Text(
-                            _pendingRequestCount > 9
-                                ? '9+'
-                                : '$_pendingRequestCount',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            SizedBox(
-              width: 48,
-              height: 48,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.message_outlined),
-                    onPressed: () async {
-                      await Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const EnhancedFriendsScreen(),
-                        ),
-                      );
-                      _loadUnreadMessages();
-                    },
-                  ),
-                  if (unreadMessageCount > 0)
-                    Positioned(
-                      right: 8,
-                      top: 8,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.shade600,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.blue.withValues(alpha: 0.5),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        constraints: const BoxConstraints(
-                          minWidth: 18,
-                          minHeight: 18,
-                        ),
-                        child: Center(
-                          child: Text(
-                            unreadMessageCount > 9
-                                ? '9+'
-                                : '$unreadMessageCount',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
             IconButton(
               icon: const Icon(Icons.person_add),
               onPressed: () {
@@ -246,8 +93,6 @@ class _SocialTabState extends ConsumerState<SocialTab> {
             await ref
                 .read(socialProvider.notifier)
                 .loadActivityFeed(authState.user!.id);
-            await _loadPendingRequests();
-            await _loadUnreadMessages();
           }
         },
         child: socialState.activityFeed.isEmpty
