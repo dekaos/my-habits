@@ -193,7 +193,7 @@ class _SlidableHabitCardState extends ConsumerState<SlidableHabitCard>
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.orange.withOpacity(0.3),
+                        color: Colors.orange.withValues(alpha: 0.3),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
@@ -207,7 +207,7 @@ class _SlidableHabitCardState extends ConsumerState<SlidableHabitCard>
                         width: 150,
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withValues(alpha: 0.2),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
@@ -230,7 +230,6 @@ class _SlidableHabitCardState extends ConsumerState<SlidableHabitCard>
                 ),
               )
             else
-              // Complete action (when habit is not completed)
               CustomSlidableAction(
                 onPressed: (context) => _handleComplete(),
                 backgroundColor: Colors.transparent,
@@ -249,7 +248,7 @@ class _SlidableHabitCardState extends ConsumerState<SlidableHabitCard>
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.green.withOpacity(0.3),
+                        color: Colors.green.withValues(alpha: 0.3),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
@@ -263,7 +262,7 @@ class _SlidableHabitCardState extends ConsumerState<SlidableHabitCard>
                         padding: const EdgeInsets.all(8),
                         width: 150,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withValues(alpha: 0.2),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
