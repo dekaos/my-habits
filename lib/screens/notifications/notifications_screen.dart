@@ -17,9 +17,8 @@ class NotificationsScreen extends ConsumerStatefulWidget {
 }
 
 class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
-  // Track which notification and action is being processed
   String? _processingNotificationId;
-  String? _processingAction; // 'accept' or 'reject'
+  String? _processingAction;
 
   @override
   void initState() {
@@ -123,15 +122,15 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
               ? BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: notification.getColor().withOpacity(0.4),
+                    color: notification.getColor().withValues(alpha: 0.4),
                     width: 2,
                   ),
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      notification.getColor().withOpacity(0.05),
-                      notification.getColor().withOpacity(0.02),
+                      notification.getColor().withValues(alpha: 0.05),
+                      notification.getColor().withValues(alpha: 0.02),
                     ],
                   ),
                 )
@@ -148,7 +147,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: notification.getColor().withOpacity(0.3),
+                        color: notification.getColor().withValues(alpha: 0.3),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -156,7 +155,8 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                   ),
                   child: CircleAvatar(
                     radius: 24,
-                    backgroundColor: notification.getColor().withOpacity(0.2),
+                    backgroundColor:
+                        notification.getColor().withValues(alpha: 0.2),
                     backgroundImage: notification.fromUserPhotoUrl != null
                         ? NetworkImage(notification.fromUserPhotoUrl!)
                         : null,
@@ -193,7 +193,6 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                                         isDark ? Colors.white : Colors.black87,
                                   ),
                                 ),
-                                // Show message preview for chat notifications
                                 if (notification.type ==
                                         NotificationType.message &&
                                     notification.message != null) ...[
@@ -206,12 +205,12 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                                     decoration: BoxDecoration(
                                       color: notification
                                           .getColor()
-                                          .withOpacity(0.1),
+                                          .withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(6),
                                       border: Border.all(
                                         color: notification
                                             .getColor()
-                                            .withOpacity(0.3),
+                                            .withValues(alpha: 0.3),
                                         width: 1,
                                       ),
                                     ),
@@ -254,7 +253,6 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                                           : Colors.grey[600],
                                     ),
                           ),
-                          // Add "Tap to open" indicator for message notifications
                           if (notification.type ==
                               NotificationType.message) ...[
                             const SizedBox(width: 8),
@@ -264,8 +262,9 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color:
-                                    notification.getColor().withOpacity(0.15),
+                                color: notification
+                                    .getColor()
+                                    .withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Row(
@@ -291,8 +290,6 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                           ],
                         ],
                       ),
-
-                      // Action buttons for friend requests
                       if (notification.type ==
                           NotificationType.friendRequest) ...[
                         const SizedBox(height: 12),
@@ -369,36 +366,30 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
   }
 
   Future<void> _handleNotificationTap(AppNotification notification) async {
-    // Mark notification as read
     await ref.read(notificationProvider.notifier).markAsRead(notification.id);
 
     if (!mounted) return;
 
-    // Navigate based on notification type
     switch (notification.type) {
       case NotificationType.message:
-        // Get the friend's profile and navigate to chat
         await _openChatFromNotification(notification);
         break;
       case NotificationType.friendRequest:
-        // Already handled by inline buttons
         break;
       case NotificationType.friendAccepted:
       case NotificationType.habitCompleted:
       case NotificationType.reactionAdded:
       case NotificationType.streakMilestone:
       case NotificationType.encouragement:
-        // Could add navigation to relevant screens
         break;
     }
   }
 
   Future<void> _openChatFromNotification(AppNotification notification) async {
     try {
-      // Get the friend's profile
       final friendProfile = UserProfile(
         id: notification.fromUserId,
-        email: '', // Not needed for chat
+        email: '',
         displayName: notification.fromUserName,
         photoUrl: notification.fromUserPhotoUrl,
         bio: null,
@@ -437,7 +428,10 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
               Icon(
                 Icons.notifications_none,
                 size: 80,
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.6),
+                color: Theme.of(context)
+                    .colorScheme
+                    .primary
+                    .withValues(alpha: 0.6),
               ),
               const SizedBox(height: 20),
               Text(
@@ -467,20 +461,17 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
 
     final messenger = ScaffoldMessenger.of(context);
 
-    // Set loading state for Accept button
     setState(() {
       _processingNotificationId = notification.id;
       _processingAction = 'accept';
     });
 
     try {
-      // Accept the friend request
       await ref.read(socialProvider.notifier).acceptFriendRequest(
             authState.user!.id,
             notification.fromUserId,
           );
 
-      // Delete the notification
       await ref
           .read(notificationProvider.notifier)
           .deleteNotification(notification.id);
@@ -529,20 +520,17 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
 
     final messenger = ScaffoldMessenger.of(context);
 
-    // Set loading state for Reject button
     setState(() {
       _processingNotificationId = notification.id;
       _processingAction = 'reject';
     });
 
     try {
-      // Reject the friend request
       await ref.read(socialProvider.notifier).rejectFriendRequest(
             authState.user!.id,
             notification.fromUserId,
           );
 
-      // Delete the notification
       await ref
           .read(notificationProvider.notifier)
           .deleteNotification(notification.id);
