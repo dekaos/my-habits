@@ -246,24 +246,93 @@ lib/
 
 ## 🧪 Testing
 
+### Unit & Widget Tests
 Run tests:
 ```bash
 flutter test
 ```
 
+### Release Build Testing
+
+**⚠️ IMPORTANT:** Always test release builds before deploying! Release builds behave differently than debug builds due to code optimization and obfuscation.
+
+#### Quick Testing (Recommended)
+Use our helper scripts for easy testing:
+
+```bash
+# Full release test with clean build
+./scripts/test_release.sh
+
+# Quick release test (faster, no clean)
+./scripts/quick_release_test.sh
+
+# Monitor logs for issues
+./scripts/monitor_logs.sh
+
+# Check for ProGuard issues
+./scripts/check_proguard_issues.sh
+```
+
+#### Manual Testing
+```bash
+# Test in release mode
+flutter run --release
+
+# Build and analyze size
+flutter build apk --release --analyze-size
+```
+
+#### Why Release Testing Matters
+Debug and release builds are very different:
+- **ProGuard/R8**: Obfuscates code in release builds
+- **Tree Shaking**: Removes unused code
+- **Optimization**: Different performance characteristics
+- **Native Code**: May break due to reflection
+
+Common issues that only appear in release:
+- Notifications not working ✓ (Fixed with ProGuard rules)
+- JSON serialization failures
+- Database queries failing
+- Plugin method calls missing
+- Reflection-based code breaking
+
+📚 **See [DEBUG_VS_RELEASE.md](DEBUG_VS_RELEASE.md)** for detailed explanation of differences.
+
+📋 **See [RELEASE_TESTING_CHECKLIST.md](RELEASE_TESTING_CHECKLIST.md)** for comprehensive testing guide.
+
+### Automated Testing (CI/CD)
+
+This project includes GitHub Actions workflow for automated release build testing:
+- Builds release APK and App Bundle on every PR
+- Uploads artifacts for manual testing
+- Runs Android lint checks
+
+See `.github/workflows/release-build-test.yml` for configuration.
+
 ## 📱 Building for Production
 
 ### Android
 ```bash
+# APK (for direct distribution)
 flutter build apk --release
-# or for app bundle
+
+# App Bundle (for Play Store - recommended)
 flutter build appbundle --release
+
+# Split APKs by architecture (smaller downloads)
+flutter build apk --release --split-per-abi
 ```
 
 ### iOS
 ```bash
 flutter build ios --release
 ```
+
+### ProGuard Configuration
+
+This app uses ProGuard/R8 for code shrinking and obfuscation in release builds. The rules are configured in `android/app/proguard-rules.pro`.
+
+If you add new dependencies that use reflection or native code, you may need to add additional ProGuard rules. Check the package documentation for required rules.
 
 ## 🤝 Contributing
 
