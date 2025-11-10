@@ -51,7 +51,6 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
 
     _entranceController.forward();
 
-    // Defer data loading until after the widget tree is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadCompletions();
     });
@@ -216,7 +215,6 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
                     ),
                     const SizedBox(height: 16),
 
-                    // Check-in section
                     if (!isCompletedToday) ...[
                       TweenAnimationBuilder<double>(
                         tween: Tween(begin: 0.0, end: 1.0),
@@ -302,7 +300,6 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
                     ),
                     const SizedBox(height: 16),
 
-                    // Recent completions
                     TweenAnimationBuilder<double>(
                       tween: Tween(begin: 0.0, end: 1.0),
                       duration: const Duration(milliseconds: 900),
