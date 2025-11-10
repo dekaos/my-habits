@@ -171,7 +171,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
           Icon(
             Icons.trending_up_rounded,
             size: 80,
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -242,7 +242,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.15),
+                    color: color.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(icon, color: color, size: 20),
@@ -316,8 +316,10 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color:
-                        Theme.of(context).colorScheme.primary.withOpacity(0.15),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .primary
+                        .withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -993,8 +995,8 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        Colors.green.withOpacity(0.3),
-                        Colors.teal.withOpacity(0.3),
+                        Colors.green.withValues(alpha: 0.3),
+                        Colors.teal.withValues(alpha: 0.3),
                       ],
                     ),
                     borderRadius: BorderRadius.circular(12),
@@ -1033,7 +1035,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
                               Theme.of(context)
                                   .colorScheme
                                   .primary
-                                  .withOpacity(0.7),
+                                  .withValues(alpha: 0.7),
                             ],
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
@@ -1113,8 +1115,8 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
                     getDrawingHorizontalLine: (value) {
                       return FlLine(
                         color: Theme.of(context).brightness == Brightness.dark
-                            ? Colors.white.withOpacity(0.1)
-                            : Colors.grey.withOpacity(0.2),
+                            ? Colors.white.withValues(alpha: 0.1)
+                            : Colors.grey.withValues(alpha: 0.2),
                         strokeWidth: 1,
                       );
                     },
