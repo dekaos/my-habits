@@ -119,7 +119,8 @@ class FriendsScreen extends ConsumerWidget {
             Icon(
               Icons.people_outline,
               size: 100,
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+              color:
+                  Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
             ),
             const SizedBox(height: 24),
             Text(
