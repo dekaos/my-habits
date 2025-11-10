@@ -60,18 +60,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         ref.read(notificationProvider.notifier).loadNotifications(userId),
       ]);
 
-      // Get friend IDs for message unread counts
       final friendIds =
           ref.read(socialProvider).friends.map((f) => f.id).toList();
 
-      // Load unread message counts
       if (friendIds.isNotEmpty) {
         await ref
             .read(messagingProvider.notifier)
             .loadUnreadCounts(userId, friendIds);
       }
 
-      // Subscribe to real-time notifications and messages
       debugPrint('🏠 HomeScreen - Setting up realtime subscriptions...');
       ref.read(notificationProvider.notifier).subscribeToNotifications(userId);
       ref.read(messagingProvider.notifier).subscribeToMessages(userId);
@@ -80,7 +77,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       debugPrint('✅ HomeScreen - Data loaded successfully');
     } catch (e) {
       debugPrint('❌ HomeScreen - Error loading data: $e');
-      _hasLoadedData = false; // Allow retry on error
+      _hasLoadedData = false;
     }
   }
 
@@ -142,8 +139,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           boxShadow: [
             BoxShadow(
               color: notificationState.unreadCount > 0
-                  ? Theme.of(context).colorScheme.primary.withOpacity(0.3)
-                  : Colors.black.withOpacity(0.1),
+                  ? Theme.of(context).colorScheme.primary.withValues(alpha: .3)
+                  : Colors.black.withValues(alpha: .1),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -157,12 +154,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               height: 56,
               decoration: BoxDecoration(
                 color: isDark
-                    ? Colors.black.withOpacity(0.6)
-                    : Colors.white.withOpacity(0.8),
+                    ? Colors.black.withValues(alpha: .6)
+                    : Colors.white.withValues(alpha: .8),
                 border: Border.all(
                   color: isDark
-                      ? Colors.white.withOpacity(0.15)
-                      : Colors.white.withOpacity(0.5),
+                      ? Colors.white.withValues(alpha: .15)
+                      : Colors.white.withValues(alpha: .5),
                   width: 1.5,
                 ),
                 shape: BoxShape.circle,
@@ -247,18 +244,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               height: 70,
               decoration: BoxDecoration(
                 color: isDark
-                    ? Colors.black.withOpacity(0.6)
-                    : Colors.white.withOpacity(0.7),
+                    ? Colors.black.withValues(alpha: .6)
+                    : Colors.white.withValues(alpha: .7),
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(
                   color: isDark
-                      ? Colors.white.withOpacity(0.15)
-                      : Colors.white.withOpacity(0.5),
+                      ? Colors.white.withValues(alpha: .15)
+                      : Colors.white.withValues(alpha: .5),
                   width: 1.5,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(isDark ? 0.5 : 0.15),
+                    color: Colors.black.withValues(alpha: isDark ? 0.5 : 0.15),
                     blurRadius: 30,
                     offset: const Offset(0, 10),
                   ),
