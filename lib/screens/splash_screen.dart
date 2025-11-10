@@ -30,7 +30,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   void initState() {
     super.initState();
 
-    // Logo animation controller
     _logoController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
@@ -57,13 +56,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       ),
     );
 
-    // Particles animation
     _particlesController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 3),
     )..repeat();
 
-    // Text animation controller
     _textController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 800),
@@ -86,7 +83,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       ),
     );
 
-    // Pulse animation
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
@@ -99,7 +95,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       ),
     );
 
-    // Start animations sequence
     _startAnimations();
     _checkAuthStatus();
   }
@@ -175,7 +170,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         ),
         child: Stack(
           children: [
-            // Animated particles background
             AnimatedBuilder(
               animation: _particlesController,
               builder: (context, child) {
@@ -188,13 +182,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 );
               },
             ),
-
-            // Main content
             Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Animated logo with glow effect
                   AnimatedBuilder(
                     animation: _logoController,
                     builder: (context, child) {
@@ -233,7 +224,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                     );
                                   },
                                 ),
-                                // Logo container
+                                // Custom Habit Hero Logo
                                 Container(
                                   width: 120,
                                   height: 120,
@@ -253,12 +244,19 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                       width: 3,
                                     ),
                                   ),
-                                  child: Icon(
-                                    Icons.stars_rounded,
-                                    size: 60,
-                                    color: isDark
-                                        ? Colors.white
-                                        : Theme.of(context).colorScheme.primary,
+                                  child: CustomPaint(
+                                    size: const Size(120, 120),
+                                    painter: HabitHeroLogoPainter(
+                                      primaryColor: isDark
+                                          ? Colors.white
+                                          : Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                      accentColor: Theme.of(context)
+                                          .colorScheme
+                                          .secondary,
+                                      animation: _logoController.value,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -395,6 +393,86 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   }
 }
 
+class HabitHeroLogoPainter extends CustomPainter {
+  final Color primaryColor;
+  final Color accentColor;
+  final double animation;
+
+  HabitHeroLogoPainter({
+    required this.primaryColor,
+    required this.accentColor,
+    required this.animation,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2 * 0.55;
+
+    _drawProgressCircle(canvas, center, radius);
+
+    _drawCheckmark(canvas, center, radius);
+  }
+
+  void _drawProgressCircle(Canvas canvas, Offset center, double radius) {
+    final bgPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 6
+      ..color = primaryColor.withValues(alpha: 0.2);
+
+    canvas.drawCircle(center, radius, bgPaint);
+
+    final progressPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 6
+      ..strokeCap = StrokeCap.round
+      ..color = primaryColor;
+
+    final rect = Rect.fromCircle(center: center, radius: radius);
+    canvas.drawArc(
+      rect,
+      -math.pi / 2,
+      math.pi * 2 * animation,
+      false,
+      progressPaint,
+    );
+  }
+
+  void _drawCheckmark(Canvas canvas, Offset center, double radius) {
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 7
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..color = primaryColor;
+
+    final checkPath = Path();
+    final checkSize = radius * 0.7;
+
+    checkPath.moveTo(
+      center.dx - checkSize * 0.35,
+      center.dy,
+    );
+    checkPath.lineTo(
+      center.dx - checkSize * 0.05,
+      center.dy + checkSize * 0.35,
+    );
+    checkPath.lineTo(
+      center.dx + checkSize * 0.45,
+      center.dy - checkSize * 0.35,
+    );
+
+    canvas.drawPath(checkPath, paint);
+  }
+
+  @override
+  bool shouldRepaint(HabitHeroLogoPainter oldDelegate) {
+    return animation != oldDelegate.animation ||
+        primaryColor != oldDelegate.primaryColor ||
+        accentColor != oldDelegate.accentColor;
+  }
+}
+
 class ParticlesPainter extends CustomPainter {
   final double animation;
   final bool isDark;
@@ -407,13 +485,11 @@ class ParticlesPainter extends CustomPainter {
       ..style = PaintingStyle.fill
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
 
-    // Generate particles
     for (int i = 0; i < 20; i++) {
       final random = math.Random(i);
       final x = random.nextDouble() * size.width;
       final baseY = random.nextDouble() * size.height;
 
-      // Floating animation
       final floatOffset =
           math.sin((animation + random.nextDouble()) * math.pi * 2) * 30;
       final y = baseY + floatOffset;
