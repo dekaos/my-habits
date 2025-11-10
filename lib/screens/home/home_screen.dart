@@ -113,16 +113,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       extendBody: true,
       backgroundColor:
           isDark ? const Color(0xFF0F0F1E) : const Color(0xFFF8F9FE),
-      body: AnimatedGradientBackground(
-        child: IndexedStack(
-          index: _currentIndex,
-          children: tabs,
-        ),
+      body: Stack(
+        children: [
+          AnimatedGradientBackground(
+            child: IndexedStack(
+              index: _currentIndex,
+              children: tabs,
+            ),
+          ),
+          Positioned(
+            right: 0,
+            top: 0,
+            bottom: 0,
+            child: Center(
+              child:
+                  _buildNotificationButton(context, notificationState, isDark),
+            ),
+          ),
+        ],
       ),
       bottomNavigationBar: _buildGlassBottomNav(isDark),
-      floatingActionButton:
-          _buildNotificationButton(context, notificationState, isDark),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
     );
   }
 
@@ -131,100 +141,112 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     NotificationState notificationState,
     bool isDark,
   ) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 48, right: 4),
-      child: Container(
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: notificationState.unreadCount > 0
-                  ? Theme.of(context).colorScheme.primary.withValues(alpha: .3)
-                  : Colors.black.withValues(alpha: .1),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(24),
+          bottomLeft: Radius.circular(24),
         ),
-        child: ClipOval(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: notificationState.unreadCount > 0
+                ? Theme.of(context).colorScheme.primary.withValues(alpha: .3)
+                : Colors.black.withValues(alpha: .1),
+            blurRadius: 12,
+            offset: const Offset(-2, 0),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(24),
+          bottomLeft: Radius.circular(24),
+        ),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            width: 60,
+            height: 56,
+            decoration: BoxDecoration(
+              color: isDark
+                  ? Colors.black.withValues(alpha: .6)
+                  : Colors.white.withValues(alpha: .8),
+              border: Border.all(
                 color: isDark
-                    ? Colors.black.withValues(alpha: .6)
-                    : Colors.white.withValues(alpha: .8),
-                border: Border.all(
-                  color: isDark
-                      ? Colors.white.withValues(alpha: .15)
-                      : Colors.white.withValues(alpha: .5),
-                  width: 1.5,
-                ),
-                shape: BoxShape.circle,
+                    ? Colors.white.withValues(alpha: .15)
+                    : Colors.white.withValues(alpha: .5),
+                width: 1.5,
               ),
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const NotificationsScreen(),
-                          ),
-                        );
-                      },
-                      customBorder: const CircleBorder(),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(24),
+                bottomLeft: Radius.circular(24),
+              ),
+            ),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const NotificationsScreen(),
+                        ),
+                      );
+                    },
+                    customBorder: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(24),
+                        bottomLeft: Radius.circular(24),
+                      ),
+                    ),
+                    child: Center(
+                      child: Icon(
+                        notificationState.unreadCount > 0
+                            ? Icons.notifications
+                            : Icons.notifications_outlined,
+                        color: notificationState.unreadCount > 0
+                            ? Theme.of(context).colorScheme.primary
+                            : (isDark ? Colors.grey[400] : Colors.grey[600]),
+                        size: 24,
+                      ),
+                    ),
+                  ),
+                ),
+                if (notificationState.unreadCount > 0)
+                  Positioned(
+                    top: 6,
+                    right: 10,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      constraints: const BoxConstraints(
+                        minWidth: 18,
+                        minHeight: 18,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: isDark ? Colors.black : Colors.white,
+                          width: 2,
+                        ),
+                      ),
                       child: Center(
-                        child: Icon(
-                          notificationState.unreadCount > 0
-                              ? Icons.notifications
-                              : Icons.notifications_outlined,
-                          color: notificationState.unreadCount > 0
-                              ? Theme.of(context).colorScheme.primary
-                              : (isDark ? Colors.grey[400] : Colors.grey[600]),
-                          size: 24,
+                        child: Text(
+                          notificationState.unreadCount > 9
+                              ? '9+'
+                              : '${notificationState.unreadCount}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                  if (notificationState.unreadCount > 0)
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        constraints: const BoxConstraints(
-                          minWidth: 18,
-                          minHeight: 18,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: isDark ? Colors.black : Colors.white,
-                            width: 2,
-                          ),
-                        ),
-                        child: Center(
-                          child: Text(
-                            notificationState.unreadCount > 9
-                                ? '9+'
-                                : '${notificationState.unreadCount}',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
+              ],
             ),
           ),
         ),
