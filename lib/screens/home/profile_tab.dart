@@ -41,7 +41,7 @@ class _ProfileTabState extends ConsumerState<ProfileTab>
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: const PreferredSize(
-        preferredSize: const Size.fromHeight(60),
+        preferredSize: Size.fromHeight(60),
         child: GlassAppBar(
           title: 'Profile',
         ),
