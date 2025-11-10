@@ -175,13 +175,14 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
                 ),
               );
 
-              if (confirmed == true && mounted) {
-                final navigator = Navigator.of(context);
-
+              if (confirmed == true) {
                 await ref
                     .read(habitProvider.notifier)
                     .deleteHabit(widget.habit.id);
-                navigator.pop();
+
+                if (!mounted || !context.mounted) return;
+
+                Navigator.of(context).pop();
               }
             },
           ),
