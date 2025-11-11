@@ -7,6 +7,7 @@ import '../models/activity.dart';
 import '../providers/auth_provider.dart';
 import '../providers/social_provider.dart';
 import 'glass_card.dart';
+import '../../widgets/animated_gradient_background.dart';
 
 class ActivityCard extends ConsumerWidget {
   final Activity activity;
@@ -286,124 +287,129 @@ class ActivityCard extends ConsumerWidget {
     String emoji,
     List<String> userIds,
   ) async {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       builder: (context) {
-        return ClipRRect(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: isDark
-                    ? Colors.black.withValues(alpha: 0.9)
-                    : Colors.white.withValues(alpha: 0.95),
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(24)),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+        return DraggableScrollableSheet(
+          initialChildSize: 0.35,
+          minChildSize: 0.25,
+          maxChildSize: 0.8,
+          expand: false,
+          builder: (context, scrollController) {
+            return ClipRRect(
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(24)),
+              child: AnimatedGradientBackground(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        emoji,
-                        style: const TextStyle(fontSize: 32),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        '${userIds.length} ${userIds.length == 1 ? 'reaction' : 'reactions'}',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  const Divider(),
-                  const SizedBox(height: 8),
-                  FutureBuilder<List<Map<String, dynamic>>>(
-                    future: _fetchUserProfiles(userIds),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(20.0),
-                            child: CircularProgressIndicator(),
+                      Row(
+                        children: [
+                          Text(
+                            emoji,
+                            style: const TextStyle(fontSize: 32),
                           ),
-                        );
-                      }
-
-                      if (snapshot.hasError || !snapshot.hasData) {
-                        return Padding(
-                          padding: const EdgeInsets.all(20.0),
-                          child: Text(
-                            'Could not load users',
-                            style: TextStyle(color: Colors.grey[600]),
+                          const SizedBox(width: 12),
+                          Text(
+                            '${userIds.length} ${userIds.length == 1 ? 'reaction' : 'reactions'}',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
-                        );
-                      }
-
-                      final users = snapshot.data!;
-
-                      return ListView.separated(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: users.length,
-                        separatorBuilder: (context, index) =>
-                            const SizedBox(height: 8),
-                        itemBuilder: (context, index) {
-                          final user = users[index];
-                          final displayName = user['display_name'] ?? 'User';
-                          final photoUrl = user['photo_url'];
-
-                          return ListTile(
-                            contentPadding: EdgeInsets.zero,
-                            leading: CircleAvatar(
-                              radius: 20,
-                              backgroundColor: Theme.of(context)
-                                  .colorScheme
-                                  .primaryContainer,
-                              backgroundImage: photoUrl != null
-                                  ? NetworkImage(photoUrl)
-                                  : null,
-                              child: photoUrl == null
-                                  ? Text(
-                                      displayName[0].toUpperCase(),
-                                      style: TextStyle(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onPrimaryContainer,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    )
-                                  : null,
-                            ),
-                            title: Text(
-                              displayName,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      const Divider(),
+                      const SizedBox(height: 8),
+                      FutureBuilder<List<Map<String, dynamic>>>(
+                        future: _fetchUserProfiles(userIds),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(20.0),
+                                child: CircularProgressIndicator(),
                               ),
-                            ),
-                            trailing: Text(
-                              emoji,
-                              style: const TextStyle(fontSize: 20),
-                            ),
+                            );
+                          }
+
+                          if (snapshot.hasError || !snapshot.hasData) {
+                            return Padding(
+                              padding: const EdgeInsets.all(20.0),
+                              child: Text(
+                                'Could not load users',
+                                style: TextStyle(color: Colors.grey[600]),
+                              ),
+                            );
+                          }
+
+                          final users = snapshot.data!;
+
+                          return ListView.separated(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: users.length,
+                            separatorBuilder: (context, index) =>
+                                const SizedBox(height: 8),
+                            itemBuilder: (context, index) {
+                              final user = users[index];
+                              final displayName =
+                                  user['display_name'] ?? 'User';
+                              final photoUrl = user['photo_url'];
+
+                              return ListTile(
+                                contentPadding: EdgeInsets.zero,
+                                leading: CircleAvatar(
+                                  radius: 20,
+                                  backgroundColor: Theme.of(context)
+                                      .colorScheme
+                                      .primaryContainer,
+                                  backgroundImage: photoUrl != null
+                                      ? NetworkImage(photoUrl)
+                                      : null,
+                                  child: photoUrl == null
+                                      ? Text(
+                                          displayName[0].toUpperCase(),
+                                          style: TextStyle(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onPrimaryContainer,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        )
+                                      : null,
+                                ),
+                                title: Text(
+                                  displayName,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                trailing: Text(
+                                  emoji,
+                                  style: const TextStyle(fontSize: 20),
+                                ),
+                              );
+                            },
                           );
                         },
-                      );
-                    },
+                      ),
+                      const SizedBox(height: 16),
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                ],
+                ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );
@@ -436,97 +442,91 @@ class ActivityCard extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       builder: (context) {
-        return ClipRRect(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: isDark
-                    ? Colors.black.withValues(alpha: 0.8)
-                    : Colors.white.withValues(alpha: 0.9),
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(24)),
-                border: Border.all(
-                  color: isDark
-                      ? Colors.white.withValues(alpha: 0.1)
-                      : Colors.grey.withValues(alpha: 0.3),
-                  width: 1,
-                ),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Handle bar
-                  Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(2),
+        return DraggableScrollableSheet(
+          initialChildSize: 0.4,
+          minChildSize: 0.3,
+          maxChildSize: 0.6,
+          expand: false,
+          builder: (context, scrollController) {
+            return ClipRRect(
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(24)),
+              child: AnimatedGradientBackground(
+                  child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Choose a Reaction',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: -0.5,
-                        ),
-                  ),
-                  const SizedBox(height: 24),
-                  Wrap(
-                    spacing: 16,
-                    runSpacing: 16,
-                    alignment: WrapAlignment.center,
-                    children: reactions.map((emoji) {
-                      return GestureDetector(
-                        onTap: () async {
-                          if (authState.user != null) {
-                            await ref
-                                .read(socialProvider.notifier)
-                                .addReactionToActivity(
-                                  activity.id,
-                                  authState.user!.id,
-                                  emoji,
-                                );
-                            if (context.mounted) {
-                              Navigator.pop(context);
+                    const SizedBox(height: 20),
+                    Text(
+                      'Choose a Reaction',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: -0.5,
+                          ),
+                    ),
+                    const SizedBox(height: 24),
+                    Wrap(
+                      spacing: 16,
+                      runSpacing: 16,
+                      alignment: WrapAlignment.center,
+                      children: reactions.map((emoji) {
+                        return GestureDetector(
+                          onTap: () async {
+                            if (authState.user != null) {
+                              await ref
+                                  .read(socialProvider.notifier)
+                                  .addReactionToActivity(
+                                    activity.id,
+                                    authState.user!.id,
+                                    emoji,
+                                  );
+                              if (context.mounted) {
+                                Navigator.pop(context);
+                              }
                             }
-                          }
-                        },
-                        child: Container(
-                          width: 64,
-                          height: 64,
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? Colors.white.withValues(alpha: 0.1)
-                                : Colors.grey.shade200,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
+                          },
+                          child: Container(
+                            width: 64,
+                            height: 64,
+                            decoration: BoxDecoration(
                               color: isDark
-                                  ? Colors.white.withValues(alpha: 0.2)
-                                  : Colors.transparent,
-                              width: 1.5,
+                                  ? Colors.white.withValues(alpha: 0.1)
+                                  : Colors.grey.shade200,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: isDark
+                                    ? Colors.white.withValues(alpha: 0.2)
+                                    : Colors.transparent,
+                                width: 1.5,
+                              ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                emoji,
+                                style: const TextStyle(fontSize: 32),
+                              ),
                             ),
                           ),
-                          child: Center(
-                            child: Text(
-                              emoji,
-                              style: const TextStyle(fontSize: 32),
-                            ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 16),
-                ],
-              ),
-            ),
-          ),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                ),
+              )),
+            );
+          },
         );
       },
     );
