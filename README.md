@@ -1,4 +1,4 @@
-# Habit Hero 🌟
+# My Habits
 
 A beautiful habit tracking app with social accountability features built with Flutter. Stay motivated by building better habits with your friends!
 
@@ -9,7 +9,13 @@ A beautiful habit tracking app with social accountability features built with Fl
 - **Flexible Scheduling**: Daily, weekly, or custom frequency options
 - **Streak Tracking**: Track current and longest streaks for each habit
 - **Daily Check-ins**: Mark habits complete with optional notes and photos
-- **Visual Progress**: Beautiful charts and statistics
+- **Advanced Analytics**: Comprehensive performance dashboard with:
+  - 90-day activity heatmap showing completion patterns
+  - 30-day trend chart with interactive data points
+  - Weekly pattern analysis to identify your most productive days
+  - Streak insights (average, best, and active streaks)
+  - Top performing habits leaderboard
+  - Background isolate calculations for smooth performance
 
 ### Social Features
 - **Friends System**: Connect with friends to stay motivated together
@@ -104,6 +110,7 @@ lib/
 │   ├── home/
 │   │   ├── home_screen.dart
 │   │   ├── habits_tab.dart
+│   │   ├── performance_tab.dart  # Advanced analytics & charts
 │   │   ├── social_tab.dart
 │   │   └── profile_tab.dart
 │   ├── habits/
@@ -112,9 +119,13 @@ lib/
 │   └── social/
 │       ├── friends_screen.dart
 │       └── search_users_screen.dart
-└── widgets/                  # Reusable widgets
-    ├── habit_card.dart
-    └── activity_card.dart
+├── widgets/                  # Reusable widgets
+│   ├── habit_card.dart
+│   ├── slidable_habit_card.dart
+│   ├── celebration_animation.dart
+│   └── activity_card.dart
+└── utils/                    # Utilities & helpers
+    └── chart_calculator.dart # Isolate-based chart calculations
 ```
 
 ## 🗄️ Firebase Firestore Structure
@@ -185,49 +196,23 @@ lib/
 }
 ```
 
-## 💰 Monetization Strategy
-
-### Freemium Model
-
-**Free Tier:**
-- Up to 5 habits
-- Basic statistics
-- Add up to 10 friends
-- Basic themes
-
-**Premium ($9.99/month or $79.99/year):**
-- Unlimited habits
-- Advanced analytics and insights
-- Unlimited friends
-- Custom themes and icons
-- Priority support
-- Export data
-- Remove ads (if implemented)
-- Habit templates
-- Goal reminders and notifications
-- Accountability partner matching
-
-### Additional Revenue Streams:
-1. **In-app purchases**: Custom icon packs, themes
-2. **Affiliate partnerships**: Health/wellness products
-3. **Enterprise plans**: For organizations promoting employee wellness
-4. **API access**: For researchers studying habit formation
-
 ## 🎯 Roadmap
 
 ### Phase 1: MVP (Current)
 - [x] Core habit tracking
 - [x] Social features
 - [x] Authentication
-- [x] Basic UI
+- [x] Beautiful UI with animations
+- [x] Advanced analytics dashboard
+- [x] Performance optimization with isolates
 
 ### Phase 2: Enhancement
-- [ ] Push notifications
-- [ ] Habit reminders
-- [ ] Advanced analytics
+- [x] Push notifications
+- [x] Habit reminders
 - [ ] Calendar view
 - [ ] Habit templates
-- [ ] Profile customization
+- [x] Profile customization
+- [ ] Export analytics data
 
 ### Phase 3: Growth
 - [ ] Challenges and competitions
