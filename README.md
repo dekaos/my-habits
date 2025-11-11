@@ -111,51 +111,83 @@ A beautiful habit tracking app with social accountability features built with Fl
 
 ```
 lib/
-├── main.dart                 # App entry point
-├── l10n/                     # Internationalization
-│   ├── app_en.arb           # English translations (1,200+ strings)
-│   ├── app_pt.arb           # Portuguese translations
-│   ├── app_localizations.dart         # Generated - DO NOT EDIT
-│   ├── app_localizations_en.dart      # Generated - DO NOT EDIT
-│   └── app_localizations_pt.dart      # Generated - DO NOT EDIT
-├── models/                   # Data models
-│   ├── habit.dart
-│   ├── habit_completion.dart
-│   ├── user_profile.dart
-│   └── activity.dart
-├── providers/                # State management (Riverpod)
-│   ├── auth_provider.dart
-│   ├── habit_provider.dart
-│   └── social_provider.dart
-├── services/                 # Backend services
-│   ├── supabase_service.dart
-│   ├── notification_service.dart
-│   ├── haptic_service.dart
-│   └── image_service.dart
-├── screens/                  # UI screens
-│   ├── splash_screen.dart
-│   ├── auth/
-│   │   ├── login_screen.dart
-│   │   └── signup_screen.dart
-│   ├── home/
-│   │   ├── home_screen.dart
-│   │   ├── habits_tab.dart
-│   │   ├── performance_tab.dart  # Advanced analytics & charts
-│   │   ├── social_tab.dart
-│   │   └── profile_tab.dart
-│   ├── habits/
-│   │   ├── add_habit_screen.dart
-│   │   └── habit_detail_screen.dart
-│   └── social/
-│       ├── friends_screen.dart
-│       └── search_users_screen.dart
-├── widgets/                  # Reusable widgets
-│   ├── habit_card.dart
-│   ├── slidable_habit_card.dart
-│   ├── celebration_animation.dart
-│   └── activity_card.dart
-└── utils/                    # Utilities & helpers
-    └── chart_calculator.dart # Isolate-based chart calculations
+├── main.dart                              # App entry point with i18n config
+│
+├── l10n/                                  # 🌍 Internationalization
+│   ├── app_en.arb                        # English translations (1,200+ strings)
+│   ├── app_pt.arb                        # Portuguese translations (340+ strings)
+│   ├── app_localizations.dart            # Generated base class - DO NOT EDIT
+│   ├── app_localizations_en.dart         # Generated English class - DO NOT EDIT
+│   └── app_localizations_pt.dart         # Generated Portuguese class - DO NOT EDIT
+│
+├── models/                                # 📦 Data Models
+│   ├── habit.dart                        # Habit model with frequency options
+│   ├── habit_completion.dart             # Completion records with notes
+│   ├── user_profile.dart                 # User profile data
+│   ├── activity.dart                     # Social feed activity items
+│   ├── message.dart                      # Chat messages
+│   └── notification.dart                 # In-app notifications
+│
+├── providers/                             # 🔄 State Management (Riverpod)
+│   ├── auth_provider.dart                # Authentication & user state
+│   ├── habit_provider.dart               # Habit CRUD & tracking logic
+│   ├── social_provider.dart              # Friends & activity feed
+│   ├── messaging_provider.dart           # Real-time chat
+│   └── notification_provider.dart        # Notification management
+│
+├── services/                              # ⚙️ Backend Services
+│   ├── notification_service.dart         # Local & push notifications
+│   ├── haptic_service.dart               # Haptic feedback
+│   └── image_service.dart                # Image upload & processing
+│
+├── screens/                               # 📱 UI Screens
+│   ├── splash_screen.dart                # Animated splash with logo
+│   │
+│   ├── auth/                             # 🔐 Authentication
+│   │   ├── login_screen.dart             # Login with email/password
+│   │   └── signup_screen.dart            # User registration
+│   │
+│   ├── home/                             # 🏠 Main App Screens
+│   │   ├── home_screen.dart              # Main container with bottom nav
+│   │   ├── habits_tab.dart               # Today's habits & progress
+│   │   ├── performance_tab.dart          # Analytics dashboard with charts
+│   │   ├── social_tab.dart               # Activity feed from friends
+│   │   └── profile_tab.dart              # User profile & settings
+│   │
+│   ├── habits/                           # ✅ Habit Management
+│   │   ├── add_habit_screen.dart         # Create new habit
+│   │   ├── edit_habit_screen.dart        # Edit existing habit
+│   │   └── habit_detail_screen.dart      # Habit stats & history
+│   │
+│   ├── social/                           # 👥 Social Features
+│   │   ├── enhanced_friends_screen.dart  # Friends list with unread counts
+│   │   ├── friends_screen.dart           # Basic friends view
+│   │   ├── search_users_screen.dart      # Find & add friends
+│   │   ├── friend_requests_screen.dart   # Pending friend requests
+│   │   └── chat_screen.dart              # 1-on-1 messaging
+│   │
+│   ├── profile/                          # 👤 Profile Management
+│   │   └── edit_profile_screen.dart      # Edit name, bio, photo
+│   │
+│   └── notifications/                    # 🔔 Notifications
+│       └── notifications_screen.dart     # Unified notification center
+│
+├── widgets/                               # 🧩 Reusable Widgets
+│   ├── habit_card.dart                   # Habit display card
+│   ├── slidable_habit_card.dart          # Swipeable habit card (complete/undo)
+│   ├── activity_card.dart                # Social feed activity item
+│   ├── celebration_animation.dart        # Success animation with confetti
+│   ├── share_progress_sheet.dart         # Share habit progress as image
+│   ├── habit_icon_selector.dart          # Icon picker for habits
+│   ├── habit_calendar_view.dart          # Calendar visualization
+│   ├── animated_gradient_background.dart # Animated gradient backgrounds
+│   ├── glass_card.dart                   # Glassmorphism card component
+│   └── habit_hero_logo.dart              # App logo widget
+│
+└── utils/                                 # 🛠️ Utilities & Helpers
+    ├── chart_calculator.dart             # Isolate-based chart calculations
+    ├── performance_utils.dart            # Performance optimization helpers
+    └── habit_icons.dart                  # Icon mapping utilities
 ```
 
 ## 🌍 Internationalization
