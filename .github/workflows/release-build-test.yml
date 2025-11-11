@@ -30,7 +30,7 @@ jobs:
         run: flutter pub get
 
       - name: Verify formatting
-        run: flutter format --output=none --set-exit-if-changed .
+        run: dart format --output=none --set-exit-if-changed .
         continue-on-error: true
 
       - name: Analyze project source
@@ -104,6 +104,7 @@ jobs:
       - name: Run Android Lint
         run: |
           cd android
+          chmod +x gradlew
           ./gradlew lint
         continue-on-error: true
 
