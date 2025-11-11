@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 
 class HabitIconSelector extends StatelessWidget {
   final String? selectedIcon;
@@ -10,51 +11,81 @@ class HabitIconSelector extends StatelessWidget {
     super.key,
   });
 
-  static const List<Map<String, dynamic>> iconOptions = [
-    {'name': 'fitness', 'icon': Icons.fitness_center, 'label': 'Fitness'},
-    {'name': 'book', 'icon': Icons.book, 'label': 'Reading'},
-    {'name': 'water', 'icon': Icons.water_drop, 'label': 'Hydration'},
-    {'name': 'sleep', 'icon': Icons.bedtime, 'label': 'Sleep'},
-    {'name': 'restaurant', 'icon': Icons.restaurant, 'label': 'Eating'},
-    {'name': 'run', 'icon': Icons.directions_run, 'label': 'Running'},
-    {'name': 'meditation', 'icon': Icons.spa, 'label': 'Meditation'},
-    {'name': 'yoga', 'icon': Icons.self_improvement, 'label': 'Yoga'},
-    {'name': 'art', 'icon': Icons.palette, 'label': 'Art'},
-    {'name': 'music', 'icon': Icons.music_note, 'label': 'Music'},
-    {'name': 'work', 'icon': Icons.work, 'label': 'Work'},
-    {'name': 'school', 'icon': Icons.school, 'label': 'Study'},
-    {'name': 'heart', 'icon': Icons.favorite, 'label': 'Health'},
-    {'name': 'walk', 'icon': Icons.directions_walk, 'label': 'Walking'},
-    {'name': 'bike', 'icon': Icons.directions_bike, 'label': 'Cycling'},
+  static const List<Map<String, dynamic>> iconOptionsData = [
+    {'name': 'fitness', 'icon': Icons.fitness_center},
+    {'name': 'book', 'icon': Icons.book},
+    {'name': 'water', 'icon': Icons.water_drop},
+    {'name': 'sleep', 'icon': Icons.bedtime},
+    {'name': 'restaurant', 'icon': Icons.restaurant},
+    {'name': 'run', 'icon': Icons.directions_run},
+    {'name': 'meditation', 'icon': Icons.spa},
+    {'name': 'yoga', 'icon': Icons.self_improvement},
+    {'name': 'art', 'icon': Icons.palette},
+    {'name': 'music', 'icon': Icons.music_note},
+    {'name': 'work', 'icon': Icons.work},
+    {'name': 'school', 'icon': Icons.school},
+    {'name': 'heart', 'icon': Icons.favorite},
+    {'name': 'walk', 'icon': Icons.directions_walk},
+    {'name': 'bike', 'icon': Icons.directions_bike},
   ];
+
+  List<Map<String, dynamic>> _getIconOptions(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return [
+      {
+        'name': 'fitness',
+        'icon': Icons.fitness_center,
+        'label': l10n.iconFitness
+      },
+      {'name': 'book', 'icon': Icons.book, 'label': l10n.iconReading},
+      {'name': 'water', 'icon': Icons.water_drop, 'label': l10n.iconHydration},
+      {'name': 'sleep', 'icon': Icons.bedtime, 'label': l10n.iconSleep},
+      {
+        'name': 'restaurant',
+        'icon': Icons.restaurant,
+        'label': l10n.iconEating
+      },
+      {'name': 'run', 'icon': Icons.directions_run, 'label': l10n.iconRunning},
+      {'name': 'meditation', 'icon': Icons.spa, 'label': l10n.iconMeditation},
+      {'name': 'yoga', 'icon': Icons.self_improvement, 'label': l10n.iconYoga},
+      {'name': 'art', 'icon': Icons.palette, 'label': l10n.iconArt},
+      {'name': 'music', 'icon': Icons.music_note, 'label': l10n.iconMusic},
+      {'name': 'work', 'icon': Icons.work, 'label': l10n.iconWork},
+      {'name': 'school', 'icon': Icons.school, 'label': l10n.iconStudy},
+      {'name': 'heart', 'icon': Icons.favorite, 'label': l10n.iconHealth},
+      {
+        'name': 'walk',
+        'icon': Icons.directions_walk,
+        'label': l10n.iconWalking
+      },
+      {
+        'name': 'bike',
+        'icon': Icons.directions_bike,
+        'label': l10n.iconCycling
+      },
+    ];
+  }
 
   /// Helper method to get icon data by name
   static IconData? getIconByName(String? name) {
     if (name == null) return null;
-    final iconData = iconOptions.firstWhere(
+    final iconData = iconOptionsData.firstWhere(
       (option) => option['name'] == name,
       orElse: () => {},
     );
     return iconData['icon'] as IconData?;
   }
 
-  /// Helper method to get label by name
-  static String? getLabelByName(String? name) {
-    if (name == null) return null;
-    final iconData = iconOptions.firstWhere(
-      (option) => option['name'] == name,
-      orElse: () => {},
-    );
-    return iconData['label'] as String?;
-  }
-
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final iconOptions = _getIconOptions(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Choose an Icon',
+          l10n.chooseAnIcon,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),

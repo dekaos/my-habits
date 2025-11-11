@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../models/habit.dart';
+import '../l10n/app_localizations.dart';
 import 'glass_card.dart';
 import 'animated_gradient_background.dart';
 import 'habit_icon_selector.dart';
@@ -64,6 +65,7 @@ class _ShareProgressSheetState extends State<ShareProgressSheet>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return FadeTransition(
@@ -141,7 +143,7 @@ class _ShareProgressSheetState extends State<ShareProgressSheet>
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Share Progress',
+                                  l10n.shareProgress,
                                   style: Theme.of(context)
                                       .textTheme
                                       .titleLarge
@@ -152,7 +154,7 @@ class _ShareProgressSheetState extends State<ShareProgressSheet>
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  'Inspire your friends!',
+                                  l10n.inspireYourFriends,
                                   style: Theme.of(context)
                                       .textTheme
                                       .bodyMedium
@@ -226,7 +228,7 @@ class _ShareProgressSheetState extends State<ShareProgressSheet>
                                     context,
                                     '🔥',
                                     '${widget.currentStreak}',
-                                    'Day Streak',
+                                    l10n.dayStreak,
                                   ),
                                 ),
                                 const SizedBox(width: 12),
@@ -235,7 +237,7 @@ class _ShareProgressSheetState extends State<ShareProgressSheet>
                                     context,
                                     '✅',
                                     '${widget.totalCompletions}',
-                                    'Completed',
+                                    l10n.completed,
                                   ),
                                 ),
                               ],
@@ -257,10 +259,10 @@ class _ShareProgressSheetState extends State<ShareProgressSheet>
                             _buildShareOption(
                               context,
                               icon: Icons.image_rounded,
-                              title: 'Share as Image',
+                              title: l10n.shareAsImage,
                               subtitle: _isGeneratingImage
-                                  ? 'Generating...'
-                                  : 'Create a beautiful share card',
+                                  ? l10n.generating
+                                  : l10n.createShareCard,
                               onTap: _isGeneratingImage
                                   ? null
                                   : () => _shareAsImage(context),
@@ -292,6 +294,8 @@ class _ShareProgressSheetState extends State<ShareProgressSheet>
   }
 
   Widget _buildShareCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return SizedBox(
       width: 600,
       height: 800,
@@ -418,24 +422,23 @@ class _ShareProgressSheetState extends State<ShareProgressSheet>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'My Habits',
-                                style: TextStyle(
+                                l10n.myHabitsTitle,
+                                style: const TextStyle(
                                   fontSize: 32,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
                                   letterSpacing: -1,
                                   shadows: [
                                     Shadow(
-                                      color:
-                                          Colors.black.withValues(alpha: 0.5),
+                                      color: Colors.black26,
                                       blurRadius: 12,
-                                      offset: const Offset(0, 4),
+                                      offset: Offset(0, 4),
                                     ),
                                   ],
                                 ),
                               ),
                               Text(
-                                'Progress Report',
+                                l10n.progressReport,
                                 style: TextStyle(
                                   fontSize: 18,
                                   color: Colors.white.withValues(alpha: 0.95),
@@ -511,7 +514,7 @@ class _ShareProgressSheetState extends State<ShareProgressSheet>
                           ),
                           child: Text(
                             widget.habit.description ??
-                                'Building better habits',
+                                l10n.buildingBetterHabits,
                             style: TextStyle(
                               fontSize: 16,
                               color: Colors.grey.shade700,
@@ -538,7 +541,7 @@ class _ShareProgressSheetState extends State<ShareProgressSheet>
                           child: _buildShareStatCard(
                             '🔥',
                             '${widget.currentStreak}',
-                            'Day\nStreak',
+                            l10n.dayStreakLabel,
                             context,
                           ),
                         ),
@@ -547,7 +550,7 @@ class _ShareProgressSheetState extends State<ShareProgressSheet>
                           child: _buildShareStatCard(
                             '🏆',
                             '${widget.habit.longestStreak}',
-                            'Best\nStreak',
+                            l10n.bestStreakLabel,
                             context,
                           ),
                         ),
@@ -556,7 +559,7 @@ class _ShareProgressSheetState extends State<ShareProgressSheet>
                           child: _buildShareStatCard(
                             '✅',
                             '${widget.totalCompletions}',
-                            'Total\nDone',
+                            l10n.totalDoneLabel,
                             context,
                           ),
                         ),
@@ -583,7 +586,7 @@ class _ShareProgressSheetState extends State<ShareProgressSheet>
                     ),
                     child: Center(
                       child: Text(
-                        '💪  Keep building better habits!',
+                        l10n.keepBuildingBetterHabits,
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w600,
@@ -604,7 +607,7 @@ class _ShareProgressSheetState extends State<ShareProgressSheet>
                   const SizedBox(height: 16),
 
                   Text(
-                    '#MyHabits',
+                    l10n.myHabitsHashtag,
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.white.withValues(alpha: 0.95),
@@ -820,6 +823,7 @@ class _ShareProgressSheetState extends State<ShareProgressSheet>
   }
 
   Future<void> _shareAsImage(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() => _isGeneratingImage = true);
 
     try {
@@ -861,7 +865,7 @@ class _ShareProgressSheetState extends State<ShareProgressSheet>
       if (context.mounted) {
         await Share.shareXFiles(
           [XFile(file.path)],
-          text: '🎯 My ${widget.habit.title} Progress! #MyHabits',
+          text: l10n.myHabitProgress(widget.habit.title),
         );
 
         if (context.mounted) {
@@ -878,7 +882,7 @@ class _ShareProgressSheetState extends State<ShareProgressSheet>
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Failed to generate image: $e',
+                    l10n.failedToGenerateImage(e.toString()),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),

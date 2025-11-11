@@ -5,6 +5,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/habit_provider.dart';
 import '../../models/habit.dart';
 import '../../models/habit_completion.dart';
+import '../../l10n/app_localizations.dart';
 import '../../widgets/glass_card.dart';
 import '../../utils/chart_calculator.dart';
 import '../habits/habit_detail_screen.dart';
@@ -126,6 +127,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final l10n = AppLocalizations.of(context)!;
     final habitState = ref.watch(habitProvider);
     final habits = habitState.habits;
 
@@ -158,7 +160,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(60),
         child: GlassAppBar(
-          title: 'Performance',
+          title: l10n.performance,
           actions: [
             IconButton(
               icon: const Icon(Icons.refresh),
@@ -205,6 +207,8 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
   }
 
   Widget _buildEmptyState(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -216,14 +220,14 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
           ),
           const SizedBox(height: 16),
           Text(
-            'No Performance Data Yet',
+            l10n.noPerformanceData,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Start tracking habits to see your progress!',
+            l10n.startTrackingHabits,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Colors.grey,
                 ),
@@ -234,6 +238,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
   }
 
   Widget _buildOverviewCards(List<Habit> habits) {
+    final l10n = AppLocalizations.of(context)!;
     final totalCompletions = habits.fold<int>(
       0,
       (sum, habit) => sum + habit.totalCompletions,
@@ -244,7 +249,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
         Expanded(
           child: _buildStatCard(
             context,
-            'Total Habits',
+            l10n.totalHabits,
             habits.length.toString(),
             Icons.format_list_bulleted,
             Colors.blue,
@@ -254,7 +259,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
         Expanded(
           child: _buildStatCard(
             context,
-            'Completions',
+            l10n.completions,
             totalCompletions.toString(),
             Icons.check_circle,
             Colors.green,
@@ -313,6 +318,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
   }
 
   Widget _buildTimelineHeatmap() {
+    final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final startDate = today.subtract(const Duration(days: 89));
@@ -347,7 +353,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Activity Heatmap',
+                  l10n.activityHeatmap,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                         letterSpacing: -0.5,
@@ -366,7 +372,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    'Last 90 Days',
+                    l10n.last90Days,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.w600,
@@ -381,7 +387,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
                     height: 120,
                     child: Center(
                       child: Text(
-                        'No activity in the last 90 days',
+                        l10n.noActivity90Days,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: Colors.grey,
                             ),
@@ -445,7 +451,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
                 return Padding(
                   padding: const EdgeInsets.only(bottom: cellSpacing),
                   child: Tooltip(
-                    message: '${date.month}/${date.day}: $count completions',
+                    message: '${date.month}/${date.day}: $count',
                     child: Container(
                       width: cellSize,
                       height: cellSize,
@@ -472,11 +478,13 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
   }
 
   Widget _buildHeatmapLegend(int maxCompletions) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         Text(
-          'Less',
+          l10n.less,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Colors.grey,
               ),
@@ -501,7 +509,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
         }),
         const SizedBox(width: 8),
         Text(
-          'More',
+          l10n.more,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Colors.grey,
               ),
@@ -511,6 +519,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
   }
 
   Widget _buildTrendChart() {
+    final l10n = AppLocalizations.of(context)!;
     // Use pre-calculated data from isolate
     final data = _trendChartData;
 
@@ -526,7 +535,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    '30-Day Trend',
+                    l10n.dayTrend30,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -561,7 +570,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '30-Day Trend',
+                  l10n.dayTrend30,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                         letterSpacing: -0.5,
@@ -581,7 +590,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      'Peak: $maxCount',
+                      l10n.peak(maxCount),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: Theme.of(context).colorScheme.primary,
                             fontWeight: FontWeight.w600,
@@ -596,7 +605,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
               child: maxCount == 0
                   ? Center(
                       child: Text(
-                        'No completions in the last 30 days',
+                        l10n.noCompletions30Days,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: Colors.grey,
                             ),
@@ -721,6 +730,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
   }
 
   Widget _buildStreakInsights(List<Habit> habits) {
+    final l10n = AppLocalizations.of(context)!;
     final avgStreak = habits.isEmpty
         ? 0.0
         : habits.fold<int>(0, (sum, habit) => sum + habit.currentStreak) /
@@ -764,7 +774,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  'Streak Insights',
+                  l10n.streakInsights,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                         letterSpacing: -0.5,
@@ -778,7 +788,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
                 Expanded(
                   child: _buildInsightItem(
                     context,
-                    'Avg Streak',
+                    l10n.avgStreak,
                     avgStreak.toStringAsFixed(1),
                     Icons.trending_up,
                     Colors.blue,
@@ -788,7 +798,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
                 Expanded(
                   child: _buildInsightItem(
                     context,
-                    'Best Streak',
+                    l10n.bestStreak,
                     longestStreak.toString(),
                     Icons.emoji_events,
                     Colors.amber,
@@ -798,7 +808,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
                 Expanded(
                   child: _buildInsightItem(
                     context,
-                    'Active Now',
+                    l10n.activeNow,
                     activeHabits.toString(),
                     Icons.bolt,
                     Colors.purple,
@@ -854,6 +864,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
   }
 
   Widget _buildTopHabits(List<Habit> habits) {
+    final l10n = AppLocalizations.of(context)!;
     final sortedHabits = List<Habit>.from(habits)
       ..sort((a, b) => b.totalCompletions.compareTo(a.totalCompletions));
 
@@ -891,7 +902,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  'Top Performing Habits',
+                  l10n.topPerformingHabits,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                         letterSpacing: -0.5,
@@ -912,6 +923,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
   }
 
   Widget _buildTopHabitItem(BuildContext context, Habit habit, int rank) {
+    final l10n = AppLocalizations.of(context)!;
     final color = Color(int.parse(habit.color.replaceFirst('#', '0xFF')));
 
     return Padding(
@@ -971,7 +983,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
                           Icon(Icons.check_circle, size: 14, color: color),
                           const SizedBox(width: 4),
                           Text(
-                            '${habit.totalCompletions} completions',
+                            l10n.completionsCount(habit.totalCompletions),
                             style:
                                 Theme.of(context).textTheme.bodySmall?.copyWith(
                                       color: Colors.grey,
@@ -982,7 +994,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
                               size: 14, color: Colors.orange),
                           const SizedBox(width: 4),
                           Text(
-                            '${habit.currentStreak} streak',
+                            l10n.streakCount(habit.currentStreak),
                             style:
                                 Theme.of(context).textTheme.bodySmall?.copyWith(
                                       color: Colors.grey,
@@ -1003,6 +1015,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
   }
 
   Widget _buildWeeklyPattern() {
+    final l10n = AppLocalizations.of(context)!;
     // Use pre-calculated data from isolate
     final data = _weeklyPatternData;
 
@@ -1018,7 +1031,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
               Row(
                 children: [
                   Text(
-                    'Weekly Pattern',
+                    l10n.weeklyPattern,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -1070,7 +1083,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  'Weekly Pattern',
+                  l10n.weeklyPattern,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                         letterSpacing: -0.5,
@@ -1137,14 +1150,14 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
                       sideTitles: SideTitles(
                         showTitles: true,
                         getTitlesWidget: (value, meta) {
-                          const days = [
-                            'Mon',
-                            'Tue',
-                            'Wed',
-                            'Thu',
-                            'Fri',
-                            'Sat',
-                            'Sun'
+                          final days = [
+                            l10n.mon,
+                            l10n.tue,
+                            l10n.wed,
+                            l10n.thu,
+                            l10n.fri,
+                            l10n.sat,
+                            l10n.sun
                           ];
                           if (value.toInt() >= 0 && value.toInt() < 7) {
                             return Padding(

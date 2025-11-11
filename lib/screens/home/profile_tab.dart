@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/habit_provider.dart';
+import '../../l10n/app_localizations.dart';
 import '../auth/login_screen.dart';
 import '../profile/edit_profile_screen.dart';
 import '../../widgets/glass_card.dart';
@@ -37,13 +38,14 @@ class _ProfileTabState extends ConsumerState<ProfileTab>
     final authState = ref.watch(authProvider);
     final habitState = ref.watch(habitProvider);
     final userProfile = authState.userProfile;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: const PreferredSize(
-        preferredSize: Size.fromHeight(60),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(60),
         child: GlassAppBar(
-          title: 'Profile',
+          title: l10n.profile,
         ),
       ),
       body: userProfile == null
@@ -54,7 +56,7 @@ class _ProfileTabState extends ConsumerState<ProfileTab>
                   const CircularProgressIndicator(),
                   const SizedBox(height: 16),
                   Text(
-                    'Loading profile...',
+                    l10n.loading,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Colors.grey[600],
                         ),
@@ -157,6 +159,7 @@ class _ProfileTabState extends ConsumerState<ProfileTab>
   }
 
   Widget _buildStatsSection(BuildContext context, HabitState habitState) {
+    final l10n = AppLocalizations.of(context)!;
     final totalHabits = habitState.habits.length;
     final activeStreaks =
         habitState.habits.where((h) => h.currentStreak > 0).length;
@@ -173,7 +176,7 @@ class _ProfileTabState extends ConsumerState<ProfileTab>
             context,
             icon: Icons.check_circle,
             value: totalHabits.toString(),
-            label: 'Habits',
+            label: l10n.habits,
           ),
         ),
         const SizedBox(width: 12),
@@ -182,7 +185,7 @@ class _ProfileTabState extends ConsumerState<ProfileTab>
             context,
             icon: Icons.local_fire_department,
             value: activeStreaks.toString(),
-            label: 'Active',
+            label: l10n.activeHabits,
           ),
         ),
         const SizedBox(width: 12),
@@ -191,7 +194,7 @@ class _ProfileTabState extends ConsumerState<ProfileTab>
             context,
             icon: Icons.emoji_events,
             value: longestStreak.toString(),
-            label: 'Best',
+            label: l10n.bestStreak,
           ),
         ),
       ],
@@ -267,6 +270,7 @@ class _ProfileTabState extends ConsumerState<ProfileTab>
 
   Widget _buildActionsSection(
       BuildContext context, WidgetRef ref, userProfile) {
+    final l10n = AppLocalizations.of(context)!;
     return GlassCard(
       padding: EdgeInsets.zero,
       enableGlow: false,
@@ -275,7 +279,7 @@ class _ProfileTabState extends ConsumerState<ProfileTab>
           _buildActionTile(
             context,
             icon: Icons.edit,
-            title: 'Edit Profile',
+            title: l10n.editProfile,
             onTap: () {
               if (userProfile != null) {
                 Navigator.of(context).push(
@@ -292,7 +296,7 @@ class _ProfileTabState extends ConsumerState<ProfileTab>
           _buildActionTile(
             context,
             icon: Icons.notifications,
-            title: 'Notifications',
+            title: l10n.notifications,
             onTap: () {
               // TODO: Notification settings
             },
@@ -301,7 +305,7 @@ class _ProfileTabState extends ConsumerState<ProfileTab>
           _buildActionTile(
             context,
             icon: Icons.lock,
-            title: 'Privacy',
+            title: 'Privacy', // TODO: Add to l10n
             onTap: () {
               // TODO: Privacy settings
             },
@@ -310,7 +314,7 @@ class _ProfileTabState extends ConsumerState<ProfileTab>
           _buildActionTile(
             context,
             icon: Icons.help,
-            title: 'Help & Support',
+            title: 'Help & Support', // TODO: Add to l10n
             onTap: () {
               // TODO: Help
             },
@@ -319,7 +323,7 @@ class _ProfileTabState extends ConsumerState<ProfileTab>
           _buildActionTile(
             context,
             icon: Icons.logout,
-            title: 'Sign Out',
+            title: l10n.logout,
             iconColor: Colors.red,
             textColor: Colors.red,
             onTap: () async {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/habit.dart';
 import '../providers/habit_provider.dart';
+import '../l10n/app_localizations.dart';
 import '../utils/performance_utils.dart';
 import '../utils/habit_icons.dart';
 import 'glass_card.dart';
@@ -65,11 +66,12 @@ class _HabitCardState extends ConsumerState<HabitCard> {
         _isCompleting = false;
       });
 
+      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(isCompleted
-              ? '${widget.habit.title} marked as incomplete'
-              : '${widget.habit.title} completed! 🎉'),
+              ? l10n.habitMarkedIncomplete(widget.habit.title)
+              : l10n.habitCompleted(widget.habit.title)),
           backgroundColor: isCompleted ? Colors.orange : Colors.green,
           duration: const Duration(seconds: 2),
         ),
@@ -79,6 +81,7 @@ class _HabitCardState extends ConsumerState<HabitCard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final habitState = ref.watch(habitProvider);
     final habitNotifier = ref.read(habitProvider.notifier);
 
@@ -254,7 +257,7 @@ class _HabitCardState extends ConsumerState<HabitCard> {
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
-                                      '${currentHabit.currentStreak} day${currentHabit.currentStreak > 1 ? 's' : ''}',
+                                      l10n.dayCount(currentHabit.currentStreak),
                                       style: const TextStyle(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,
@@ -287,7 +290,8 @@ class _HabitCardState extends ConsumerState<HabitCard> {
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    '${currentHabit.totalCompletions} total',
+                                    l10n.totalCount(
+                                        currentHabit.totalCompletions),
                                     style: Theme.of(context)
                                         .textTheme
                                         .bodySmall
@@ -314,7 +318,7 @@ class _HabitCardState extends ConsumerState<HabitCard> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Consistency',
+                          l10n.consistency,
                           style:
                               Theme.of(context).textTheme.bodySmall?.copyWith(
                                     fontWeight: FontWeight.w600,
@@ -325,8 +329,8 @@ class _HabitCardState extends ConsumerState<HabitCard> {
                         ),
                         Text(
                           currentHabit.currentStreak > 0
-                              ? 'On Fire! 🔥'
-                              : 'Keep Building',
+                              ? l10n.onFire
+                              : l10n.keepBuilding,
                           style:
                               Theme.of(context).textTheme.bodySmall?.copyWith(
                                     fontWeight: FontWeight.bold,

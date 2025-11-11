@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import '../../providers/habit_provider.dart';
 import '../../models/habit.dart';
 import '../../models/habit_completion.dart';
+import '../../l10n/app_localizations.dart';
 import '../../widgets/animated_gradient_background.dart';
 import '../../widgets/glass_card.dart';
 import '../../services/haptic_service.dart';
@@ -109,6 +110,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final habitState = ref.watch(habitProvider);
 
     final currentHabit = habitState.habits.firstWhere(
@@ -158,18 +160,17 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
               final confirmed = await showDialog<bool>(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: const Text('Delete Habit'),
-                  content:
-                      const Text('Are you sure you want to delete this habit?'),
+                  title: Text(l10n.deleteHabit),
+                  content: Text(l10n.deleteHabitQuestion),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context, false),
-                      child: const Text('Cancel'),
+                      child: Text(l10n.cancel),
                     ),
                     TextButton(
                       onPressed: () => Navigator.pop(context, true),
-                      child: const Text('Delete',
-                          style: TextStyle(color: Colors.red)),
+                      child: Text(l10n.delete,
+                          style: const TextStyle(color: Colors.red)),
                     ),
                   ],
                 ),
@@ -266,7 +267,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
                               const SizedBox(width: 16),
                               Expanded(
                                 child: Text(
-                                  'Completed today! Great job! 🎉',
+                                  l10n.completedToday,
                                   style: Theme.of(context)
                                       .textTheme
                                       .titleMedium
@@ -327,6 +328,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
   }
 
   Widget _buildStreakCard(BuildContext context, Habit habit) {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return RepaintBoundary(
@@ -346,7 +348,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
               context,
               emoji: '🔥',
               value: '${habit.currentStreak}',
-              label: 'Current',
+              label: l10n.current,
             ),
             Container(
               width: 1,
@@ -359,7 +361,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
               context,
               emoji: '🏆',
               value: '${habit.longestStreak}',
-              label: 'Best',
+              label: l10n.best,
             ),
             Container(
               width: 1,
@@ -372,7 +374,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
               context,
               emoji: '✓',
               value: '${habit.totalCompletions}',
-              label: 'Total',
+              label: l10n.total,
             ),
           ],
         ),
@@ -422,6 +424,8 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
   }
 
   Widget _buildCheckInSection(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return RepaintBoundary(
       child: GlassCard(
         padding: const EdgeInsets.all(20),
@@ -429,7 +433,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Check In',
+              l10n.checkIn,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     letterSpacing: -0.5,
@@ -441,10 +445,10 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
               enableGlow: false,
               child: TextField(
                 controller: _noteController,
-                decoration: const InputDecoration(
-                  hintText: 'Add a note (optional)...',
+                decoration: InputDecoration(
+                  hintText: l10n.addNoteOptional,
                   border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(vertical: 12),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
                 ),
                 maxLines: 2,
               ),
@@ -469,7 +473,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
                     const Icon(Icons.check_circle, size: 20),
                   const SizedBox(width: 8),
                   Text(
-                    _isCompleting ? 'Completing... 🎉' : 'Mark as Complete',
+                    _isCompleting ? l10n.completing : l10n.markAsComplete,
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -485,6 +489,8 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
   }
 
   Widget _buildChartSection(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     if (_completions.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -513,7 +519,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Last 7 Days',
+              l10n.last7Days,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     letterSpacing: -0.5,
@@ -553,16 +559,17 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
                           showTitles: true,
                           getTitlesWidget: (value, meta) {
                             final date = last7Days[value.toInt()];
+                            final dayNames = [
+                              l10n.mon,
+                              l10n.tue,
+                              l10n.wed,
+                              l10n.thu,
+                              l10n.fri,
+                              l10n.sat,
+                              l10n.sun
+                            ];
                             return Text(
-                              [
-                                'Mon',
-                                'Tue',
-                                'Wed',
-                                'Thu',
-                                'Fri',
-                                'Sat',
-                                'Sun'
-                              ][date.weekday - 1],
+                              dayNames[date.weekday - 1],
                               style: const TextStyle(fontSize: 10),
                             );
                           },
@@ -586,6 +593,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
   }
 
   Widget _buildRecentCompletions(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     if (_completions.isEmpty) {
@@ -605,7 +613,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
               ),
               const SizedBox(height: 16),
               Text(
-                'No completions yet.\nStart your streak today!',
+                l10n.noCompletionsYet,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: isDark ? Colors.grey[400] : Colors.grey[600],
                     ),
@@ -624,7 +632,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Recent Completions',
+            l10n.recentCompletions,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                   letterSpacing: -0.5,

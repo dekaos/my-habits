@@ -6,6 +6,7 @@ import '../../providers/habit_provider.dart';
 import '../../providers/social_provider.dart';
 import '../../providers/notification_provider.dart';
 import '../../providers/messaging_provider.dart';
+import '../../l10n/app_localizations.dart';
 import '../../widgets/animated_gradient_background.dart';
 import '../notifications/notifications_screen.dart';
 import 'habits_tab.dart';
@@ -255,6 +256,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   Widget _buildGlassBottomNav(bool isDark) {
+    final l10n = AppLocalizations.of(context)!;
+
     return RepaintBoundary(
       child: Container(
         margin: const EdgeInsets.fromLTRB(16, 0, 16, 20),
@@ -290,28 +293,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     index: 0,
                     icon: Icons.check_circle_outline,
                     selectedIcon: Icons.check_circle,
-                    label: 'Habits',
+                    label: l10n.habits,
                     isDark: isDark,
                   ),
                   _buildNavItem(
                     index: 1,
                     icon: Icons.people_outline,
                     selectedIcon: Icons.people,
-                    label: 'Social',
+                    label: l10n.social,
                     isDark: isDark,
                   ),
                   _buildNavItem(
                     index: 2,
                     icon: Icons.trending_up_rounded,
                     selectedIcon: Icons.trending_up_rounded,
-                    label: 'Performance',
+                    label: l10n.performance,
                     isDark: isDark,
                   ),
                   _buildNavItem(
                     index: 3,
                     icon: Icons.person_outline,
                     selectedIcon: Icons.person,
-                    label: 'Profile',
+                    label: l10n.profile,
                     isDark: isDark,
                   ),
                 ],

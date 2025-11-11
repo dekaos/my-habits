@@ -1,0 +1,1294 @@
+{
+  "@@locale": "en",
+  
+  "@_APP_INFO": {},
+  "appTitle": "Habit Hero",
+  "@appTitle": {
+    "description": "The name of the application"
+  },
+  "myHabitsTitle": "My Habits",
+  "@myHabitsTitle": {
+    "description": "App name displayed on splash screen"
+  },
+  "buildBetterHabits": "Build Better Habits Together",
+  "@buildBetterHabits": {
+    "description": "Splash screen tagline"
+  },
+
+  "@_AUTH": {},
+  "welcomeBack": "Welcome Back!",
+  "@welcomeBack": {
+    "description": "Login screen greeting"
+  },
+  "signInToContinue": "Sign in to continue your habit journey",
+  "@signInToContinue": {
+    "description": "Login screen subtitle"
+  },
+  "email": "Email",
+  "@email": {
+    "description": "Email input label"
+  },
+  "password": "Password",
+  "@password": {
+    "description": "Password input label"
+  },
+  "login": "Login",
+  "@login": {
+    "description": "Login button text"
+  },
+  "dontHaveAccount": "Don't have an account?",
+  "@dontHaveAccount": {
+    "description": "Prompt to create new account"
+  },
+  "signUp": "Sign Up",
+  "@signUp": {
+    "description": "Sign up button text"
+  },
+  "createAccount": "Create Account",
+  "@createAccount": {
+    "description": "Sign up screen title"
+  },
+  "joinMyHabits": "Join My Habits",
+  "@joinMyHabits": {
+    "description": "Sign up screen header"
+  },
+  "startBuildingHabits": "Start building better habits with friends",
+  "@startBuildingHabits": {
+    "description": "Sign up screen subtitle"
+  },
+  "fullName": "Full Name",
+  "@fullName": {
+    "description": "Full name input label"
+  },
+  "confirmPassword": "Confirm Password",
+  "@confirmPassword": {
+    "description": "Confirm password input label"
+  },
+  "alreadyHaveAccount": "Already have an account?",
+  "@alreadyHaveAccount": {
+    "description": "Prompt to login instead"
+  },
+  "signIn": "Sign In",
+  "@signIn": {
+    "description": "Sign in button text"
+  },
+
+  "@_VALIDATION": {},
+  "pleaseEnterEmail": "Please enter your email",
+  "@pleaseEnterEmail": {
+    "description": "Email validation error"
+  },
+  "pleaseEnterValidEmail": "Please enter a valid email",
+  "@pleaseEnterValidEmail": {
+    "description": "Email format validation error"
+  },
+  "pleaseEnterPassword": "Please enter your password",
+  "@pleaseEnterPassword": {
+    "description": "Password validation error"
+  },
+  "passwordTooShort": "Password must be at least 6 characters",
+  "@passwordTooShort": {
+    "description": "Password length validation error"
+  },
+  "pleaseEnterName": "Please enter your name",
+  "@pleaseEnterName": {
+    "description": "Name validation error"
+  },
+  "passwordsDoNotMatch": "Passwords do not match",
+  "@passwordsDoNotMatch": {
+    "description": "Password confirmation validation error"
+  },
+  "pleaseEnterHabitTitle": "Please enter a habit title",
+  "@pleaseEnterHabitTitle": {
+    "description": "Habit title validation error"
+  },
+
+  "@_AUTH_MESSAGES": {},
+  "loginFailed": "Login failed. Please check your credentials.",
+  "@loginFailed": {
+    "description": "Login error message"
+  },
+  "signupFailed": "Signup failed. Please try again.",
+  "@signupFailed": {
+    "description": "Signup error message"
+  },
+
+  "@_NAVIGATION": {},
+  "habits": "Habits",
+  "@habits": {
+    "description": "Habits tab title"
+  },
+  "social": "Social",
+  "@social": {
+    "description": "Social tab title"
+  },
+  "performance": "Performance",
+  "@performance": {
+    "description": "Performance tab title"
+  },
+  "profile": "Profile",
+  "@profile": {
+    "description": "Profile tab title"
+  },
+
+  "@_HABITS": {},
+  "myHabits": "My Habits",
+  "@myHabits": {
+    "description": "Habits tab app bar title"
+  },
+  "newHabit": "New Habit",
+  "@newHabit": {
+    "description": "Button to create new habit"
+  },
+  "beginYourJourney": "Begin Your Journey",
+  "@beginYourJourney": {
+    "description": "Empty state title"
+  },
+  "everyGreatJourney": "Every great journey begins with a single step.\n\nCreate your first habit and start building the life you want, one day at a time.",
+  "@everyGreatJourney": {
+    "description": "Empty state message for habits"
+  },
+  "smallStepsBigChanges": "Small steps, big changes",
+  "@smallStepsBigChanges": {
+    "description": "Motivational tagline"
+  },
+  "todaysJourney": "Today's Journey",
+  "@todaysJourney": {
+    "description": "Section title for today's habits"
+  },
+  "upcomingHabits": "Upcoming Habits",
+  "@upcomingHabits": {
+    "description": "Section title for upcoming habits"
+  },
+  "dailyProgress": "Daily Progress",
+  "@dailyProgress": {
+    "description": "Progress card title"
+  },
+  "habitsCompleted": "{completed} of {total} habits completed",
+  "@habitsCompleted": {
+    "description": "Progress indicator",
+    "placeholders": {
+      "completed": {
+        "type": "int",
+        "example": "3"
+      },
+      "total": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "amazingWork": "Amazing work!",
+  "@amazingWork": {
+    "description": "Congratulation message for 100% completion"
+  },
+  "keepGoing": "Keep going!",
+  "@keepGoing": {
+    "description": "Encouragement message"
+  },
+  "currentStreak": "Current Streak",
+  "@currentStreak": {
+    "description": "Current streak label"
+  },
+  "longestStreak": "Longest Streak",
+  "@longestStreak": {
+    "description": "Longest streak label"
+  },
+  "streakDays": "{count, plural, =0{No streak} =1{1 day} other{{count} days}}",
+  "@streakDays": {
+    "description": "Streak count with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "habitCount": "{count, plural, =1{1 habit} other{{count} habits}}",
+  "@habitCount": {
+    "description": "Habit count with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "allHabits": "All Habits",
+  "@allHabits": {
+    "description": "Section title for all habits"
+  },
+  "yourProgressToday": "Your Progress Today",
+  "@yourProgressToday": {
+    "description": "Progress card subtitle"
+  },
+  "perfectDay": "Perfect day! All habits built! 🎉",
+  "@perfectDay": {
+    "description": "Message for 100% completion"
+  },
+  "greatMomentum": "Great momentum! Keep building!",
+  "@greatMomentum": {
+    "description": "Message for >50% completion"
+  },
+  "everyStepCounts": "Every step counts. Keep going!",
+  "@everyStepCounts": {
+    "description": "Message for <50% completion"
+  },
+  "readyToBuildHabits": "Ready to build new habits?",
+  "@readyToBuildHabits": {
+    "description": "Message when no habits for today"
+  },
+
+  "@_HABIT_MANAGEMENT": {},
+  "habitTitle": "Habit Title",
+  "@habitTitle": {
+    "description": "Habit title input label"
+  },
+  "habitTitlePlaceholder": "e.g., Morning Exercise",
+  "@habitTitlePlaceholder": {
+    "description": "Habit title placeholder text"
+  },
+  "description": "Description",
+  "@description": {
+    "description": "Description label"
+  },
+  "descriptionOptional": "Description (optional)",
+  "@descriptionOptional": {
+    "description": "Optional description label"
+  },
+  "descriptionPlaceholder": "Add more details about your habit...",
+  "@descriptionPlaceholder": {
+    "description": "Description placeholder text"
+  },
+  "selectIcon": "Select Icon",
+  "@selectIcon": {
+    "description": "Icon selection label"
+  },
+  "chooseAnIcon": "Choose an Icon",
+  "@chooseAnIcon": {
+    "description": "Icon selector title"
+  },
+  "iconFitness": "Fitness",
+  "@iconFitness": {"description": "Fitness icon label"},
+  "iconReading": "Reading",
+  "@iconReading": {"description": "Reading icon label"},
+  "iconHydration": "Hydration",
+  "@iconHydration": {"description": "Hydration icon label"},
+  "iconSleep": "Sleep",
+  "@iconSleep": {"description": "Sleep icon label"},
+  "iconEating": "Eating",
+  "@iconEating": {"description": "Eating icon label"},
+  "iconRunning": "Running",
+  "@iconRunning": {"description": "Running icon label"},
+  "iconMeditation": "Meditation",
+  "@iconMeditation": {"description": "Meditation icon label"},
+  "iconYoga": "Yoga",
+  "@iconYoga": {"description": "Yoga icon label"},
+  "iconArt": "Art",
+  "@iconArt": {"description": "Art icon label"},
+  "iconMusic": "Music",
+  "@iconMusic": {"description": "Music icon label"},
+  "iconWork": "Work",
+  "@iconWork": {"description": "Work icon label"},
+  "iconStudy": "Study",
+  "@iconStudy": {"description": "Study icon label"},
+  "iconHealth": "Health",
+  "@iconHealth": {"description": "Health icon label"},
+  "iconWalking": "Walking",
+  "@iconWalking": {"description": "Walking icon label"},
+  "iconCycling": "Cycling",
+  "@iconCycling": {"description": "Cycling icon label"},
+  "selectColor": "Select Color",
+  "@selectColor": {
+    "description": "Color selection label"
+  },
+  "chooseColor": "Choose a Color",
+  "@chooseColor": {
+    "description": "Color picker title"
+  },
+  "frequency": "Frequency",
+  "@frequency": {
+    "description": "Frequency selection label"
+  },
+  "daily": "Daily",
+  "@daily": {
+    "description": "Daily frequency option"
+  },
+  "weekly": "Weekly",
+  "@weekly": {
+    "description": "Weekly frequency option"
+  },
+  "custom": "Custom",
+  "@custom": {
+    "description": "Custom frequency option"
+  },
+  "selectDays": "Select Days",
+  "@selectDays": {
+    "description": "Custom days selection label"
+  },
+  "scheduledTime": "Scheduled Time",
+  "@scheduledTime": {
+    "description": "Time picker label"
+  },
+  "scheduledTimeOptional": "Scheduled Time (optional)",
+  "@scheduledTimeOptional": {
+    "description": "Optional time picker label"
+  },
+  "selectTime": "Select Time",
+  "@selectTime": {
+    "description": "Time picker button text"
+  },
+  "shareWithFriends": "Share with Friends",
+  "@shareWithFriends": {
+    "description": "Public habit toggle label"
+  },
+  "makeHabitPublic": "Make this habit visible to friends",
+  "@makeHabitPublic": {
+    "description": "Public habit toggle description"
+  },
+  "letFriendsSeeProgress": "Let your friends see your progress",
+  "@letFriendsSeeProgress": {
+    "description": "Public habit subtitle"
+  },
+  "changingFrequencyWarning": "Changing frequency will reset your streak and completion history.",
+  "@changingFrequencyWarning": {
+    "description": "Warning when changing habit frequency"
+  },
+  "optional": "Optional",
+  "@optional": {
+    "description": "Optional label"
+  },
+  "clearTime": "Clear time",
+  "@clearTime": {
+    "description": "Tooltip for clearing scheduled time"
+  },
+  "notificationScheduledTomorrow": "Note: Notification scheduled for tomorrow at {time}",
+  "@notificationScheduledTomorrow": {
+    "description": "Notification scheduled for tomorrow message",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "9:00 AM"
+      }
+    }
+  },
+  "notificationPermissionsDenied": "Notification permissions denied. You won't receive reminders for this habit.",
+  "@notificationPermissionsDenied": {
+    "description": "Notification permissions denied message"
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Save button text"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button text"
+  },
+  "delete": "Delete",
+  "@delete": {
+    "description": "Delete button text"
+  },
+  "edit": "Edit",
+  "@edit": {
+    "description": "Edit button text"
+  },
+  "editHabit": "Edit Habit",
+  "@editHabit": {
+    "description": "Edit habit screen title"
+  },
+  "deleteHabit": "Delete Habit",
+  "@deleteHabit": {
+    "description": "Delete habit confirmation title"
+  },
+  "deleteHabitConfirmation": "Are you sure you want to delete this habit? This action cannot be undone.",
+  "@deleteHabitConfirmation": {
+    "description": "Delete habit confirmation message"
+  },
+  "deleteHabitQuestion": "Are you sure you want to delete this habit?",
+  "@deleteHabitQuestion": {
+    "description": "Delete habit dialog question"
+  },
+  "habitDetails": "Habit Details",
+  "@habitDetails": {
+    "description": "Habit details screen title"
+  },
+  "markComplete": "Mark Complete",
+  "@markComplete": {
+    "description": "Button to mark habit complete"
+  },
+  "markAsComplete": "Mark as Complete",
+  "@markAsComplete": {
+    "description": "Button text to mark habit as complete"
+  },
+  "completing": "Completing... 🎉",
+  "@completing": {
+    "description": "Status text when completing a habit"
+  },
+  "completedToday": "Completed today! Great job! 🎉",
+  "@completedToday": {
+    "description": "Message shown when habit is already completed"
+  },
+  "checkIn": "Check In",
+  "@checkIn": {
+    "description": "Check in section title"
+  },
+  "addNoteOptional": "Add a note (optional)...",
+  "@addNoteOptional": {
+    "description": "Note input placeholder"
+  },
+  "addNote": "Add Note",
+  "@addNote": {
+    "description": "Add note button text"
+  },
+  "noteOptional": "Note (optional)",
+  "@noteOptional": {
+    "description": "Note input label"
+  },
+  "notePlaceholder": "How did it go?",
+  "@notePlaceholder": {
+    "description": "Note placeholder text"
+  },
+  "current": "Current",
+  "@current": {
+    "description": "Current streak label"
+  },
+  "best": "Best",
+  "@best": {
+    "description": "Best streak label"
+  },
+  "total": "Total",
+  "@total": {
+    "description": "Total completions label"
+  },
+  "recentCompletions": "Recent Completions",
+  "@recentCompletions": {
+    "description": "Recent completions section title"
+  },
+  "noCompletionsYet": "No completions yet.\nStart your streak today!",
+  "@noCompletionsYet": {
+    "description": "Empty state message for no completions"
+  },
+
+  "@_DAYS": {},
+  "monday": "Monday",
+  "@monday": {"description": "Monday"},
+  "tuesday": "Tuesday",
+  "@tuesday": {"description": "Tuesday"},
+  "wednesday": "Wednesday",
+  "@wednesday": {"description": "Wednesday"},
+  "thursday": "Thursday",
+  "@thursday": {"description": "Thursday"},
+  "friday": "Friday",
+  "@friday": {"description": "Friday"},
+  "saturday": "Saturday",
+  "@saturday": {"description": "Saturday"},
+  "sunday": "Sunday",
+  "@sunday": {"description": "Sunday"},
+  "mon": "Mon",
+  "@mon": {"description": "Monday short"},
+  "tue": "Tue",
+  "@tue": {"description": "Tuesday short"},
+  "wed": "Wed",
+  "@wed": {"description": "Wednesday short"},
+  "thu": "Thu",
+  "@thu": {"description": "Thursday short"},
+  "fri": "Fri",
+  "@fri": {"description": "Friday short"},
+  "sat": "Sat",
+  "@sat": {"description": "Saturday short"},
+  "sun": "Sun",
+  "@sun": {"description": "Sunday short"},
+
+  "@_SOCIAL": {},
+  "noActivityYet": "No Activity Yet",
+  "@noActivityYet": {
+    "description": "Empty state title for social feed"
+  },
+  "connectWithFriends": "Connect with friends to see their progress\nand stay motivated together!",
+  "@connectWithFriends": {
+    "description": "Empty state message for social feed"
+  },
+  "findFriends": "Find Friends",
+  "@findFriends": {
+    "description": "Button to search for friends"
+  },
+  "searchUsers": "Search Users",
+  "@searchUsers": {
+    "description": "Search users screen title"
+  },
+  "searchByUsername": "Search by username or email...",
+  "@searchByUsername": {
+    "description": "Search input placeholder"
+  },
+  "addFriend": "Add Friend",
+  "@addFriend": {
+    "description": "Add friend button text"
+  },
+  "searchByName": "Search by name or email...",
+  "@searchByName": {
+    "description": "Search users input placeholder"
+  },
+  "friendRequestSent": "Friend request sent to {name}",
+  "@friendRequestSent": {
+    "description": "Friend request sent confirmation",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "John"
+      }
+    }
+  },
+  "searchForFriends": "Search for friends to add them!",
+  "@searchForFriends": {
+    "description": "Empty search state message"
+  },
+  "searchForUsers": "Search for users to add as friends",
+  "@searchForUsers": {
+    "description": "Empty search state message"
+  },
+  "noUsersFound": "No users found",
+  "@noUsersFound": {
+    "description": "No search results message"
+  },
+  "you": "You",
+  "@you": {
+    "description": "You label"
+  },
+  "add": "Add",
+  "@add": {
+    "description": "Add button text"
+  },
+  "pending": "Pending",
+  "@pending": {
+    "description": "Friend request pending status"
+  },
+  "friends": "Friends",
+  "@friends": {
+    "description": "Friends list title"
+  },
+  "friendRequests": "Friend Requests",
+  "@friendRequests": {
+    "description": "Friend requests screen title"
+  },
+  "accept": "Accept",
+  "@accept": {
+    "description": "Accept button text"
+  },
+  "reject": "Reject",
+  "@reject": {
+    "description": "Reject button text"
+  },
+  "sendMessage": "Send Message",
+  "@sendMessage": {
+    "description": "Send message button text"
+  },
+  "viewProfile": "View Profile",
+  "@viewProfile": {
+    "description": "View profile button text"
+  },
+  "removeFriend": "Remove Friend",
+  "@removeFriend": {
+    "description": "Remove friend button text"
+  },
+  "removeFriendQuestion": "Remove Friend?",
+  "@removeFriendQuestion": {
+    "description": "Remove friend dialog title"
+  },
+  "removeFriendConfirmation": "Are you sure you want to remove {name} from your friends?",
+  "@removeFriendConfirmation": {
+    "description": "Remove friend confirmation message",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "John"
+      }
+    }
+  },
+  "remove": "Remove",
+  "@remove": {
+    "description": "Remove button text"
+  },
+  "friendRemoved": "{name} removed from friends",
+  "@friendRemoved": {
+    "description": "Friend removed confirmation",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "John"
+      }
+    }
+  },
+  "noFriendsYet": "No Friends Yet",
+  "@noFriendsYet": {
+    "description": "No friends empty state title"
+  },
+  "addFriendsToStayMotivated": "Add friends to stay motivated together!\nShare progress and celebrate wins.",
+  "@addFriendsToStayMotivated": {
+    "description": "No friends empty state message"
+  },
+  "streaksCount": "{count} streaks",
+  "@streaksCount": {
+    "description": "Streaks count label",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "newMessages": "{count} new",
+  "@newMessages": {
+    "description": "New messages count",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "chat": "Chat",
+  "@chat": {
+    "description": "Chat screen title"
+  },
+  "typeMessage": "Type a message...",
+  "@typeMessage": {
+    "description": "Message input placeholder"
+  },
+  "noMessages": "No messages yet",
+  "@noMessages": {
+    "description": "Empty chat state message"
+  },
+  "startConversation": "Start a conversation!",
+  "@startConversation": {
+    "description": "Empty chat state subtitle"
+  },
+  "sayHelloTo": "Say hello to {name}",
+  "@sayHelloTo": {
+    "description": "Chat empty state greeting",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "John"
+      }
+    }
+  },
+  "failedToSendMessage": "Failed to send message: {error}",
+  "@failedToSendMessage": {
+    "description": "Failed to send message error",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+
+  "@_PERFORMANCE": {},
+  "weeklyOverview": "Weekly Overview",
+  "@weeklyOverview": {
+    "description": "Performance chart section title"
+  },
+  "completionRate": "Completion Rate",
+  "@completionRate": {
+    "description": "Completion rate label"
+  },
+  "thisWeek": "This Week",
+  "@thisWeek": {
+    "description": "This week label"
+  },
+  "last7Days": "Last 7 Days",
+  "@last7Days": {
+    "description": "Last 7 days label"
+  },
+  "statistics": "Statistics",
+  "@statistics": {
+    "description": "Statistics section title"
+  },
+  "totalHabits": "Total Habits",
+  "@totalHabits": {
+    "description": "Total habits count label"
+  },
+  "activeHabits": "Active Habits",
+  "@activeHabits": {
+    "description": "Active habits count label"
+  },
+  "bestStreak": "Best Streak",
+  "@bestStreak": {
+    "description": "Best streak label"
+  },
+  "noPerformanceData": "No Performance Data Yet",
+  "@noPerformanceData": {
+    "description": "Empty state title for performance tab"
+  },
+  "startTrackingHabits": "Start tracking habits to see your progress!",
+  "@startTrackingHabits": {
+    "description": "Empty state subtitle for performance tab"
+  },
+  "completions": "Completions",
+  "@completions": {
+    "description": "Completions label"
+  },
+  "activityHeatmap": "Activity Heatmap",
+  "@activityHeatmap": {
+    "description": "Activity heatmap section title"
+  },
+  "last90Days": "Last 90 Days",
+  "@last90Days": {
+    "description": "Last 90 days label"
+  },
+  "noActivity90Days": "No activity in the last 90 days",
+  "@noActivity90Days": {
+    "description": "No activity message"
+  },
+  "less": "Less",
+  "@less": {
+    "description": "Heatmap legend less label"
+  },
+  "more": "More",
+  "@more": {
+    "description": "Heatmap legend more label"
+  },
+  "dayTrend30": "30-Day Trend",
+  "@dayTrend30": {
+    "description": "30-day trend section title"
+  },
+  "peak": "Peak: {count}",
+  "@peak": {
+    "description": "Peak completions label",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "noCompletions30Days": "No completions in the last 30 days",
+  "@noCompletions30Days": {
+    "description": "No completions message"
+  },
+  "streakInsights": "Streak Insights",
+  "@streakInsights": {
+    "description": "Streak insights section title"
+  },
+  "avgStreak": "Avg Streak",
+  "@avgStreak": {
+    "description": "Average streak label"
+  },
+  "activeNow": "Active Now",
+  "@activeNow": {
+    "description": "Active now label"
+  },
+  "topPerformingHabits": "Top Performing Habits",
+  "@topPerformingHabits": {
+    "description": "Top habits section title"
+  },
+  "completionsCount": "{count} completions",
+  "@completionsCount": {
+    "description": "Completions count label",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "streakCount": "{count} streak",
+  "@streakCount": {
+    "description": "Streak count label",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "weeklyPattern": "Weekly Pattern",
+  "@weeklyPattern": {
+    "description": "Weekly pattern section title"
+  },
+  "completionsTooltip": "{date}: {count} completions",
+  "@completionsTooltip": {
+    "description": "Tooltip for heatmap cells",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "11/5"
+      },
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+
+  "@_PROFILE": {},
+  "myProfile": "My Profile",
+  "@myProfile": {
+    "description": "Profile tab title"
+  },
+  "editProfile": "Edit Profile",
+  "@editProfile": {
+    "description": "Edit profile button text"
+  },
+  "displayName": "Display Name",
+  "@displayName": {
+    "description": "Display name label"
+  },
+  "enterDisplayName": "Enter your display name",
+  "@enterDisplayName": {
+    "description": "Display name hint"
+  },
+  "displayNameEmpty": "Display name cannot be empty",
+  "@displayNameEmpty": {
+    "description": "Display name validation error"
+  },
+  "bio": "Bio",
+  "@bio": {
+    "description": "Bio label"
+  },
+  "tellAboutYourself": "Tell us about yourself...",
+  "@tellAboutYourself": {
+    "description": "Bio hint"
+  },
+  "emailCannotBeChanged": "Email cannot be changed",
+  "@emailCannotBeChanged": {
+    "description": "Email read-only message"
+  },
+  "tapToChangePhoto": "Tap to change photo",
+  "@tapToChangePhoto": {
+    "description": "Photo change instruction"
+  },
+  "newPhotoSelected": "New photo selected",
+  "@newPhotoSelected": {
+    "description": "Photo selected confirmation"
+  },
+  "chooseFromGallery": "Choose from Gallery",
+  "@chooseFromGallery": {
+    "description": "Gallery picker option"
+  },
+  "takePhoto": "Take a Photo",
+  "@takePhoto": {
+    "description": "Camera picker option"
+  },
+  "removePhoto": "Remove Photo",
+  "@removePhoto": {
+    "description": "Remove photo option"
+  },
+  "profileUpdatedSuccessfully": "Profile updated successfully!",
+  "@profileUpdatedSuccessfully": {
+    "description": "Profile update success message"
+  },
+  "errorUpdatingProfile": "Error updating profile: {error}",
+  "@errorUpdatingProfile": {
+    "description": "Profile update error message",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "logout": "Logout",
+  "@logout": {
+    "description": "Logout button text"
+  },
+  "settings": "Settings",
+  "@settings": {
+    "description": "Settings section title"
+  },
+  "notifications": "Notifications",
+  "@notifications": {
+    "description": "Notifications screen title"
+  },
+  "noNotifications": "No notifications",
+  "@noNotifications": {
+    "description": "Empty notifications message"
+  },
+  "noNotificationsTitle": "No Notifications",
+  "@noNotificationsTitle": {
+    "description": "Empty notifications title"
+  },
+  "markAllRead": "Mark all read",
+  "@markAllRead": {
+    "description": "Mark all notifications read button"
+  },
+  "youreAllCaughtUp": "You're all caught up!",
+  "@youreAllCaughtUp": {
+    "description": "No new notifications message"
+  },
+  "youreAllCaughtUpMessage": "You're all caught up!\nWe'll notify you when something happens.",
+  "@youreAllCaughtUpMessage": {
+    "description": "No new notifications detailed message"
+  },
+  "notificationDeleted": "Notification deleted",
+  "@notificationDeleted": {
+    "description": "Notification deleted confirmation"
+  },
+  "tapToReply": "Tap to reply",
+  "@tapToReply": {
+    "description": "Tap to reply to message"
+  },
+  "nowFriends": "You and {name} are now friends!",
+  "@nowFriends": {
+    "description": "Friend request accepted message",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "John"
+      }
+    }
+  },
+  "friendRequestDeclined": "Friend request from {name} declined",
+  "@friendRequestDeclined": {
+    "description": "Friend request declined message",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "John"
+      }
+    }
+  },
+  "errorAcceptingRequest": "Error accepting request: {error}",
+  "@errorAcceptingRequest": {
+    "description": "Error accepting friend request",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "errorRejectingRequest": "Error rejecting request: {error}",
+  "@errorRejectingRequest": {
+    "description": "Error rejecting friend request",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "errorOpeningChat": "Error opening chat: {error}",
+  "@errorOpeningChat": {
+    "description": "Error opening chat",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "justNow": "Just now",
+  "@justNow": {
+    "description": "Just now time label"
+  },
+  "weeksAgo": "{count}w ago",
+  "@weeksAgo": {
+    "description": "Weeks ago",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+
+  "@_NOTIFICATION_MESSAGES": {},
+  "friendRequestFrom": "{name} sent you a friend request",
+  "@friendRequestFrom": {
+    "description": "Friend request notification",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "John"
+      }
+    }
+  },
+  "friendRequestAccepted": "{name} accepted your friend request",
+  "@friendRequestAccepted": {
+    "description": "Friend request accepted notification",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "John"
+      }
+    }
+  },
+  "habitCompletedBy": "{name} completed \"{habit}\"",
+  "@habitCompletedBy": {
+    "description": "Friend habit completion notification",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "John"
+      },
+      "habit": {
+        "type": "String",
+        "example": "Morning Run"
+      }
+    }
+  },
+  "reactionReceived": "{name} reacted {emoji}",
+  "@reactionReceived": {
+    "description": "Reaction notification",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "John"
+      },
+      "emoji": {
+        "type": "String",
+        "example": "❤️"
+      }
+    }
+  },
+  "newMessage": "{name} sent you a message",
+  "@newMessage": {
+    "description": "New message notification",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "John"
+      }
+    }
+  },
+
+  "@_TIME": {},
+  "today": "Today",
+  "@today": {"description": "Today label"},
+  "yesterday": "Yesterday",
+  "@yesterday": {"description": "Yesterday label"},
+  "now": "Now",
+  "@now": {"description": "Now label"},
+  "minutesAgo": "{count}m ago",
+  "@minutesAgo": {
+    "description": "Minutes ago",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "hoursAgo": "{count}h ago",
+  "@hoursAgo": {
+    "description": "Hours ago",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "daysAgo": "{count}d ago",
+  "@daysAgo": {
+    "description": "Days ago",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+
+  "@_MISC": {},
+  "loading": "Loading...",
+  "@loading": {"description": "Loading indicator text"},
+  "error": "Error",
+  "@error": {"description": "Error label"},
+  "tryAgain": "Try Again",
+  "@tryAgain": {"description": "Try again button text"},
+  "ok": "OK",
+  "@ok": {"description": "OK button text"},
+  "done": "Done",
+  "@done": {"description": "Done button text"},
+  "undo": "Undo",
+  "@undo": {"description": "Undo button text"},
+  "close": "Close",
+  "@close": {"description": "Close button text"},
+  "search": "Search",
+  "@search": {"description": "Search label"},
+  "noResults": "No results found",
+  "@noResults": {"description": "No search results message"},
+  "react": "React",
+  "@react": {"description": "React button text"},
+  "chooseReaction": "Choose a Reaction",
+  "@chooseReaction": {"description": "Reaction picker title"},
+  "reactionCount": "{count, plural, =1{1 reaction} other{{count} reactions}}",
+  "@reactionCount": {
+    "description": "Reaction count with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "couldNotLoadUsers": "Could not load users",
+  "@couldNotLoadUsers": {"description": "Error loading users message"},
+
+  "@_CELEBRATIONS": {},
+  "celebrationFitnessTitle": "Beast Mode! 💪",
+  "@celebrationFitnessTitle": {"description": "Fitness celebration title"},
+  "celebrationFitnessSubtitle": "One step closer to your fitness goal!",
+  "@celebrationFitnessSubtitle": {"description": "Fitness celebration subtitle"},
+  "celebrationBookTitle": "Bookworm! 📚",
+  "@celebrationBookTitle": {"description": "Book celebration title"},
+  "celebrationBookSubtitle": "Knowledge is power!",
+  "@celebrationBookSubtitle": {"description": "Book celebration subtitle"},
+  "celebrationWaterTitle": "Hydrated! 💧",
+  "@celebrationWaterTitle": {"description": "Water celebration title"},
+  "celebrationWaterSubtitle": "Stay refreshed and healthy!",
+  "@celebrationWaterSubtitle": {"description": "Water celebration subtitle"},
+  "celebrationSleepTitle": "Sweet Dreams! 😴",
+  "@celebrationSleepTitle": {"description": "Sleep celebration title"},
+  "celebrationSleepSubtitle": "Rest well, you earned it!",
+  "@celebrationSleepSubtitle": {"description": "Sleep celebration subtitle"},
+  "celebrationFoodTitle": "Delicious! 🍽️",
+  "@celebrationFoodTitle": {"description": "Food celebration title"},
+  "celebrationFoodSubtitle": "Healthy eating habits!",
+  "@celebrationFoodSubtitle": {"description": "Food celebration subtitle"},
+  "celebrationRunTitle": "On the Move! 🏃",
+  "@celebrationRunTitle": {"description": "Run celebration title"},
+  "celebrationRunSubtitle": "Keep running towards your goals!",
+  "@celebrationRunSubtitle": {"description": "Run celebration subtitle"},
+  "celebrationMeditationTitle": "Inner Peace! 🧘",
+  "@celebrationMeditationTitle": {"description": "Meditation celebration title"},
+  "celebrationMeditationSubtitle": "Mindfulness achieved!",
+  "@celebrationMeditationSubtitle": {"description": "Meditation celebration subtitle"},
+  "celebrationYogaTitle": "Namaste! 🧘‍♀️",
+  "@celebrationYogaTitle": {"description": "Yoga celebration title"},
+  "celebrationYogaSubtitle": "Balance and flexibility!",
+  "@celebrationYogaSubtitle": {"description": "Yoga celebration subtitle"},
+  "celebrationArtTitle": "Creative! 🎨",
+  "@celebrationArtTitle": {"description": "Art celebration title"},
+  "celebrationArtSubtitle": "Express yourself!",
+  "@celebrationArtSubtitle": {"description": "Art celebration subtitle"},
+  "celebrationMusicTitle": "Harmony! 🎵",
+  "@celebrationMusicTitle": {"description": "Music celebration title"},
+  "celebrationMusicSubtitle": "Keep the rhythm going!",
+  "@celebrationMusicSubtitle": {"description": "Music celebration subtitle"},
+  "celebrationWorkTitle": "Productive! 💼",
+  "@celebrationWorkTitle": {"description": "Work celebration title"},
+  "celebrationWorkSubtitle": "Crushing those tasks!",
+  "@celebrationWorkSubtitle": {"description": "Work celebration subtitle"},
+  "celebrationSchoolTitle": "Smart! 🎓",
+  "@celebrationSchoolTitle": {"description": "School celebration title"},
+  "celebrationSchoolSubtitle": "Learning never stops!",
+  "@celebrationSchoolSubtitle": {"description": "School celebration subtitle"},
+  "celebrationHeartTitle": "Healthy! ❤️",
+  "@celebrationHeartTitle": {"description": "Heart/health celebration title"},
+  "celebrationHeartSubtitle": "Taking care of yourself!",
+  "@celebrationHeartSubtitle": {"description": "Heart/health celebration subtitle"},
+  "celebrationWalkTitle": "Step by Step! 🚶",
+  "@celebrationWalkTitle": {"description": "Walk celebration title"},
+  "celebrationWalkSubtitle": "Every step counts!",
+  "@celebrationWalkSubtitle": {"description": "Walk celebration subtitle"},
+  "celebrationBikeTitle": "Pedal Power! 🚴",
+  "@celebrationBikeTitle": {"description": "Bike celebration title"},
+  "celebrationBikeSubtitle": "Rolling towards success!",
+  "@celebrationBikeSubtitle": {"description": "Bike celebration subtitle"},
+  "celebrationDefaultTitle": "🎉 Great Job! 🎉",
+  "@celebrationDefaultTitle": {"description": "Default celebration title"},
+  "celebrationDefaultSubtitle": "Keep up the great work!",
+  "@celebrationDefaultSubtitle": {"description": "Default celebration subtitle"},
+
+  "@_HABIT_CARD": {},
+  "habitCompleted": "{habit} completed! 🎉",
+  "@habitCompleted": {
+    "description": "Habit completed message",
+    "placeholders": {
+      "habit": {
+        "type": "String",
+        "example": "Morning Exercise"
+      }
+    }
+  },
+  "habitMarkedIncomplete": "{habit} marked as incomplete",
+  "@habitMarkedIncomplete": {
+    "description": "Habit marked incomplete message",
+    "placeholders": {
+      "habit": {
+        "type": "String",
+        "example": "Morning Exercise"
+      }
+    }
+  },
+  "dayCount": "{count, plural, =1{1 day} other{{count} days}}",
+  "@dayCount": {
+    "description": "Day count with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "totalCount": "{count} total",
+  "@totalCount": {
+    "description": "Total count label",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "10"
+      }
+    }
+  },
+  "consistency": "Consistency",
+  "@consistency": {"description": "Consistency label"},
+  "onFire": "On Fire! 🔥",
+  "@onFire": {"description": "On fire status"},
+  "keepBuilding": "Keep Building",
+  "@keepBuilding": {"description": "Keep building encouragement"},
+
+  "@_SHARE": {},
+  "shareProgress": "Share Progress",
+  "@shareProgress": {"description": "Share progress title"},
+  "inspireYourFriends": "Inspire your friends!",
+  "@inspireYourFriends": {"description": "Share progress subtitle"},
+  "dayStreak": "Day Streak",
+  "@dayStreak": {"description": "Day streak label"},
+  "completed": "Completed",
+  "@completed": {"description": "Completed label"},
+  "shareAsImage": "Share as Image",
+  "@shareAsImage": {"description": "Share as image option"},
+  "generating": "Generating...",
+  "@generating": {"description": "Generating status"},
+  "createShareCard": "Create a beautiful share card",
+  "@createShareCard": {"description": "Share card description"},
+  "progressReport": "Progress Report",
+  "@progressReport": {"description": "Progress report label"},
+  "buildingBetterHabits": "Building better habits",
+  "@buildingBetterHabits": {"description": "Default habit description"},
+  "dayStreakLabel": "Day\nStreak",
+  "@dayStreakLabel": {"description": "Day streak label for share card"},
+  "bestStreakLabel": "Best\nStreak",
+  "@bestStreakLabel": {"description": "Best streak label for share card"},
+  "totalDoneLabel": "Total\nDone",
+  "@totalDoneLabel": {"description": "Total done label for share card"},
+  "keepBuildingBetterHabits": "💪  Keep building better habits!",
+  "@keepBuildingBetterHabits": {"description": "Share card footer message"},
+  "myHabitsHashtag": "#MyHabits",
+  "@myHabitsHashtag": {"description": "Hashtag for sharing"},
+  "myHabitProgress": "🎯 My {habit} Progress! #MyHabits",
+  "@myHabitProgress": {
+    "description": "Share text with habit name",
+    "placeholders": {
+      "habit": {
+        "type": "String",
+        "example": "Morning Exercise"
+      }
+    }
+  },
+  "failedToGenerateImage": "Failed to generate image: {error}",
+  "@failedToGenerateImage": {
+    "description": "Image generation error",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  }
+}
+

@@ -34,6 +34,16 @@ A beautiful habit tracking app with social accountability features built with Fl
 - **Public/Private Habits**: Choose which habits to share
 - **Realtime Updates**: Powered by Supabase realtime subscriptions for instant updates
 
+### Internationalization 🌍
+- **Multi-Language Support**: Fully internationalized app
+- **Supported Languages**:
+  - 🇺🇸 English (default)
+  - 🇧🇷 Brazilian Portuguese (Português do Brasil)
+- **Automatic Language Detection**: App automatically displays in the user's device language
+- **1,200+ Translated Strings**: All user-facing text is localized
+- **ICU Message Format**: Advanced formatting for plurals, dates, and parameters
+- **Easy to Extend**: Add new languages by creating ARB files
+
 ### UI/UX
 - **Material 3 Design**: Modern, beautiful interface
 - **Dark Mode Support**: Automatic theme switching
@@ -87,7 +97,12 @@ A beautiful habit tracking app with social accountability features built with Fl
    mkdir -p assets/images assets/animations
    ```
 
-5. **Run the app**
+5. **Generate localization files**
+   ```bash
+   flutter gen-l10n
+   ```
+
+6. **Run the app**
    ```bash
    flutter run
    ```
@@ -97,6 +112,12 @@ A beautiful habit tracking app with social accountability features built with Fl
 ```
 lib/
 ├── main.dart                 # App entry point
+├── l10n/                     # Internationalization
+│   ├── app_en.arb           # English translations (1,200+ strings)
+│   ├── app_pt.arb           # Portuguese translations
+│   ├── app_localizations.dart         # Generated - DO NOT EDIT
+│   ├── app_localizations_en.dart      # Generated - DO NOT EDIT
+│   └── app_localizations_pt.dart      # Generated - DO NOT EDIT
 ├── models/                   # Data models
 │   ├── habit.dart
 │   ├── habit_completion.dart
@@ -135,6 +156,56 @@ lib/
 │   └── activity_card.dart
 └── utils/                    # Utilities & helpers
     └── chart_calculator.dart # Isolate-based chart calculations
+```
+
+## 🌍 Internationalization
+
+The app fully supports multiple languages with automatic device language detection:
+
+### Supported Languages
+- **English (en)** - Default language
+- **Portuguese (pt)** - Brazilian Portuguese / Português do Brasil
+
+### How It Works
+1. App detects your device language automatically
+2. If device language is Portuguese → Shows Portuguese
+3. Otherwise → Shows English (default fallback)
+4. Over 1,200 strings translated with ICU message format
+
+### For Developers
+
+**To add new translations:**
+1. Add strings to `lib/l10n/app_en.arb` (English)
+2. Add translations to `lib/l10n/app_pt.arb` (Portuguese)
+3. Run `flutter gen-l10n` to regenerate localization files
+
+**To use in code:**
+```dart
+final l10n = AppLocalizations.of(context)!;
+Text(l10n.welcomeBack); // Automatically shows correct language
+```
+
+**To add a new language:**
+1. Create `lib/l10n/app_[locale].arb` (e.g., `app_es.arb` for Spanish)
+2. Add translations for all keys from `app_en.arb`
+3. Add locale to `supportedLocales` in `main.dart`
+4. Run `flutter gen-l10n`
+
+See `LOCALIZATION_GUIDE.md` for comprehensive documentation.
+
+### Testing Different Languages
+
+**On Device/Simulator:**
+- Change device Settings → Language to "Português (Brasil)"
+- Restart the app to see Portuguese
+
+**For Development Testing:**
+Temporarily force a locale in `main.dart`:
+```dart
+MaterialApp(
+  locale: const Locale('pt'), // Force Portuguese
+  // ... rest of config
+)
 ```
 
 ## 🗄️ Supabase Database Schema
@@ -267,6 +338,7 @@ See `SUPABASE_QUICK_SETUP.sql` for complete RLS policies.
 - [x] Beautiful UI with animations
 - [x] Advanced analytics dashboard
 - [x] Performance optimization with isolates
+- [x] Full internationalization (English + Portuguese)
 
 ### Phase 2: Enhancement
 - [x] Push notifications
@@ -277,6 +349,7 @@ See `SUPABASE_QUICK_SETUP.sql` for complete RLS policies.
 - [ ] Export analytics data
 
 ### Phase 3: Growth
+- [ ] Additional languages (Spanish, French, German, etc.)
 - [ ] Challenges and competitions
 - [ ] Leaderboards
 - [ ] Community forums

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/social_provider.dart';
 import '../../providers/messaging_provider.dart';
+import '../../l10n/app_localizations.dart';
 import '../social/enhanced_friends_screen.dart';
 import '../social/search_users_screen.dart';
 import '../../widgets/activity_card.dart';
@@ -56,13 +57,14 @@ class _SocialTabState extends ConsumerState<SocialTab> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
     final socialState = ref.watch(socialProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(60),
         child: GlassAppBar(
-          title: 'Social',
+          title: l10n.social,
           actions: [
             IconButton(
               icon: const Icon(Icons.person_add),
@@ -120,6 +122,8 @@ class _SocialTabState extends ConsumerState<SocialTab> {
   }
 
   Widget _buildEmptyState(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32.0),
@@ -139,14 +143,14 @@ class _SocialTabState extends ConsumerState<SocialTab> {
               ),
               const SizedBox(height: 20),
               Text(
-                'No Activity Yet',
+                l10n.noActivityYet,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
               ),
               const SizedBox(height: 8),
               Text(
-                'Connect with friends to see their progress\nand stay motivated together!',
+                l10n.connectWithFriends,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Colors.grey[600],
                     ),
@@ -169,7 +173,7 @@ class _SocialTabState extends ConsumerState<SocialTab> {
                     const Icon(Icons.person_add, size: 20),
                     const SizedBox(width: 8),
                     Text(
-                      'Find Friends',
+                      l10n.findFriends,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.w600,
                           ),

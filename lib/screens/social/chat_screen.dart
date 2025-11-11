@@ -5,6 +5,7 @@ import '../../models/message.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/messaging_provider.dart';
 import '../../providers/notification_provider.dart';
+import '../../l10n/app_localizations.dart';
 import '../../widgets/animated_gradient_background.dart';
 import '../../widgets/glass_card.dart';
 
@@ -99,13 +100,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       });
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Row(
               children: [
                 const Icon(Icons.error_outline, color: Colors.white),
                 const SizedBox(width: 12),
-                Text('Failed to send message: $e'),
+                Text(l10n.failedToSendMessage(e.toString())),
               ],
             ),
             backgroundColor: Colors.red.shade600,
@@ -264,6 +266,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   Widget _buildEmptyState() {
+    final l10n = AppLocalizations.of(context)!;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -290,14 +294,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           ),
           const SizedBox(height: 24),
           Text(
-            'Start a conversation!',
+            l10n.startConversation,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Say hello to ${widget.friend.displayName}',
+            l10n.sayHelloTo(widget.friend.displayName),
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   color: Colors.grey.shade600,
                 ),
@@ -308,6 +312,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   Widget _buildDateDivider(DateTime date) {
+    final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
     final isToday =
         date.year == now.year && date.month == now.month && date.day == now.day;
@@ -317,9 +322,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     String label;
     if (isToday) {
-      label = 'Today';
+      label = l10n.today;
     } else if (isYesterday) {
-      label = 'Yesterday';
+      label = l10n.yesterday;
     } else {
       label = '${date.day}/${date.month}/${date.year}';
     }
@@ -462,6 +467,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   Widget _buildMessageInput() {
+    final l10n = AppLocalizations.of(context)!;
+
     return GlassCard(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -470,10 +477,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           Expanded(
             child: TextField(
               controller: _messageController,
-              decoration: const InputDecoration(
-                hintText: 'Type a message...',
+              decoration: InputDecoration(
+                hintText: l10n.typeMessage,
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(horizontal: 8),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 8),
               ),
               maxLines: null,
               textCapitalization: TextCapitalization.sentences,

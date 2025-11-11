@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../models/user_profile.dart';
 import '../../providers/auth_provider.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/image_service.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/animated_gradient_background.dart';
@@ -65,6 +66,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   }
 
   void _showImageSourceDialog() {
+    final l10n = AppLocalizations.of(context)!;
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -89,7 +92,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               const SizedBox(height: 24),
               ListTile(
                 leading: const Icon(Icons.photo_library),
-                title: const Text('Choose from Gallery'),
+                title: Text(l10n.chooseFromGallery),
                 onTap: () {
                   Navigator.pop(context);
                   _pickImage(ImageSource.gallery);
@@ -97,7 +100,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               ),
               ListTile(
                 leading: const Icon(Icons.camera_alt),
-                title: const Text('Take a Photo'),
+                title: Text(l10n.takePhoto),
                 onTap: () {
                   Navigator.pop(context);
                   _pickImage(ImageSource.camera);
@@ -106,8 +109,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               if (widget.userProfile.photoUrl != null || _selectedImage != null)
                 ListTile(
                   leading: const Icon(Icons.delete, color: Colors.red),
-                  title: const Text('Remove Photo',
-                      style: TextStyle(color: Colors.red)),
+                  title: Text(l10n.removePhoto,
+                      style: const TextStyle(color: Colors.red)),
                   onTap: () {
                     Navigator.pop(context);
                     setState(() {
@@ -125,6 +128,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   }
 
   Future<void> _saveProfile() async {
+    final l10n = AppLocalizations.of(context)!;
+
     if (!_hasChanges) {
       Navigator.pop(context);
       return;
@@ -133,7 +138,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     final displayName = _displayNameController.text.trim();
     if (displayName.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Display name cannot be empty')),
+        SnackBar(content: Text(l10n.displayNameEmpty)),
       );
       return;
     }
@@ -170,14 +175,14 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
       if (mounted) {
         messenger.showSnackBar(
-          const SnackBar(content: Text('Profile updated successfully!')),
+          SnackBar(content: Text(l10n.profileUpdatedSuccessfully)),
         );
         navigator.pop();
       }
     } catch (e) {
       if (mounted) {
         messenger.showSnackBar(
-          SnackBar(content: Text('Error updating profile: $e')),
+          SnackBar(content: Text(l10n.errorUpdatingProfile(e.toString()))),
         );
       }
     } finally {
@@ -189,12 +194,13 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: isDark ? Colors.black : Colors.grey[50],
       appBar: AppBar(
-        title: const Text('Edit Profile'),
+        title: Text(l10n.editProfile),
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
@@ -207,7 +213,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : Text(
-                    'Save',
+                    l10n.save,
                     style: TextStyle(
                       color: _hasChanges
                           ? Theme.of(context).colorScheme.primary
@@ -300,7 +306,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Tap to change photo',
+                      l10n.tapToChangePhoto,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: Colors.grey[600],
                           ),
@@ -329,7 +335,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              'New photo selected',
+                              l10n.newPhotoSelected,
                               style: TextStyle(
                                 color: Theme.of(context).colorScheme.primary,
                                 fontSize: 12,
@@ -353,7 +359,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Display Name',
+                      l10n.displayName,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: Theme.of(context).colorScheme.primary,
@@ -363,7 +369,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     TextField(
                       controller: _displayNameController,
                       decoration: InputDecoration(
-                        hintText: 'Enter your display name',
+                        hintText: l10n.enterDisplayName,
                         prefixIcon: const Icon(Icons.person_outline),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -388,7 +394,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Bio',
+                      l10n.bio,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: Theme.of(context).colorScheme.primary,
@@ -398,7 +404,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     TextField(
                       controller: _bioController,
                       decoration: InputDecoration(
-                        hintText: 'Tell us about yourself...',
+                        hintText: l10n.tellAboutYourself,
                         prefixIcon: const Icon(Icons.edit_note),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -424,7 +430,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Email',
+                      l10n.email,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: Colors.grey[600],
@@ -446,7 +452,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Email cannot be changed',
+                      l10n.emailCannotBeChanged,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: Colors.grey[600],
                           ),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/social_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/messaging_provider.dart';
+import '../../l10n/app_localizations.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/animated_gradient_background.dart';
 import 'search_users_screen.dart';
@@ -50,6 +51,7 @@ class _EnhancedFriendsScreenState extends ConsumerState<EnhancedFriendsScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final authState = ref.watch(authProvider);
     final socialState = ref.watch(socialProvider);
 
@@ -58,9 +60,9 @@ class _EnhancedFriendsScreenState extends ConsumerState<EnhancedFriendsScreen>
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text(
-          'Friends',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          l10n.friends,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
           IconButton(
@@ -101,6 +103,8 @@ class _EnhancedFriendsScreenState extends ConsumerState<EnhancedFriendsScreen>
   }
 
   Widget _buildEmptyState(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Center(
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -133,14 +137,14 @@ class _EnhancedFriendsScreenState extends ConsumerState<EnhancedFriendsScreen>
             ),
             const SizedBox(height: 32),
             Text(
-              'No Friends Yet',
+              l10n.noFriendsYet,
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
             ),
             const SizedBox(height: 12),
             Text(
-              'Add friends to stay motivated together!\nShare progress and celebrate wins.',
+              l10n.addFriendsToStayMotivated,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: Colors.grey.shade600,
                   ),
@@ -162,7 +166,7 @@ class _EnhancedFriendsScreenState extends ConsumerState<EnhancedFriendsScreen>
                   const Icon(Icons.person_add_rounded, size: 20),
                   const SizedBox(width: 8),
                   Text(
-                    'Find Friends',
+                    l10n.findFriends,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
@@ -181,6 +185,7 @@ class _EnhancedFriendsScreenState extends ConsumerState<EnhancedFriendsScreen>
     SocialState socialState,
     AuthState authState,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     final messagingState = ref.watch(messagingProvider);
 
     return ListView.builder(
@@ -310,7 +315,7 @@ class _EnhancedFriendsScreenState extends ConsumerState<EnhancedFriendsScreen>
                           const Text('🔥', style: TextStyle(fontSize: 12)),
                           const SizedBox(width: 4),
                           Text(
-                            '${friend.totalStreaks} streaks',
+                            l10n.streaksCount(friend.totalStreaks),
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
@@ -341,7 +346,7 @@ class _EnhancedFriendsScreenState extends ConsumerState<EnhancedFriendsScreen>
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              '$unreadCount new',
+                              l10n.newMessages(unreadCount),
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
@@ -370,17 +375,17 @@ class _EnhancedFriendsScreenState extends ConsumerState<EnhancedFriendsScreen>
                           color: Theme.of(context).colorScheme.primary,
                         ),
                         const SizedBox(width: 12),
-                        const Text('View Profile'),
+                        Text(l10n.viewProfile),
                       ],
                     ),
                   ),
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'message',
                     child: Row(
                       children: [
-                        Icon(Icons.message_outlined, color: Colors.blue),
-                        SizedBox(width: 12),
-                        Text('Send Message'),
+                        const Icon(Icons.message_outlined, color: Colors.blue),
+                        const SizedBox(width: 12),
+                        Text(l10n.sendMessage),
                       ],
                     ),
                   ),
@@ -392,7 +397,7 @@ class _EnhancedFriendsScreenState extends ConsumerState<EnhancedFriendsScreen>
                             color: Colors.red.shade400),
                         const SizedBox(width: 12),
                         Text(
-                          'Remove Friend',
+                          l10n.removeFriend,
                           style: TextStyle(color: Colors.red.shade400),
                         ),
                       ],
@@ -430,27 +435,26 @@ class _EnhancedFriendsScreenState extends ConsumerState<EnhancedFriendsScreen>
     String friendId,
     String friendName,
   ) async {
+    final l10n = AppLocalizations.of(context)!;
     final messenger = ScaffoldMessenger.of(context);
 
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Remove Friend?'),
-        content: Text(
-          'Are you sure you want to remove $friendName from your friends?',
-        ),
+        title: Text(l10n.removeFriendQuestion),
+        content: Text(l10n.removeFriendConfirmation(friendName)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
             style: FilledButton.styleFrom(
               backgroundColor: Colors.red,
             ),
-            child: const Text('Remove'),
+            child: Text(l10n.remove),
           ),
         ],
       ),
@@ -471,7 +475,7 @@ class _EnhancedFriendsScreenState extends ConsumerState<EnhancedFriendsScreen>
                 children: [
                   const Icon(Icons.check_circle, color: Colors.white),
                   const SizedBox(width: 12),
-                  Text('$friendName removed from friends'),
+                  Text(l10n.friendRemoved(friendName)),
                 ],
               ),
               backgroundColor: Colors.orange.shade600,

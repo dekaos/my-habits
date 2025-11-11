@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/habit_provider.dart';
 import '../../models/habit.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/notification_service.dart';
 import '../../widgets/animated_gradient_background.dart';
 import '../../widgets/glass_card.dart';
@@ -89,10 +90,12 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
           scheduledTime.subtract(const Duration(minutes: 30));
       if (notificationTime.isBefore(now)) {
         if (mounted) {
+          final l10n = AppLocalizations.of(context)!;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                'Note: Notification scheduled for tomorrow at ${_selectedTime!.format(context)}',
+                l10n.notificationScheduledTomorrow(
+                    _selectedTime!.format(context)),
               ),
               duration: const Duration(seconds: 4),
               backgroundColor: Colors.orange,
@@ -132,11 +135,11 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
         if (permissionGranted) {
           await notificationService.scheduleHabitNotification(habit);
         } else if (mounted) {
+          final l10n = AppLocalizations.of(context)!;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                  'Notification permissions denied. You won\'t receive reminders for this habit.'),
-              duration: Duration(seconds: 3),
+            SnackBar(
+              content: Text(l10n.notificationPermissionsDenied),
+              duration: const Duration(seconds: 3),
             ),
           );
         }
@@ -152,13 +155,15 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text('New Habit'),
+        title: Text(l10n.newHabit),
         actions: [
           if (_isSaving)
             const Padding(
@@ -172,7 +177,7 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
           else
             TextButton(
               onPressed: _saveHabit,
-              child: const Text('Save'),
+              child: Text(l10n.save),
             ),
         ],
       ),
@@ -190,16 +195,16 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
                   enableGlow: false,
                   child: TextFormField(
                     controller: _titleController,
-                    decoration: const InputDecoration(
-                      labelText: 'Habit Title',
-                      hintText: 'e.g., Morning Exercise',
+                    decoration: InputDecoration(
+                      labelText: l10n.habitTitle,
+                      hintText: l10n.habitTitlePlaceholder,
                       border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(vertical: 12),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 12),
                     ),
                     textCapitalization: TextCapitalization.sentences,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter a habit title';
+                        return l10n.pleaseEnterHabitTitle;
                       }
                       return null;
                     },
@@ -214,11 +219,11 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
                   enableGlow: false,
                   child: TextFormField(
                     controller: _descriptionController,
-                    decoration: const InputDecoration(
-                      labelText: 'Description (optional)',
-                      hintText: 'Add more details...',
+                    decoration: InputDecoration(
+                      labelText: l10n.descriptionOptional,
+                      hintText: l10n.descriptionPlaceholder,
                       border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(vertical: 12),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 12),
                     ),
                     maxLines: 3,
                     textCapitalization: TextCapitalization.sentences,
@@ -249,7 +254,7 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Choose a Color',
+                        l10n.chooseColor,
                         style:
                             Theme.of(context).textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
@@ -299,7 +304,7 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Frequency',
+                        l10n.frequency,
                         style:
                             Theme.of(context).textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
@@ -308,16 +313,16 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
                       const SizedBox(height: 16),
                       Center(
                         child: SegmentedButton<HabitFrequency>(
-                          segments: const [
+                          segments: [
                             ButtonSegment(
                               value: HabitFrequency.daily,
-                              label: Text('Daily'),
-                              icon: Icon(Icons.calendar_today),
+                              label: Text(l10n.daily),
+                              icon: const Icon(Icons.calendar_today),
                             ),
                             ButtonSegment(
                               value: HabitFrequency.custom,
-                              label: Text('Custom'),
-                              icon: Icon(Icons.edit_calendar),
+                              label: Text(l10n.custom),
+                              icon: const Icon(Icons.edit_calendar),
                             ),
                           ],
                           selected: {_frequency},
@@ -343,13 +348,13 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
                       spacing: 8,
                       children: List.generate(7, (index) {
                         final days = [
-                          'Mon',
-                          'Tue',
-                          'Wed',
-                          'Thu',
-                          'Fri',
-                          'Sat',
-                          'Sun'
+                          l10n.mon,
+                          l10n.tue,
+                          l10n.wed,
+                          l10n.thu,
+                          l10n.fri,
+                          l10n.sat,
+                          l10n.sun
                         ];
                         final isSelected = _customDays.contains(index);
                         return FilterChip(
@@ -387,7 +392,7 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Scheduled Time',
+                                l10n.scheduledTimeOptional,
                                 style: Theme.of(context)
                                     .textTheme
                                     .titleMedium
@@ -398,7 +403,7 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Optional',
+                                l10n.optional,
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodySmall
@@ -417,7 +422,7 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
                                   _selectedTime = null;
                                 });
                               },
-                              tooltip: 'Clear time',
+                              tooltip: l10n.clearTime,
                             ),
                         ],
                       ),
@@ -470,7 +475,7 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
                                   Text(
                                     _selectedTime != null
                                         ? _selectedTime!.format(context)
-                                        : 'Select time',
+                                        : l10n.selectTime,
                                     style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: _selectedTime != null
@@ -506,13 +511,13 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
                   enableGlow: false,
                   child: SwitchListTile(
                     title: Text(
-                      'Share with friends',
+                      l10n.shareWithFriends,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
                     ),
                     subtitle: Text(
-                      'Let your friends see your progress',
+                      l10n.letFriendsSeeProgress,
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                     value: _isPublic,

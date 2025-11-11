@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/activity.dart';
 import '../providers/auth_provider.dart';
 import '../providers/social_provider.dart';
+import '../l10n/app_localizations.dart';
 import 'glass_card.dart';
 import '../../widgets/animated_gradient_background.dart';
 
@@ -13,20 +14,21 @@ class ActivityCard extends ConsumerWidget {
 
   const ActivityCard({required this.activity, super.key});
 
-  String _getTimeAgo(DateTime dateTime) {
+  String _getTimeAgo(BuildContext context, DateTime dateTime) {
+    final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
     final difference = now.difference(dateTime);
 
     if (difference.inDays > 7) {
       return DateFormat('MMM d').format(dateTime);
     } else if (difference.inDays > 0) {
-      return '${difference.inDays}d ago';
+      return l10n.daysAgo(difference.inDays);
     } else if (difference.inHours > 0) {
-      return '${difference.inHours}h ago';
+      return l10n.hoursAgo(difference.inHours);
     } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}m ago';
+      return l10n.minutesAgo(difference.inMinutes);
     } else {
-      return 'Just now';
+      return l10n.justNow;
     }
   }
 
@@ -58,6 +60,7 @@ class ActivityCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return RepaintBoundary(
@@ -135,7 +138,7 @@ class ActivityCard extends ConsumerWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        _getTimeAgo(activity.createdAt),
+                        _getTimeAgo(context, activity.createdAt),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color:
                                   isDark ? Colors.grey[400] : Colors.grey[600],
@@ -195,7 +198,7 @@ class ActivityCard extends ConsumerWidget {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      'React',
+                      l10n.react,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: isDark ? Colors.grey[400] : Colors.grey[600],
                             fontWeight: FontWeight.w500,
@@ -286,6 +289,8 @@ class ActivityCard extends ConsumerWidget {
     String emoji,
     List<String> userIds,
   ) async {
+    final l10n = AppLocalizations.of(context)!;
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -315,7 +320,7 @@ class ActivityCard extends ConsumerWidget {
                           ),
                           const SizedBox(width: 12),
                           Text(
-                            '${userIds.length} ${userIds.length == 1 ? 'reaction' : 'reactions'}',
+                            l10n.reactionCount(userIds.length),
                             style: Theme.of(context)
                                 .textTheme
                                 .titleLarge
@@ -345,7 +350,7 @@ class ActivityCard extends ConsumerWidget {
                             return Padding(
                               padding: const EdgeInsets.all(20.0),
                               child: Text(
-                                'Could not load users',
+                                l10n.couldNotLoadUsers,
                                 style: TextStyle(color: Colors.grey[600]),
                               ),
                             );
@@ -434,6 +439,7 @@ class ActivityCard extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     final reactions = ['👍', '❤️', '🔥', '🎉', '💪', '👏'];
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final authState = ref.read(authProvider);
@@ -468,7 +474,7 @@ class ActivityCard extends ConsumerWidget {
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      'Choose a Reaction',
+                      l10n.chooseReaction,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                             letterSpacing: -0.5,

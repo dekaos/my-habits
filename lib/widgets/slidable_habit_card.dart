@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import '../models/habit.dart';
 import '../providers/habit_provider.dart';
+
+import '../l10n/app_localizations.dart';
 import '../services/haptic_service.dart';
 import 'habit_card.dart';
 import 'celebration_animation.dart';
@@ -81,6 +83,7 @@ class _SlidableHabitCardState extends ConsumerState<SlidableHabitCard>
       if (mounted) {
         setState(() => _isProcessing = false);
 
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Row(
@@ -88,7 +91,7 @@ class _SlidableHabitCardState extends ConsumerState<SlidableHabitCard>
                 const Icon(Icons.undo_rounded, color: Colors.white),
                 const SizedBox(width: 12),
                 Text(
-                  '${currentHabit.title} marked incomplete',
+                  l10n.habitMarkedIncomplete(currentHabit.title),
                   style: const TextStyle(fontWeight: FontWeight.w500),
                 ),
               ],
@@ -107,6 +110,7 @@ class _SlidableHabitCardState extends ConsumerState<SlidableHabitCard>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final habitState = ref.watch(habitProvider);
     final habitNotifier = ref.read(habitProvider.notifier);
 
@@ -168,9 +172,9 @@ class _SlidableHabitCardState extends ConsumerState<SlidableHabitCard>
                         ),
                       ),
                       const SizedBox(height: 4),
-                      const Text(
-                        'Undo',
-                        style: TextStyle(
+                      Text(
+                        l10n.undo,
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
@@ -223,9 +227,9 @@ class _SlidableHabitCardState extends ConsumerState<SlidableHabitCard>
                         ),
                       ),
                       const SizedBox(height: 4),
-                      const Text(
-                        'Done',
-                        style: TextStyle(
+                      Text(
+                        l10n.done,
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
                           fontWeight: FontWeight.bold,

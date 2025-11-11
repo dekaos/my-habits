@@ -5,6 +5,7 @@ import '../../models/user_profile.dart';
 import '../../providers/notification_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/social_provider.dart';
+import '../../l10n/app_localizations.dart';
 import '../../widgets/glass_card.dart';
 import '../social/chat_screen.dart';
 import '../../widgets/animated_gradient_background.dart';
@@ -36,6 +37,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final notificationState = ref.watch(notificationProvider);
     final authState = ref.watch(authProvider);
 
@@ -44,7 +46,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
         backgroundColor: Colors.transparent,
         extendBodyBehindAppBar: true,
         appBar: GlassAppBar(
-          title: 'Notifications',
+          title: l10n.notifications,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.of(context).pop(),
@@ -60,7 +62,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                   }
                 },
                 icon: const Icon(Icons.done_all, size: 18),
-                label: const Text('Mark all read'),
+                label: Text(l10n.markAllRead),
               ),
           ],
         ),
@@ -101,6 +103,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
 
   Widget _buildNotificationCard(
       BuildContext context, AppNotification notification) {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Dismissible(
@@ -120,9 +123,9 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
             .read(notificationProvider.notifier)
             .deleteNotification(notification.id);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Notification deleted'),
-            duration: Duration(seconds: 2),
+          SnackBar(
+            content: Text(l10n.notificationDeleted),
+            duration: const Duration(seconds: 2),
           ),
         );
       },
@@ -285,7 +288,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    'Tap to reply',
+                                    l10n.tapToReply,
                                     style: TextStyle(
                                       fontSize: 10,
                                       color: notification.getColor(),
@@ -323,7 +326,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                                         ),
                                       )
                                     : const Icon(Icons.check, size: 18),
-                                label: const Text('Accept'),
+                                label: Text(l10n.accept),
                                 style: FilledButton.styleFrom(
                                   backgroundColor: Colors.green,
                                   padding:
@@ -350,7 +353,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                                         ),
                                       )
                                     : const Icon(Icons.close, size: 18),
-                                label: const Text('Reject'),
+                                label: Text(l10n.reject),
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: Colors.red,
                                   side: const BorderSide(color: Colors.red),
@@ -413,9 +416,10 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error opening chat: $e'),
+            content: Text(l10n.errorOpeningChat(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -424,6 +428,8 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
   }
 
   Widget _buildEmptyState(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32.0),
@@ -443,14 +449,14 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
               ),
               const SizedBox(height: 20),
               Text(
-                'No Notifications',
+                l10n.noNotificationsTitle,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
               ),
               const SizedBox(height: 8),
               Text(
-                'You\'re all caught up!\nWe\'ll notify you when something happens.',
+                l10n.youreAllCaughtUpMessage,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Colors.grey[600],
                     ),
@@ -485,6 +491,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
           .deleteNotification(notification.id);
 
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         messenger.showSnackBar(
           SnackBar(
             content: Row(
@@ -492,8 +499,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                 const Icon(Icons.check_circle, color: Colors.white),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text(
-                      'You and ${notification.fromUserName} are now friends!'),
+                  child: Text(l10n.nowFriends(notification.fromUserName)),
                 ),
               ],
             ),
@@ -504,9 +510,10 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         messenger.showSnackBar(
           SnackBar(
-            content: Text('Error accepting request: $e'),
+            content: Text(l10n.errorAcceptingRequest(e.toString())),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),
@@ -544,6 +551,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
           .deleteNotification(notification.id);
 
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         messenger.showSnackBar(
           SnackBar(
             content: Row(
@@ -552,7 +560,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                      'Friend request from ${notification.fromUserName} declined'),
+                      l10n.friendRequestDeclined(notification.fromUserName)),
                 ),
               ],
             ),
@@ -563,9 +571,10 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         messenger.showSnackBar(
           SnackBar(
-            content: Text('Error rejecting request: $e'),
+            content: Text(l10n.errorRejectingRequest(e.toString())),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),
@@ -582,19 +591,20 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
   }
 
   String _getTimeAgo(DateTime dateTime) {
+    final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
     final difference = now.difference(dateTime);
 
     if (difference.inDays > 7) {
-      return '${(difference.inDays / 7).floor()}w ago';
+      return l10n.weeksAgo((difference.inDays / 7).floor());
     } else if (difference.inDays > 0) {
-      return '${difference.inDays}d ago';
+      return l10n.daysAgo(difference.inDays);
     } else if (difference.inHours > 0) {
-      return '${difference.inHours}h ago';
+      return l10n.hoursAgo(difference.inHours);
     } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}m ago';
+      return l10n.minutesAgo(difference.inMinutes);
     } else {
-      return 'Just now';
+      return l10n.justNow;
     }
   }
 }

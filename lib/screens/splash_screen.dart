@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:math' as math;
 import '../providers/auth_provider.dart';
+import '../l10n/app_localizations.dart';
 import 'auth/login_screen.dart';
 import 'home/home_screen.dart';
 
@@ -147,6 +148,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -287,7 +289,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                   ],
                                 ).createShader(bounds),
                                 child: Text(
-                                  'My Habits',
+                                  l10n.myHabitsTitle,
                                   style: Theme.of(context)
                                       .textTheme
                                       .displayMedium
@@ -306,7 +308,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                       Icons.trending_up_rounded, 0),
                                   const SizedBox(width: 8),
                                   Text(
-                                    'Build Better Habits Together',
+                                    l10n.buildBetterHabits,
                                     style: Theme.of(context)
                                         .textTheme
                                         .titleMedium

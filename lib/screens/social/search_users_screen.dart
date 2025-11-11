@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/social_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/user_profile.dart';
+import '../../l10n/app_localizations.dart';
 import '../../widgets/animated_gradient_background.dart';
 
 class SearchUsersScreen extends ConsumerStatefulWidget {
@@ -44,6 +45,7 @@ class _SearchUsersScreenState extends ConsumerState<SearchUsersScreen> {
   }
 
   Future<void> _sendFriendRequest(UserProfile user) async {
+    final l10n = AppLocalizations.of(context)!;
     final authState = ref.read(authProvider);
 
     if (authState.user == null) return;
@@ -63,7 +65,7 @@ class _SearchUsersScreenState extends ConsumerState<SearchUsersScreen> {
                 const Icon(Icons.check_circle, color: Colors.white),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text('Friend request sent to ${user.displayName}'),
+                  child: Text(l10n.friendRequestSent(user.displayName)),
                 ),
               ],
             ),
@@ -99,11 +101,12 @@ class _SearchUsersScreenState extends ConsumerState<SearchUsersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final authState = ref.watch(authProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Find Friends'),
+        title: Text(l10n.findFriends),
       ),
       body: AnimatedGradientBackground(
         child: Column(
@@ -113,7 +116,7 @@ class _SearchUsersScreenState extends ConsumerState<SearchUsersScreen> {
               child: TextField(
                 controller: _searchController,
                 decoration: InputDecoration(
-                  hintText: 'Search by name or email...',
+                  hintText: l10n.searchByName,
                   prefixIcon: const Icon(Icons.search),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -153,8 +156,8 @@ class _SearchUsersScreenState extends ConsumerState<SearchUsersScreen> {
                                 const SizedBox(height: 16),
                                 Text(
                                   _searchController.text.isEmpty
-                                      ? 'Search for users to add as friends'
-                                      : 'No users found',
+                                      ? l10n.searchForUsers
+                                      : l10n.noUsersFound,
                                   style: Theme.of(context)
                                       .textTheme
                                       .bodyLarge
@@ -221,11 +224,11 @@ class _SearchUsersScreenState extends ConsumerState<SearchUsersScreen> {
                                   ],
                                 ),
                                 trailing: isCurrentUser
-                                    ? const Chip(label: Text('You'))
+                                    ? Chip(label: Text(l10n.you))
                                     : FilledButton(
                                         onPressed: () =>
                                             _sendFriendRequest(user),
-                                        child: const Text('Add'),
+                                        child: Text(l10n.add),
                                       ),
                               ),
                             );

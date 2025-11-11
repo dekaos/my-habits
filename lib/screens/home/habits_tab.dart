@@ -7,6 +7,7 @@ import '../habits/add_habit_screen.dart';
 import '../habits/habit_detail_screen.dart';
 import '../../widgets/slidable_habit_card.dart';
 import '../../widgets/glass_card.dart';
+import '../../l10n/app_localizations.dart';
 
 class HabitsTab extends ConsumerStatefulWidget {
   const HabitsTab({super.key});
@@ -20,13 +21,14 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
     final habitState = ref.watch(habitProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: const PreferredSize(
-        preferredSize: Size.fromHeight(60),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(60),
         child: GlassAppBar(
-          title: 'My Habits',
+          title: l10n.myHabits,
         ),
       ),
       body: RefreshIndicator(
@@ -43,36 +45,43 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
                 ? _buildEmptyState(context)
                 : _buildHabitsList(context, ref, habitState),
       ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 80),
-        child: GlassButton(
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const AddHabitScreen(),
+      floatingActionButton: Builder(
+        builder: (context) {
+          final l10n = AppLocalizations.of(context)!;
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 80),
+            child: GlassButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const AddHabitScreen(),
+                  ),
+                );
+              },
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.add, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    l10n.newHabit,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                ],
               ),
-            );
-          },
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.add, size: 20),
-              const SizedBox(width: 8),
-              Text(
-                'New Habit',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
 
   Widget _buildEmptyState(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Padding(
       padding: const EdgeInsets.all(32.0),
       child: GlassCard(
@@ -109,7 +118,7 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
             ),
             const SizedBox(height: 24),
             Text(
-              'Begin Your Journey',
+              l10n.beginYourJourney,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     letterSpacing: -0.5,
@@ -117,7 +126,7 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
             ),
             const SizedBox(height: 12),
             Text(
-              'Every great journey begins with a single step.\n\nCreate your first habit and start building the life you want, one day at a time.',
+              l10n.everyGreatJourney,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Colors.grey[600],
                     height: 1.5,
@@ -134,7 +143,7 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Small steps, big changes',
+                  l10n.smallStepsBigChanges,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         fontStyle: FontStyle.italic,
                         color: Colors.grey[500],
@@ -150,6 +159,7 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
 
   Widget _buildHabitsList(
       BuildContext context, WidgetRef ref, HabitState habitState) {
+    final l10n = AppLocalizations.of(context)!;
     final habitNotifier = ref.read(habitProvider.notifier);
     final todaysHabits = habitNotifier.getTodaysHabits();
     final otherHabits =
@@ -182,7 +192,7 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Today\'s Journey',
+                  l10n.todaysJourney,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                         letterSpacing: -0.5,
@@ -200,7 +210,7 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    '${todaysHabits.length} habit${todaysHabits.length > 1 ? 's' : ''}',
+                    l10n.habitCount(todaysHabits.length),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Theme.of(context).colorScheme.primary,
@@ -261,7 +271,7 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'All Habits',
+                  l10n.allHabits,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         letterSpacing: -0.3,
@@ -316,6 +326,7 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
     List<Habit> todaysHabits, {
     Key? key,
   }) {
+    final l10n = AppLocalizations.of(context)!;
     final habitNotifier = ref.read(habitProvider.notifier);
     final completed =
         todaysHabits.where(habitNotifier.isHabitCompletedToday).length;
@@ -347,7 +358,7 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
                     const Text('💫', style: TextStyle(fontSize: 20)),
                     const SizedBox(width: 8),
                     Text(
-                      'Your Progress Today',
+                      l10n.yourProgressToday,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             letterSpacing: -0.3,
@@ -495,11 +506,11 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
                     child: Text(
                       total > 0
                           ? progress == 1.0
-                              ? 'Perfect day! All habits built! 🎉'
+                              ? l10n.perfectDay
                               : progress >= 0.5
-                                  ? 'Great momentum! Keep building!'
-                                  : 'Every step counts. Keep going!'
-                          : 'Ready to build new habits?',
+                                  ? l10n.greatMomentum
+                                  : l10n.everyStepCounts
+                          : l10n.readyToBuildHabits,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w600,
                           ),

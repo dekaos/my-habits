@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:confetti/confetti.dart';
+import '../l10n/app_localizations.dart';
 
 /// Animation theme based on habit icon
 class CelebrationTheme {
@@ -49,7 +50,7 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
   void initState() {
     super.initState();
 
-    _theme = _getThemeForIcon(widget.habitIcon);
+    _theme = _getThemeForIcon(context, widget.habitIcon);
 
     _confettiController = ConfettiController(
       duration: const Duration(seconds: 2),
@@ -96,146 +97,208 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
     });
   }
 
-  CelebrationTheme _getThemeForIcon(String? iconName) {
+  CelebrationTheme _getThemeForIcon(BuildContext context, String? iconName) {
+    final l10n = AppLocalizations.of(context)!;
+
     switch (iconName) {
       case 'fitness':
-        return const CelebrationTheme(
-          colors: [Color(0xFFEF4444), Color(0xFFF97316), Color(0xFFFBBF24)],
+        return CelebrationTheme(
+          colors: const [
+            Color(0xFFEF4444),
+            Color(0xFFF97316),
+            Color(0xFFFBBF24)
+          ],
           emoji: '💪',
-          title: 'Beast Mode! 💪',
-          subtitle: 'One step closer to your fitness goal!',
+          title: l10n.celebrationFitnessTitle,
+          subtitle: l10n.celebrationFitnessSubtitle,
           icon: Icons.fitness_center,
-          particles: ['💪', '🔥', '⚡', '🏋️'],
+          particles: const ['💪', '🔥', '⚡', '🏋️'],
         );
       case 'book':
-        return const CelebrationTheme(
-          colors: [Color(0xFF6366F1), Color(0xFF8B5CF6), Color(0xFFA78BFA)],
+        return CelebrationTheme(
+          colors: const [
+            Color(0xFF6366F1),
+            Color(0xFF8B5CF6),
+            Color(0xFFA78BFA)
+          ],
           emoji: '📚',
-          title: 'Bookworm! 📚',
-          subtitle: 'Knowledge is power!',
+          title: l10n.celebrationBookTitle,
+          subtitle: l10n.celebrationBookSubtitle,
           icon: Icons.book,
-          particles: ['📚', '📖', '✨', '💡'],
+          particles: const ['📚', '📖', '✨', '💡'],
         );
       case 'water':
-        return const CelebrationTheme(
-          colors: [Color(0xFF06B6D4), Color(0xFF0EA5E9), Color(0xFF3B82F6)],
+        return CelebrationTheme(
+          colors: const [
+            Color(0xFF06B6D4),
+            Color(0xFF0EA5E9),
+            Color(0xFF3B82F6)
+          ],
           emoji: '💧',
-          title: 'Hydrated! 💧',
-          subtitle: 'Stay refreshed and healthy!',
+          title: l10n.celebrationWaterTitle,
+          subtitle: l10n.celebrationWaterSubtitle,
           icon: Icons.water_drop,
-          particles: ['💧', '💦', '🌊', '✨'],
+          particles: const ['💧', '💦', '🌊', '✨'],
         );
       case 'sleep':
-        return const CelebrationTheme(
-          colors: [Color(0xFF8B5CF6), Color(0xFF6366F1), Color(0xFF4F46E5)],
+        return CelebrationTheme(
+          colors: const [
+            Color(0xFF8B5CF6),
+            Color(0xFF6366F1),
+            Color(0xFF4F46E5)
+          ],
           emoji: '😴',
-          title: 'Sweet Dreams! 😴',
-          subtitle: 'Rest well, you earned it!',
+          title: l10n.celebrationSleepTitle,
+          subtitle: l10n.celebrationSleepSubtitle,
           icon: Icons.bedtime,
-          particles: ['😴', '💤', '⭐', '🌙'],
+          particles: const ['😴', '💤', '⭐', '🌙'],
         );
       case 'restaurant':
-        return const CelebrationTheme(
-          colors: [Color(0xFFF59E0B), Color(0xFFFBBF24), Color(0xFFFDE68A)],
+        return CelebrationTheme(
+          colors: const [
+            Color(0xFFF59E0B),
+            Color(0xFFFBBF24),
+            Color(0xFFFDE68A)
+          ],
           emoji: '🍽️',
-          title: 'Delicious! 🍽️',
-          subtitle: 'Healthy eating habits!',
+          title: l10n.celebrationFoodTitle,
+          subtitle: l10n.celebrationFoodSubtitle,
           icon: Icons.restaurant,
-          particles: ['🍽️', '🥗', '🍎', '✨'],
+          particles: const ['🍽️', '🥗', '🍎', '✨'],
         );
       case 'run':
-        return const CelebrationTheme(
-          colors: [Color(0xFF10B981), Color(0xFF34D399), Color(0xFF6EE7B7)],
+        return CelebrationTheme(
+          colors: const [
+            Color(0xFF10B981),
+            Color(0xFF34D399),
+            Color(0xFF6EE7B7)
+          ],
           emoji: '🏃',
-          title: 'On the Move! 🏃',
-          subtitle: 'Keep running towards your goals!',
+          title: l10n.celebrationRunTitle,
+          subtitle: l10n.celebrationRunSubtitle,
           icon: Icons.directions_run,
-          particles: ['🏃', '💨', '⚡', '🔥'],
+          particles: const ['🏃', '💨', '⚡', '🔥'],
         );
       case 'meditation':
-        return const CelebrationTheme(
-          colors: [Color(0xFF8B5CF6), Color(0xFFA78BFA), Color(0xFFC4B5FD)],
+        return CelebrationTheme(
+          colors: const [
+            Color(0xFF8B5CF6),
+            Color(0xFFA78BFA),
+            Color(0xFFC4B5FD)
+          ],
           emoji: '🧘',
-          title: 'Inner Peace! 🧘',
-          subtitle: 'Mindfulness achieved!',
+          title: l10n.celebrationMeditationTitle,
+          subtitle: l10n.celebrationMeditationSubtitle,
           icon: Icons.spa,
-          particles: ['🧘', '☮️', '✨', '🕉️'],
+          particles: const ['🧘', '☮️', '✨', '🕉️'],
         );
       case 'yoga':
-        return const CelebrationTheme(
-          colors: [Color(0xFFEC4899), Color(0xFFF472B6), Color(0xFFFBBCDA)],
+        return CelebrationTheme(
+          colors: const [
+            Color(0xFFEC4899),
+            Color(0xFFF472B6),
+            Color(0xFFFBBCDA)
+          ],
           emoji: '🧘‍♀️',
-          title: 'Namaste! 🧘‍♀️',
-          subtitle: 'Balance and flexibility!',
+          title: l10n.celebrationYogaTitle,
+          subtitle: l10n.celebrationYogaSubtitle,
           icon: Icons.self_improvement,
-          particles: ['🧘‍♀️', '🌸', '✨', '💫'],
+          particles: const ['🧘‍♀️', '🌸', '✨', '💫'],
         );
       case 'art':
-        return const CelebrationTheme(
-          colors: [Color(0xFFEC4899), Color(0xFFF59E0B), Color(0xFF8B5CF6)],
+        return CelebrationTheme(
+          colors: const [
+            Color(0xFFEC4899),
+            Color(0xFFF59E0B),
+            Color(0xFF8B5CF6)
+          ],
           emoji: '🎨',
-          title: 'Creative! 🎨',
-          subtitle: 'Express yourself!',
+          title: l10n.celebrationArtTitle,
+          subtitle: l10n.celebrationArtSubtitle,
           icon: Icons.palette,
-          particles: ['🎨', '🖌️', '✨', '🌈'],
+          particles: const ['🎨', '🖌️', '✨', '🌈'],
         );
       case 'music':
-        return const CelebrationTheme(
-          colors: [Color(0xFF6366F1), Color(0xFFEC4899), Color(0xFF8B5CF6)],
+        return CelebrationTheme(
+          colors: const [
+            Color(0xFF6366F1),
+            Color(0xFFEC4899),
+            Color(0xFF8B5CF6)
+          ],
           emoji: '🎵',
-          title: 'Harmony! 🎵',
-          subtitle: 'Keep the rhythm going!',
+          title: l10n.celebrationMusicTitle,
+          subtitle: l10n.celebrationMusicSubtitle,
           icon: Icons.music_note,
-          particles: ['🎵', '🎶', '🎸', '✨'],
+          particles: const ['🎵', '🎶', '🎸', '✨'],
         );
       case 'work':
-        return const CelebrationTheme(
-          colors: [Color(0xFF6366F1), Color(0xFF3B82F6), Color(0xFF60A5FA)],
+        return CelebrationTheme(
+          colors: const [
+            Color(0xFF6366F1),
+            Color(0xFF3B82F6),
+            Color(0xFF60A5FA)
+          ],
           emoji: '💼',
-          title: 'Productive! 💼',
-          subtitle: 'Crushing those tasks!',
+          title: l10n.celebrationWorkTitle,
+          subtitle: l10n.celebrationWorkSubtitle,
           icon: Icons.work,
-          particles: ['💼', '✅', '⚡', '🎯'],
+          particles: const ['💼', '✅', '⚡', '🎯'],
         );
       case 'school':
-        return const CelebrationTheme(
-          colors: [Color(0xFFF59E0B), Color(0xFFFBBF24), Color(0xFF10B981)],
+        return CelebrationTheme(
+          colors: const [
+            Color(0xFFF59E0B),
+            Color(0xFFFBBF24),
+            Color(0xFF10B981)
+          ],
           emoji: '🎓',
-          title: 'Smart! 🎓',
-          subtitle: 'Learning never stops!',
+          title: l10n.celebrationSchoolTitle,
+          subtitle: l10n.celebrationSchoolSubtitle,
           icon: Icons.school,
-          particles: ['🎓', '📝', '💡', '✨'],
+          particles: const ['🎓', '📝', '💡', '✨'],
         );
       case 'heart':
-        return const CelebrationTheme(
-          colors: [Color(0xFFEF4444), Color(0xFFF87171), Color(0xFFFCA5A5)],
+        return CelebrationTheme(
+          colors: const [
+            Color(0xFFEF4444),
+            Color(0xFFF87171),
+            Color(0xFFFCA5A5)
+          ],
           emoji: '❤️',
-          title: 'Healthy! ❤️',
-          subtitle: 'Taking care of yourself!',
+          title: l10n.celebrationHeartTitle,
+          subtitle: l10n.celebrationHeartSubtitle,
           icon: Icons.favorite,
-          particles: ['❤️', '💖', '✨', '🌟'],
+          particles: const ['❤️', '💖', '✨', '🌟'],
         );
       case 'walk':
-        return const CelebrationTheme(
-          colors: [Color(0xFF10B981), Color(0xFF059669), Color(0xFF34D399)],
+        return CelebrationTheme(
+          colors: const [
+            Color(0xFF10B981),
+            Color(0xFF059669),
+            Color(0xFF34D399)
+          ],
           emoji: '🚶',
-          title: 'Step by Step! 🚶',
-          subtitle: 'Every step counts!',
+          title: l10n.celebrationWalkTitle,
+          subtitle: l10n.celebrationWalkSubtitle,
           icon: Icons.directions_walk,
-          particles: ['🚶', '👣', '🌿', '✨'],
+          particles: const ['🚶', '👣', '🌿', '✨'],
         );
       case 'bike':
-        return const CelebrationTheme(
-          colors: [Color(0xFF0EA5E9), Color(0xFF06B6D4), Color(0xFF22D3EE)],
+        return CelebrationTheme(
+          colors: const [
+            Color(0xFF0EA5E9),
+            Color(0xFF06B6D4),
+            Color(0xFF22D3EE)
+          ],
           emoji: '🚴',
-          title: 'Pedal Power! 🚴',
-          subtitle: 'Rolling towards success!',
+          title: l10n.celebrationBikeTitle,
+          subtitle: l10n.celebrationBikeSubtitle,
           icon: Icons.directions_bike,
-          particles: ['🚴', '💨', '⚡', '🌟'],
+          particles: const ['🚴', '💨', '⚡', '🌟'],
         );
       default:
-        return const CelebrationTheme(
-          colors: [
+        return CelebrationTheme(
+          colors: const [
             Color(0xFF6366F1),
             Color(0xFFEC4899),
             Color(0xFFF59E0B),
@@ -243,10 +306,10 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
             Color(0xFF8B5CF6),
           ],
           emoji: '🎉',
-          title: '🎉 Great Job! 🎉',
-          subtitle: 'Keep up the great work!',
+          title: l10n.celebrationDefaultTitle,
+          subtitle: l10n.celebrationDefaultSubtitle,
           icon: Icons.celebration,
-          particles: ['🎉', '✨', '🌟', '⭐'],
+          particles: const ['🎉', '✨', '🌟', '⭐'],
         );
     }
   }

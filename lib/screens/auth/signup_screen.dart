@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/auth_provider.dart';
+import '../../l10n/app_localizations.dart';
 import '../home/home_screen.dart';
 import '../../widgets/animated_gradient_background.dart';
 import '../../widgets/habit_hero_logo.dart';
@@ -48,18 +49,20 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           MaterialPageRoute(builder: (context) => const HomeScreen()),
         );
       } else {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Signup failed. Please try again.'),
+          SnackBar(
+            content: Text(l10n.signupFailed),
             backgroundColor: Colors.red,
           ),
         );
       }
     } catch (e) {
       if (!mounted) return;
+      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error: ${e.toString()}'),
+          content: Text('${l10n.error}: ${e.toString()}'),
           backgroundColor: Colors.red,
         ),
       );
@@ -69,12 +72,13 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return AnimatedGradientBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: const GlassAppBar(
-          title: 'Create Account',
+        appBar: GlassAppBar(
+          title: l10n.createAccount,
         ),
         body: SafeArea(
           child: SingleChildScrollView(
@@ -88,7 +92,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   const HabitHeroLogo(),
                   const SizedBox(height: 24),
                   Text(
-                    'Join My Habits',
+                    l10n.joinMyHabits,
                     style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -96,7 +100,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Start building better habits with friends',
+                    l10n.startBuildingHabits,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           color: Colors.grey,
                         ),
@@ -107,7 +111,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     controller: _nameController,
                     textCapitalization: TextCapitalization.words,
                     decoration: InputDecoration(
-                      labelText: 'Full Name',
+                      labelText: l10n.fullName,
                       prefixIcon: const Icon(Icons.person_outline),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -115,7 +119,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter your name';
+                        return l10n.pleaseEnterName;
                       }
                       return null;
                     },
@@ -125,7 +129,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
-                      labelText: 'Email',
+                      labelText: l10n.email,
                       prefixIcon: const Icon(Icons.email_outlined),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -133,10 +137,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter your email';
+                        return l10n.pleaseEnterEmail;
                       }
                       if (!value.contains('@')) {
-                        return 'Please enter a valid email';
+                        return l10n.pleaseEnterValidEmail;
                       }
                       return null;
                     },
@@ -146,7 +150,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     controller: _passwordController,
                     obscureText: _obscurePassword,
                     decoration: InputDecoration(
-                      labelText: 'Password',
+                      labelText: l10n.password,
                       prefixIcon: const Icon(Icons.lock_outline),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -166,10 +170,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter a password';
+                        return l10n.pleaseEnterPassword;
                       }
                       if (value.length < 6) {
-                        return 'Password must be at least 6 characters';
+                        return l10n.passwordTooShort;
                       }
                       return null;
                     },
@@ -179,7 +183,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     controller: _confirmPasswordController,
                     obscureText: _obscureConfirmPassword,
                     decoration: InputDecoration(
-                      labelText: 'Confirm Password',
+                      labelText: l10n.confirmPassword,
                       prefixIcon: const Icon(Icons.lock_outline),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -199,10 +203,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please confirm your password';
+                        return l10n.pleaseEnterPassword;
                       }
                       if (value != _passwordController.text) {
-                        return 'Passwords do not match';
+                        return l10n.passwordsDoNotMatch;
                       }
                       return null;
                     },
@@ -222,9 +226,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                             width: 20,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text(
-                            'Create Account',
-                            style: TextStyle(fontSize: 16),
+                        : Text(
+                            l10n.createAccount,
+                            style: const TextStyle(fontSize: 16),
                           ),
                   ),
                 ],
