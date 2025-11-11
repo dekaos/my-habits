@@ -1,6 +1,15 @@
 # My Habits
 
-A beautiful habit tracking app with social accountability features built with Flutter. Stay motivated by building better habits with your friends!
+A beautiful habit tracking app with social accountability features built with Flutter and Supabase. Stay motivated by building better habits with your friends!
+
+## 🛠️ Tech Stack
+
+- **Frontend**: Flutter 3.0+ with Material 3 Design
+- **State Management**: Riverpod
+- **Backend**: Supabase (PostgreSQL + Realtime + Auth + Storage)
+- **Charts**: FL Chart with isolate-based calculations
+- **Notifications**: Firebase Cloud Messaging
+- **Local Storage**: SharedPreferences
 
 ## ✨ Features
 
@@ -19,10 +28,11 @@ A beautiful habit tracking app with social accountability features built with Fl
 
 ### Social Features
 - **Friends System**: Connect with friends to stay motivated together
-- **Activity Feed**: See your friends' achievements and progress
+- **Activity Feed**: See your friends' achievements and progress in realtime
 - **Reactions**: Cheer on your friends with emoji reactions
 - **Accountability Partners**: Share specific habits with accountability partners
 - **Public/Private Habits**: Choose which habits to share
+- **Realtime Updates**: Powered by Supabase realtime subscriptions for instant updates
 
 ### UI/UX
 - **Material 3 Design**: Modern, beautiful interface
@@ -34,7 +44,7 @@ A beautiful habit tracking app with social accountability features built with Fl
 
 ### Prerequisites
 - Flutter SDK 3.0.0 or higher
-- Firebase account (for backend services)
+- Supabase account (for backend services)
 - iOS/Android development environment setup
 
 ### Installation
@@ -49,34 +59,28 @@ A beautiful habit tracking app with social accountability features built with Fl
    flutter pub get
    ```
 
-3. **Set up Firebase**
+3. **Set up Supabase**
    
-   a. Create a new Firebase project at [Firebase Console](https://console.firebase.google.com/)
+   a. Create a new Supabase project at [Supabase Console](https://app.supabase.com/)
    
-   b. Install Firebase CLI:
+   b. Copy your project URL and anon key from Project Settings > API
+   
+   c. Create a `.env` file in the project root:
    ```bash
-   npm install -g firebase-tools
+   SUPABASE_URL=your_project_url
+   SUPABASE_ANON_KEY=your_anon_key
    ```
    
-   c. Login to Firebase:
-   ```bash
-   firebase login
+   d. Run the database setup script in the Supabase SQL Editor:
+   ```sql
+   -- See SUPABASE_QUICK_SETUP.sql for the complete schema
    ```
    
-   d. Install FlutterFire CLI:
-   ```bash
-   dart pub global activate flutterfire_cli
-   ```
-   
-   e. Configure Firebase for your Flutter app:
-   ```bash
-   flutterfire configure
-   ```
-   
-   f. Enable Firebase services in the Firebase Console:
-   - Authentication (Email/Password)
-   - Cloud Firestore
-   - Storage
+   e. Enable the following in your Supabase project:
+   - Authentication (Email/Password, Social OAuth)
+   - Row Level Security (RLS) policies
+   - Storage bucket for profile images
+   - Realtime subscriptions for social features
 
 4. **Create asset directories**
    ```bash
@@ -98,10 +102,15 @@ lib/
 │   ├── habit_completion.dart
 │   ├── user_profile.dart
 │   └── activity.dart
-├── providers/                # State management
+├── providers/                # State management (Riverpod)
 │   ├── auth_provider.dart
 │   ├── habit_provider.dart
 │   └── social_provider.dart
+├── services/                 # Backend services
+│   ├── supabase_service.dart
+│   ├── notification_service.dart
+│   ├── haptic_service.dart
+│   └── image_service.dart
 ├── screens/                  # UI screens
 │   ├── splash_screen.dart
 │   ├── auth/
@@ -128,73 +137,126 @@ lib/
     └── chart_calculator.dart # Isolate-based chart calculations
 ```
 
-## 🗄️ Firebase Firestore Structure
+## 🗄️ Supabase Database Schema
 
-### Collections
+### Tables
 
-**users/**
-```javascript
-{
-  email: string,
-  displayName: string,
-  photoUrl: string?,
-  bio: string?,
-  joinedAt: timestamp,
-  friends: array<string>,
-  friendRequests: array<string>,
-  totalStreaks: number,
-  longestStreak: number
-}
+**users**
+```sql
+CREATE TABLE users (
+  id UUID PRIMARY KEY REFERENCES auth.users(id),
+  email TEXT NOT NULL,
+  display_name TEXT,
+  photo_url TEXT,
+  bio TEXT,
+  joined_at TIMESTAMPTZ DEFAULT NOW(),
+  total_streaks INTEGER DEFAULT 0,
+  longest_streak INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
 ```
 
-**habits/**
-```javascript
-{
-  userId: string,
-  title: string,
-  description: string?,
-  icon: string?,
-  color: string,
-  frequency: number, // 0=daily, 1=weekly, 2=custom
-  customDays: array<number>,
-  targetCount: number,
-  createdAt: timestamp,
-  isPublic: boolean,
-  accountabilityPartners: array<string>,
-  currentStreak: number,
-  longestStreak: number,
-  lastCompletedDate: timestamp?,
-  totalCompletions: number
-}
+**habits**
+```sql
+CREATE TABLE habits (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  description TEXT,
+  icon TEXT,
+  color TEXT NOT NULL,
+  frequency INTEGER NOT NULL DEFAULT 0, -- 0=daily, 1=weekly, 2=custom
+  custom_days INTEGER[],
+  target_count INTEGER DEFAULT 1,
+  is_public BOOLEAN DEFAULT FALSE,
+  current_streak INTEGER DEFAULT 0,
+  longest_streak INTEGER DEFAULT 0,
+  last_completed_date TIMESTAMPTZ,
+  total_completions INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
 ```
 
-**habit_completions/**
-```javascript
-{
-  habitId: string,
-  userId: string,
-  completedAt: timestamp,
-  note: string?,
-  imageUrl: string?,
-  count: number
-}
+**habit_completions**
+```sql
+CREATE TABLE habit_completions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  habit_id UUID NOT NULL REFERENCES habits(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  completed_at TIMESTAMPTZ DEFAULT NOW(),
+  note TEXT,
+  image_url TEXT,
+  count INTEGER DEFAULT 1,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
 ```
 
-**activities/**
-```javascript
-{
-  userId: string,
-  userName: string,
-  userPhotoUrl: string?,
-  type: number, // 0=completed, 1=milestone, 2=new, 3=encouragement
-  habitId: string?,
-  habitTitle: string?,
-  message: string?,
-  streakCount: number?,
-  createdAt: timestamp,
-  reactions: map<string, string>
-}
+**friend_requests**
+```sql
+CREATE TABLE friend_requests (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  from_user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  to_user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  status TEXT NOT NULL DEFAULT 'pending', -- pending, accepted, rejected
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(from_user_id, to_user_id)
+);
 ```
+
+**activities**
+```sql
+CREATE TABLE activities (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  user_name TEXT NOT NULL,
+  user_photo_url TEXT,
+  type INTEGER NOT NULL, -- 0=completed, 1=milestone, 2=new, 3=encouragement
+  habit_id UUID REFERENCES habits(id) ON DELETE CASCADE,
+  habit_title TEXT,
+  message TEXT,
+  streak_count INTEGER,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+**reactions**
+```sql
+CREATE TABLE reactions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  activity_id UUID NOT NULL REFERENCES activities(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  emoji TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(activity_id, user_id)
+);
+```
+
+**notifications**
+```sql
+CREATE TABLE notifications (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  type TEXT NOT NULL, -- friend_request, habit_reaction, etc.
+  title TEXT NOT NULL,
+  body TEXT NOT NULL,
+  data JSONB,
+  is_read BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### Row Level Security (RLS) Policies
+
+All tables have RLS enabled with policies that:
+- Users can only read/write their own data
+- Public habits are visible to friends
+- Activities are visible to friends
+- Friend requests follow bidirectional visibility rules
+
+See `SUPABASE_QUICK_SETUP.sql` for complete RLS policies.
 
 ## 🎯 Roadmap
 
