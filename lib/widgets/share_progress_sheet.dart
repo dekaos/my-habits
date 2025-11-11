@@ -8,6 +8,7 @@ import 'package:share_plus/share_plus.dart';
 import '../models/habit.dart';
 import 'glass_card.dart';
 import 'animated_gradient_background.dart';
+import 'habit_icon_selector.dart';
 
 class ShareProgressSheet extends StatefulWidget {
   final Habit habit;
@@ -192,7 +193,9 @@ class _ShareProgressSheetState extends State<ShareProgressSheet>
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Icon(
-                                    Icons.star_rounded,
+                                    HabitIconSelector.getIconByName(
+                                            widget.habit.icon) ??
+                                        Icons.star_rounded,
                                     color:
                                         Theme.of(context).colorScheme.primary,
                                     size: 28,
@@ -401,8 +404,10 @@ class _ShareProgressSheetState extends State<ShareProgressSheet>
                               width: 2,
                             ),
                           ),
-                          child: const Icon(
-                            Icons.star_rounded,
+                          child: Icon(
+                            HabitIconSelector.getIconByName(
+                                    widget.habit.icon) ??
+                                Icons.star_rounded,
                             color: Colors.white,
                             size: 40,
                           ),
