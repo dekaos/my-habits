@@ -60,7 +60,11 @@ class _SlidableHabitCardState extends ConsumerState<SlidableHabitCard>
 
     final habitNotifier = ref.read(habitProvider.notifier);
 
-    habitNotifier.completeHabit(currentHabit);
+    habitNotifier.completeHabit(currentHabit).then((_) {
+      if (mounted) {
+        setState(() => _isProcessing = false);
+      }
+    });
   }
 
   Future<void> _handleUndo(Habit currentHabit) async {
