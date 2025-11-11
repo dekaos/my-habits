@@ -1,10 +1,12 @@
 import 'dart:io';
 import 'dart:ui' as ui;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:image/image.dart' as img;
 import '../models/habit.dart';
 import '../l10n/app_localizations.dart';
 import 'glass_card.dart';
@@ -171,7 +173,6 @@ class _ShareProgressSheetState extends State<ShareProgressSheet>
                       ),
                     ),
 
-                    // Preview Card
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       child: GlassCard(
@@ -249,7 +250,6 @@ class _ShareProgressSheetState extends State<ShareProgressSheet>
 
                     const SizedBox(height: 24),
 
-                    // Share Options
                     Expanded(
                       child: SingleChildScrollView(
                         padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -313,7 +313,6 @@ class _ShareProgressSheetState extends State<ShareProgressSheet>
         ),
         child: Stack(
           children: [
-            // Decorative circles with enhanced glow
             Positioned(
               top: -50,
               right: -50,
@@ -827,8 +826,6 @@ class _ShareProgressSheetState extends State<ShareProgressSheet>
     setState(() => _isGeneratingImage = true);
 
     try {
-      await Future.delayed(const Duration(milliseconds: 500));
-
       if (!mounted || !context.mounted) return;
 
       final renderContext = _shareCardKey.currentContext;
@@ -847,20 +844,28 @@ class _ShareProgressSheetState extends State<ShareProgressSheet>
 
       final boundary = renderObject;
 
-      final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+      final ui.Image image = await boundary.toImage(pixelRatio: 2.0);
+
       final ByteData? byteData =
-          await image.toByteData(format: ui.ImageByteFormat.png);
+          await image.toByteData(format: ui.ImageByteFormat.rawRgba);
 
       if (byteData == null) {
         throw Exception('Failed to convert image to bytes');
       }
 
-      final Uint8List pngBytes = byteData.buffer.asUint8List();
+      final jpegBytes = await compute(
+        _convertToJpeg,
+        _ImageConversionParams(
+          bytes: byteData.buffer.asUint8List(),
+          width: image.width,
+          height: image.height,
+        ),
+      );
 
       final tempDir = await getTemporaryDirectory();
       final file = File(
-          '${tempDir.path}/habit_progress_${DateTime.now().millisecondsSinceEpoch}.png');
-      await file.writeAsBytes(pngBytes);
+          '${tempDir.path}/habit_progress_${DateTime.now().millisecondsSinceEpoch}.jpg');
+      await file.writeAsBytes(jpegBytes);
 
       if (context.mounted) {
         await Share.shareXFiles(
@@ -900,6 +905,33 @@ class _ShareProgressSheetState extends State<ShareProgressSheet>
       }
     }
   }
+
+  static Uint8List _convertToJpeg(_ImageConversionParams params) {
+    try {
+      final image = img.Image.fromBytes(
+        width: params.width,
+        height: params.height,
+        bytes: params.bytes.buffer,
+        order: img.ChannelOrder.rgba,
+      );
+
+      return Uint8List.fromList(img.encodeJpg(image, quality: 95));
+    } catch (e) {
+      return params.bytes;
+    }
+  }
+}
+
+class _ImageConversionParams {
+  final Uint8List bytes;
+  final int width;
+  final int height;
+
+  _ImageConversionParams({
+    required this.bytes,
+    required this.width,
+    required this.height,
+  });
 }
 
 void showShareProgress(
