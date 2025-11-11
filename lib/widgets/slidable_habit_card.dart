@@ -10,12 +10,10 @@ import 'celebration_animation.dart';
 class SlidableHabitCard extends ConsumerStatefulWidget {
   final Habit habit;
   final VoidCallback onTap;
-  final VoidCallback? onActionComplete;
 
   const SlidableHabitCard({
     required this.habit,
     required this.onTap,
-    this.onActionComplete,
     super.key,
   });
 
@@ -47,92 +45,38 @@ class _SlidableHabitCardState extends ConsumerState<SlidableHabitCard>
     super.dispose();
   }
 
-  Future<void> _handleComplete() async {
+  Future<void> _handleComplete(Habit currentHabit) async {
     if (_isProcessing) return;
 
-    // Mark as processing but don't block UI
     _isProcessing = true;
 
-    // Play haptic feedback and sound IMMEDIATELY
     HapticService.celebrateSuccess();
 
-    // Show celebration animation IMMEDIATELY (non-blocking)
     if (mounted) {
-      showCelebration(context, habitIcon: widget.habit.icon);
+      showCelebration(context, habitIcon: currentHabit.icon);
     }
 
-    // Animate the card
     _successController.forward().then((_) => _successController.reverse());
 
-    // Process habit completion in background (don't await - let it run in parallel)
     final habitNotifier = ref.read(habitProvider.notifier);
-    habitNotifier.completeHabit(widget.habit).then((_) {
-      if (mounted) {
-        // Refresh UI after completion
-        setState(() => _isProcessing = false);
-        widget.onActionComplete?.call();
 
-        // Show success feedback
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.check_circle, color: Colors.white),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '${widget.habit.title} completed!',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                        ),
-                      ),
-                      Text(
-                        '🔥 ${widget.habit.currentStreak + 1} day streak!',
-                        style: const TextStyle(fontSize: 13),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            backgroundColor: Colors.green.shade600,
-            behavior: SnackBarBehavior.floating,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            duration: const Duration(seconds: 3),
-            margin: const EdgeInsets.all(16),
-          ),
-        );
-      }
-    });
+    habitNotifier.completeHabit(currentHabit);
   }
 
-  Future<void> _handleUndo() async {
+  Future<void> _handleUndo(Habit currentHabit) async {
     if (_isProcessing) return;
 
-    // Mark as processing but don't block UI
     _isProcessing = true;
 
-    // Play undo haptic feedback IMMEDIATELY (just shake, no animation)
     HapticService.playUndoHaptic();
 
-    // Animate the card
     _successController.forward().then((_) => _successController.reverse());
 
-    // Process habit undo in background (don't await - let it run in parallel)
     final habitNotifier = ref.read(habitProvider.notifier);
-    habitNotifier.uncompleteHabit(widget.habit).then((_) {
+    habitNotifier.uncompleteHabit(currentHabit).then((_) {
       if (mounted) {
-        // Refresh UI after completion
         setState(() => _isProcessing = false);
-        widget.onActionComplete?.call();
 
-        // Show undo feedback
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Row(
@@ -140,7 +84,7 @@ class _SlidableHabitCardState extends ConsumerState<SlidableHabitCard>
                 const Icon(Icons.undo_rounded, color: Colors.white),
                 const SizedBox(width: 12),
                 Text(
-                  '${widget.habit.title} marked incomplete',
+                  '${currentHabit.title} marked incomplete',
                   style: const TextStyle(fontWeight: FontWeight.w500),
                 ),
               ],
@@ -159,24 +103,27 @@ class _SlidableHabitCardState extends ConsumerState<SlidableHabitCard>
 
   @override
   Widget build(BuildContext context) {
-    final habitNotifier = ref.watch(habitProvider.notifier);
-    final isCompleted = habitNotifier.isHabitCompletedToday(widget.habit);
+    final habitState = ref.watch(habitProvider);
+    final habitNotifier = ref.read(habitProvider.notifier);
+
+    final currentHabit = habitState.habits.firstWhere(
+      (h) => h.id == widget.habit.id,
+      orElse: () => widget.habit,
+    );
+    final isCompleted = habitNotifier.isHabitCompletedToday(currentHabit);
 
     return ScaleTransition(
       scale: _scaleAnimation,
       child: Slidable(
         key: ValueKey(widget.habit.id),
         enabled: !_isProcessing,
-
-        // Swipe from left to right reveals action
         startActionPane: ActionPane(
           motion: const StretchMotion(),
           extentRatio: 0.25,
           children: [
             if (isCompleted)
-              // Undo action (when habit is already completed)
               CustomSlidableAction(
-                onPressed: (context) => _handleUndo(),
+                onPressed: (context) => _handleUndo(currentHabit),
                 backgroundColor: Colors.transparent,
                 foregroundColor: Colors.orange.shade600,
                 padding: EdgeInsets.zero,
@@ -231,7 +178,7 @@ class _SlidableHabitCardState extends ConsumerState<SlidableHabitCard>
               )
             else
               CustomSlidableAction(
-                onPressed: (context) => _handleComplete(),
+                onPressed: (context) => _handleComplete(currentHabit),
                 backgroundColor: Colors.transparent,
                 foregroundColor: Colors.green.shade600,
                 padding: EdgeInsets.zero,
@@ -286,9 +233,8 @@ class _SlidableHabitCardState extends ConsumerState<SlidableHabitCard>
               ),
           ],
         ),
-
         child: HabitCard(
-          habit: widget.habit,
+          habit: currentHabit,
           onTap: widget.onTap,
         ),
       ),

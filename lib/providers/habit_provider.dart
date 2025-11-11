@@ -8,7 +8,6 @@ import '../models/notification.dart';
 import '../services/notification_service.dart';
 import '../utils/performance_utils.dart';
 
-// Habit State
 class HabitState {
   final List<Habit> habits;
   final bool isLoading;
@@ -52,11 +51,10 @@ class HabitNotifier extends Notifier<HabitState> {
           .eq('user_id', userId)
           .order('created_at', ascending: false);
 
-      // Parse habits (usually small list, but use isolate for future-proofing)
       final habits = await PerformanceUtils.parseJsonList<Habit>(
         jsonList: response as List,
         parser: Habit.fromSupabaseMap,
-        threshold: 30, // Lower threshold since habits are simpler
+        threshold: 30,
       );
 
       state = state.copyWith(habits: habits, isLoading: false);
@@ -90,7 +88,6 @@ class HabitNotifier extends Notifier<HabitState> {
 
       state = state.copyWith(habits: updatedHabits);
 
-      // Reschedule notification if habit has a scheduled time
       if (habit.scheduledTime != null) {
         try {
           final notificationService = NotificationService();
@@ -107,14 +104,12 @@ class HabitNotifier extends Notifier<HabitState> {
 
   Future<void> deleteHabit(String habitId) async {
     try {
-      // Cancel scheduled notification
       try {
         await NotificationService().cancelHabitNotification(habitId);
       } catch (e) {
         debugPrint('Error cancelling notification: $e');
       }
 
-      // Delete from database
       await _supabase.from('habits').delete().eq('id', habitId);
 
       final updatedHabits = state.habits.where((h) => h.id != habitId).toList();
@@ -130,7 +125,6 @@ class HabitNotifier extends Notifier<HabitState> {
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
 
-      // Create completion record
       final completion = HabitCompletion(
         id: '',
         habitId: habit.id,
@@ -144,7 +138,6 @@ class HabitNotifier extends Notifier<HabitState> {
           .from('habit_completions')
           .insert(completion.toSupabaseMap());
 
-      // Update streak
       int newStreak = habit.currentStreak;
       final lastCompleted = habit.lastCompletedDate;
 
@@ -161,7 +154,6 @@ class HabitNotifier extends Notifier<HabitState> {
         if (difference == 1) {
           newStreak += 1;
         } else if (difference == 0) {
-          // Already completed today, don't change streak
           return;
         } else {
           newStreak = 1;
@@ -181,14 +173,12 @@ class HabitNotifier extends Notifier<HabitState> {
           .update(updatedHabit.toSupabaseMap())
           .eq('id', updatedHabit.id);
 
-      // Update local state immediately for instant UI feedback
       final updatedHabits = state.habits.map((h) {
         return h.id == habit.id ? updatedHabit : h;
       }).toList();
 
       state = state.copyWith(habits: updatedHabits);
 
-      // Create activity for social feed (only once!)
       debugPrint('📢 About to create habit activity...');
       try {
         await _createHabitActivity(habit, updatedHabit);
@@ -197,15 +187,9 @@ class HabitNotifier extends Notifier<HabitState> {
       }
       debugPrint('📢 Finished creating habit activity');
 
-      // Update user's total streaks stats
-      try {
-        await _updateUserStreakStats(habit.userId);
-      } catch (e) {
+      _updateUserStreakStats(habit.userId).catchError((e) {
         debugPrint('Error updating user streak stats: $e');
-      }
-
-      // Reload to ensure data consistency
-      await loadHabits(habit.userId);
+      });
     } catch (e) {
       debugPrint('Error completing habit: $e');
     }
@@ -213,7 +197,6 @@ class HabitNotifier extends Notifier<HabitState> {
 
   Future<void> _updateUserStreakStats(String userId) async {
     try {
-      // Get all user's habits
       final habitsResponse =
           await _supabase.from('habits').select().eq('user_id', userId);
 
@@ -221,15 +204,12 @@ class HabitNotifier extends Notifier<HabitState> {
           .map((data) => Habit.fromSupabaseMap(data))
           .toList();
 
-      // Calculate total active streaks
       final totalStreaks = habits.where((h) => h.currentStreak > 0).length;
 
-      // Calculate longest streak across all habits
       final longestStreak = habits.isEmpty
           ? 0
           : habits.map((h) => h.longestStreak).reduce((a, b) => a > b ? a : b);
 
-      // Update user profile
       await _supabase.from('users').update({
         'total_streaks': totalStreaks,
         'longest_streak': longestStreak,
@@ -244,7 +224,6 @@ class HabitNotifier extends Notifier<HabitState> {
 
   Future<void> _createHabitActivity(Habit habit, Habit updatedHabit) async {
     try {
-      // Get user profile info
       final userProfile = await _supabase
           .from('users')
           .select()
@@ -273,13 +252,11 @@ class HabitNotifier extends Notifier<HabitState> {
           .insert(completionActivity.toSupabaseMap());
       debugPrint('✅ Created habit completion activity');
 
-      // Notify friends about the completion
       if (habit.isPublic) {
         await _notifyFriendsAboutCompletion(
             habit.userId, userName, habit.title, userPhotoUrl);
       }
 
-      // Check for streak milestones (7, 30, 50, 100 days)
       final milestones = [7, 30, 50, 100, 365];
       if (milestones.contains(updatedHabit.currentStreak)) {
         final milestoneActivity = Activity(
@@ -315,7 +292,6 @@ class HabitNotifier extends Notifier<HabitState> {
       debugPrint(
           '🔔 _notifyFriendsAboutCompletion called for: $userName - $habitTitle');
 
-      // Get user's friends list
       final userResponse = await _supabase
           .from('users')
           .select('friends')
@@ -331,7 +307,6 @@ class HabitNotifier extends Notifier<HabitState> {
 
       debugPrint('🔔 User has ${friendIds.length} friends: $friendIds');
 
-      // Remove duplicates from friends list (shouldn't happen, but safety check)
       final uniqueFriendIds = friendIds.toSet().toList();
 
       if (uniqueFriendIds.length != friendIds.length) {
@@ -364,7 +339,6 @@ class HabitNotifier extends Notifier<HabitState> {
       debugPrint(
           '🔔 Inserting ${notifications.length} notifications into database');
 
-      // Batch insert notifications
       await _supabase.from('notifications').insert(notifications);
 
       debugPrint(
@@ -381,7 +355,19 @@ class HabitNotifier extends Notifier<HabitState> {
       final todayStart = today.toIso8601String();
       final todayEnd = today.add(const Duration(days: 1)).toIso8601String();
 
-      // Delete today's completion record
+      final optimisticHabit = habit.copyWith(
+        clearLastCompletedDate: true,
+        currentStreak: habit.currentStreak > 0 ? habit.currentStreak - 1 : 0,
+        totalCompletions:
+            habit.totalCompletions > 0 ? habit.totalCompletions - 1 : 0,
+      );
+
+      final optimisticHabits = state.habits.map((h) {
+        return h.id == habit.id ? optimisticHabit : h;
+      }).toList();
+
+      state = state.copyWith(habits: optimisticHabits);
+
       await _supabase
           .from('habit_completions')
           .delete()
@@ -390,7 +376,6 @@ class HabitNotifier extends Notifier<HabitState> {
           .gte('completed_at', todayStart)
           .lt('completed_at', todayEnd);
 
-      // Get previous completion to update last_completed_date
       final previousCompletions = await _supabase
           .from('habit_completions')
           .select()
@@ -406,38 +391,28 @@ class HabitNotifier extends Notifier<HabitState> {
             DateTime.parse(previousCompletions[0]['completed_at']);
       }
 
-      final updatedHabit = habit.copyWith(
-        lastCompletedDate: newLastCompletedDate,
-        currentStreak: habit.currentStreak > 0 ? habit.currentStreak - 1 : 0,
-        totalCompletions:
-            habit.totalCompletions > 0 ? habit.totalCompletions - 1 : 0,
-      );
-
-      // Update database
       await _supabase.from('habits').update({
         'last_completed_date': newLastCompletedDate?.toIso8601String(),
-        'current_streak': updatedHabit.currentStreak,
-        'total_completions': updatedHabit.totalCompletions,
+        'current_streak': optimisticHabit.currentStreak,
+        'total_completions': optimisticHabit.totalCompletions,
       }).eq('id', habit.id);
 
-      // Update local state immediately for instant UI feedback
-      final updatedHabits = state.habits.map((h) {
-        return h.id == habit.id ? updatedHabit : h;
+      final finalHabit = optimisticHabit.copyWith(
+        lastCompletedDate: newLastCompletedDate,
+      );
+
+      final finalHabits = state.habits.map((h) {
+        return h.id == habit.id ? finalHabit : h;
       }).toList();
 
-      state = state.copyWith(habits: updatedHabits);
+      state = state.copyWith(habits: finalHabits);
 
-      // Update user's streak stats
-      try {
-        await _updateUserStreakStats(habit.userId);
-      } catch (e) {
+      _updateUserStreakStats(habit.userId).catchError((e) {
         debugPrint('Error updating user streak stats: $e');
-      }
-
-      // Reload to ensure data consistency
-      await loadHabits(habit.userId);
+      });
     } catch (e) {
       debugPrint('Error uncompleting habit: $e');
+      // TODO: Consider rolling back optimistic update on error
     }
   }
 
@@ -452,7 +427,7 @@ class HabitNotifier extends Notifier<HabitState> {
       return await PerformanceUtils.parseJsonList<HabitCompletion>(
         jsonList: response as List,
         parser: HabitCompletion.fromSupabaseMap,
-        threshold: 100, // Completions can be many over time
+        threshold: 100,
       );
     } catch (e) {
       debugPrint('Error loading completions: $e');
@@ -471,7 +446,7 @@ class HabitNotifier extends Notifier<HabitState> {
       return await PerformanceUtils.parseJsonList<HabitCompletion>(
         jsonList: response as List,
         parser: HabitCompletion.fromSupabaseMap,
-        threshold: 100, // User may have many completions
+        threshold: 100,
       );
     } catch (e) {
       debugPrint('Error loading all user completions: $e');
@@ -480,7 +455,6 @@ class HabitNotifier extends Notifier<HabitState> {
   }
 
   bool isHabitCompletedToday(Habit habit) {
-    // Find the current habit from the list to get latest state
     final currentHabit = state.habits.firstWhere(
       (h) => h.id == habit.id,
       orElse: () => habit,
@@ -502,7 +476,6 @@ class HabitNotifier extends Notifier<HabitState> {
       if (habit.frequency == HabitFrequency.daily) return true;
 
       if (habit.frequency == HabitFrequency.weekly) {
-        // Weekly habits appear on the same weekday they were created
         final createdWeekday =
             habit.createdAt.weekday - 1; // 0-based (0=Mon, 6=Sun)
         return today == createdWeekday;
@@ -517,6 +490,5 @@ class HabitNotifier extends Notifier<HabitState> {
   }
 }
 
-// Provider
 final habitProvider =
     NotifierProvider<HabitNotifier, HabitState>(HabitNotifier.new);

@@ -105,10 +105,12 @@ class Habit {
     int? targetCount,
     bool? isPublic,
     DateTime? scheduledTime,
+    bool clearScheduledTime = false,
     List<String>? accountabilityPartners,
     int? currentStreak,
     int? longestStreak,
     DateTime? lastCompletedDate,
+    bool clearLastCompletedDate = false,
     int? totalCompletions,
   }) {
     return Habit(
@@ -123,12 +125,15 @@ class Habit {
       targetCount: targetCount ?? this.targetCount,
       createdAt: createdAt,
       isPublic: isPublic ?? this.isPublic,
-      scheduledTime: scheduledTime ?? this.scheduledTime,
+      scheduledTime:
+          clearScheduledTime ? null : (scheduledTime ?? this.scheduledTime),
       accountabilityPartners:
           accountabilityPartners ?? this.accountabilityPartners,
       currentStreak: currentStreak ?? this.currentStreak,
       longestStreak: longestStreak ?? this.longestStreak,
-      lastCompletedDate: lastCompletedDate ?? this.lastCompletedDate,
+      lastCompletedDate: clearLastCompletedDate
+          ? null
+          : (lastCompletedDate ?? this.lastCompletedDate),
       totalCompletions: totalCompletions ?? this.totalCompletions,
     );
   }

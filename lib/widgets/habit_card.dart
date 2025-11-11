@@ -79,11 +79,18 @@ class _HabitCardState extends ConsumerState<HabitCard> {
 
   @override
   Widget build(BuildContext context) {
-    final habitNotifier = ref.watch(habitProvider.notifier);
-    final isCompleted = habitNotifier.isHabitCompletedToday(widget.habit);
+    final habitState = ref.watch(habitProvider);
+    final habitNotifier = ref.read(habitProvider.notifier);
+
+    final currentHabit = habitState.habits.firstWhere(
+      (h) => h.id == widget.habit.id,
+      orElse: () => widget.habit,
+    );
+
+    final isCompleted = habitNotifier.isHabitCompletedToday(currentHabit);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final streakProgress = widget.habit.currentStreak /
-        (widget.habit.longestStreak > 0 ? widget.habit.longestStreak : 1);
+    final streakProgress = currentHabit.currentStreak /
+        (currentHabit.longestStreak > 0 ? currentHabit.longestStreak : 1);
 
     return RepaintBoundary(
       child: GestureDetector(
@@ -103,7 +110,7 @@ class _HabitCardState extends ConsumerState<HabitCard> {
                     alignment: Alignment.center,
                     children: [
                       // Progress ring
-                      if (widget.habit.currentStreak > 0)
+                      if (currentHabit.currentStreak > 0)
                         SizedBox(
                           width: 64,
                           height: 64,
@@ -170,7 +177,7 @@ class _HabitCardState extends ConsumerState<HabitCard> {
                           children: [
                             Expanded(
                               child: Text(
-                                widget.habit.title,
+                                currentHabit.title,
                                 style: Theme.of(context)
                                     .textTheme
                                     .titleMedium
@@ -182,7 +189,7 @@ class _HabitCardState extends ConsumerState<HabitCard> {
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            if (widget.habit.isPublic)
+                            if (currentHabit.isPublic)
                               Container(
                                 margin: const EdgeInsets.only(left: 8),
                                 padding: const EdgeInsets.all(4),
@@ -198,10 +205,10 @@ class _HabitCardState extends ConsumerState<HabitCard> {
                               ),
                           ],
                         ),
-                        if (widget.habit.description != null) ...[
+                        if (currentHabit.description != null) ...[
                           const SizedBox(height: 4),
                           Text(
-                            widget.habit.description!,
+                            currentHabit.description!,
                             style:
                                 Theme.of(context).textTheme.bodySmall?.copyWith(
                                       color: isDark
@@ -215,7 +222,7 @@ class _HabitCardState extends ConsumerState<HabitCard> {
                         const SizedBox(height: 12),
                         Row(
                           children: [
-                            if (widget.habit.currentStreak > 0) ...[
+                            if (currentHabit.currentStreak > 0) ...[
                               Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 10,
@@ -247,7 +254,7 @@ class _HabitCardState extends ConsumerState<HabitCard> {
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
-                                      '${widget.habit.currentStreak} day${widget.habit.currentStreak > 1 ? 's' : ''}',
+                                      '${currentHabit.currentStreak} day${currentHabit.currentStreak > 1 ? 's' : ''}',
                                       style: const TextStyle(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,
@@ -280,7 +287,7 @@ class _HabitCardState extends ConsumerState<HabitCard> {
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    '${widget.habit.totalCompletions} total',
+                                    '${currentHabit.totalCompletions} total',
                                     style: Theme.of(context)
                                         .textTheme
                                         .bodySmall
@@ -298,7 +305,7 @@ class _HabitCardState extends ConsumerState<HabitCard> {
                   ),
                 ],
               ),
-              if (widget.habit.totalCompletions > 0) ...[
+              if (currentHabit.totalCompletions > 0) ...[
                 const SizedBox(height: 16),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -317,13 +324,13 @@ class _HabitCardState extends ConsumerState<HabitCard> {
                                   ),
                         ),
                         Text(
-                          widget.habit.currentStreak > 0
+                          currentHabit.currentStreak > 0
                               ? 'On Fire! 🔥'
                               : 'Keep Building',
                           style:
                               Theme.of(context).textTheme.bodySmall?.copyWith(
                                     fontWeight: FontWeight.bold,
-                                    color: widget.habit.currentStreak > 0
+                                    color: currentHabit.currentStreak > 0
                                         ? Colors.orange
                                         : (isDark
                                             ? Colors.grey[400]
@@ -336,9 +343,9 @@ class _HabitCardState extends ConsumerState<HabitCard> {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: LinearProgressIndicator(
-                        value: (widget.habit.currentStreak /
-                                (widget.habit.longestStreak > 0
-                                    ? widget.habit.longestStreak
+                        value: (currentHabit.currentStreak /
+                                (currentHabit.longestStreak > 0
+                                    ? currentHabit.longestStreak
                                     : 7))
                             .clamp(0.0, 1.0),
                         minHeight: 6,
