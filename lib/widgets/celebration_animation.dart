@@ -86,8 +86,12 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
     // Auto-dismiss after animation
     Future.delayed(const Duration(milliseconds: 4000), () {
       if (mounted) {
-        debugPrint('✅ Celebration complete, dismissing...');
-        widget.onComplete();
+        debugPrint('✅ Celebration complete, fading out...');
+        _scaleController.reverse().then((_) {
+          if (mounted) {
+            widget.onComplete();
+          }
+        });
       }
     });
   }
