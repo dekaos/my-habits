@@ -242,9 +242,9 @@ class TermsConditionsPage extends StatelessWidget {
                   _buildSection(
                     context,
                     '12. Governing Law',
-                    'These Terms shall be governed by and construed in accordance with the laws of [Your Jurisdiction], '
+                    'These Terms shall be governed by and construed in accordance with the laws of Brazil, '
                         'without regard to its conflict of law provisions. Any disputes shall be resolved in the courts of '
-                        '[Your Jurisdiction].',
+                        'Brazil.',
                   ),
 
                   _buildSection(
