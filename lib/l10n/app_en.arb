@@ -389,6 +389,10 @@
   "@changingFrequencyWarning": {
     "description": "Warning when changing habit frequency"
   },
+  "cannotChangeCategory": "Category cannot be changed. Create a new habit to use a different category.",
+  "@cannotChangeCategory": {
+    "description": "Warning that category/icon cannot be changed"
+  },
   "optional": "Optional",
   "@optional": {
     "description": "Optional label"
@@ -1329,8 +1333,6 @@
   "@shareAsImage": {"description": "Share as image option"},
   "generating": "Generating...",
   "@generating": {"description": "Generating status"},
-  "createShareCard": "Create a beautiful share card",
-  "@createShareCard": {"description": "Share card description"},
   "progressReport": "Progress Report",
   "@progressReport": {"description": "Progress report label"},
   "buildingBetterHabits": "Building better habits",

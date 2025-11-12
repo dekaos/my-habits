@@ -343,6 +343,10 @@ class AppLocalizationsPt extends AppLocalizations {
       'Alterar a frequência redefinirá sua sequência e histórico de conclusão.';
 
   @override
+  String get cannotChangeCategory =>
+      'A categoria não pode ser alterada. Crie um novo hábito para usar uma categoria diferente.';
+
+  @override
   String get optional => 'Opcional';
 
   @override
@@ -1084,9 +1088,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get generating => 'Gerando...';
-
-  @override
-  String get createShareCard => 'Crie um cartão de compartilhamento bonito';
 
   @override
   String get progressReport => 'Relatório de Progresso';

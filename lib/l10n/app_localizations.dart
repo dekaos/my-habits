@@ -716,6 +716,12 @@ abstract class AppLocalizations {
   /// **'Changing frequency will reset your streak and completion history.'**
   String get changingFrequencyWarning;
 
+  /// Warning that category/icon cannot be changed
+  ///
+  /// In en, this message translates to:
+  /// **'Category cannot be changed. Create a new habit to use a different category.'**
+  String get cannotChangeCategory;
+
   /// Optional label
   ///
   /// In en, this message translates to:
@@ -2023,12 +2029,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Generating...'**
   String get generating;
-
-  /// Share card description
-  ///
-  /// In en, this message translates to:
-  /// **'Create a beautiful share card'**
-  String get createShareCard;
 
   /// Progress report label
   ///

@@ -260,9 +260,8 @@ class _ShareProgressSheetState extends State<ShareProgressSheet>
                               context,
                               icon: Icons.image_rounded,
                               title: l10n.shareAsImage,
-                              subtitle: _isGeneratingImage
-                                  ? l10n.generating
-                                  : l10n.createShareCard,
+                              subtitle:
+                                  _isGeneratingImage ? l10n.generating : null,
                               onTap: _isGeneratingImage
                                   ? null
                                   : () => _shareAsImage(context),
@@ -740,7 +739,7 @@ class _ShareProgressSheetState extends State<ShareProgressSheet>
     BuildContext context, {
     required IconData icon,
     required String title,
-    required String subtitle,
+    String? subtitle,
     required VoidCallback? onTap,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -801,16 +800,18 @@ class _ShareProgressSheetState extends State<ShareProgressSheet>
                 : (isDark ? Colors.grey.shade600 : Colors.grey.shade500),
           ),
         ),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 4),
-          child: Text(
-            subtitle,
-            style: TextStyle(
-              fontSize: 13,
-              color: isDark ? Colors.grey.shade500 : Colors.grey.shade600,
-            ),
-          ),
-        ),
+        subtitle: subtitle != null
+            ? Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: isDark ? Colors.grey.shade500 : Colors.grey.shade600,
+                  ),
+                ),
+              )
+            : null,
         trailing: Icon(
           Icons.chevron_right_rounded,
           color: onTap != null

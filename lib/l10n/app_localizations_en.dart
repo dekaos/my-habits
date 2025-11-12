@@ -339,6 +339,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Changing frequency will reset your streak and completion history.';
 
   @override
+  String get cannotChangeCategory =>
+      'Category cannot be changed. Create a new habit to use a different category.';
+
+  @override
   String get optional => 'Optional';
 
   @override
@@ -1079,9 +1083,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get generating => 'Generating...';
-
-  @override
-  String get createShareCard => 'Create a beautiful share card';
 
   @override
   String get progressReport => 'Progress Report';
