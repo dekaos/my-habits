@@ -6,6 +6,7 @@ import '../../l10n/app_localizations.dart';
 import '../auth/login_screen.dart';
 import '../profile/edit_profile_screen.dart';
 import '../../widgets/glass_card.dart';
+import '../../widgets/notification_settings_sheet.dart';
 
 class ProfileTab extends ConsumerStatefulWidget {
   const ProfileTab({super.key});
@@ -298,7 +299,7 @@ class _ProfileTabState extends ConsumerState<ProfileTab>
             icon: Icons.notifications,
             title: l10n.notifications,
             onTap: () {
-              // TODO: Notification settings
+              showNotificationSettingsSheet(context);
             },
           ),
           _buildDivider(),

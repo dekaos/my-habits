@@ -8,6 +8,7 @@ import '../../providers/notification_provider.dart';
 import '../../providers/messaging_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../widgets/animated_gradient_background.dart';
+import '../../services/notification_service.dart';
 import '../notifications/notifications_screen.dart';
 import 'habits_tab.dart';
 import 'performance_tab.dart';
@@ -34,6 +35,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Future.delayed(const Duration(milliseconds: 800));
+
+      await NotificationService().handleLaunchNotification();
+    });
   }
 
   @override

@@ -3,6 +3,9 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import '../models/habit.dart';
+import '../main.dart' show navigatorKey;
+import '../screens/habits/habit_detail_screen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -13,6 +16,11 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   bool _initialized = false;
+
+  String? _currentLocalizedTitle;
+  String? _currentLocalizedBody;
+
+  NotificationResponse? _launchNotification;
 
   Future<void> initialize() async {
     if (_initialized) return;
@@ -41,6 +49,15 @@ class NotificationService {
         initSettings,
         onDidReceiveNotificationResponse: _onNotificationTapped,
       );
+
+      final launchDetails =
+          await _notifications.getNotificationAppLaunchDetails();
+      if (launchDetails != null &&
+          launchDetails.didNotificationLaunchApp &&
+          launchDetails.notificationResponse != null) {
+        debugPrint('🚀 App launched from notification');
+        _launchNotification = launchDetails.notificationResponse;
+      }
 
       _initialized = true;
     } catch (e) {
@@ -92,19 +109,87 @@ class NotificationService {
     return true;
   }
 
-  void _onNotificationTapped(NotificationResponse response) {
-    // TODO: Navigate to habit detail screen
-    debugPrint('Notification tapped: ${response.payload}');
+  void _onNotificationTapped(NotificationResponse response) async {
+    debugPrint('🔔 Notification tapped: ${response.payload}');
+    await _handleNotificationNavigation(response);
   }
 
-  Future<void> scheduleHabitNotification(Habit habit) async {
-    if (habit.scheduledTime == null) return;
+  Future<void> _handleNotificationNavigation(
+      NotificationResponse response) async {
+    final habitId = response.payload;
+    if (habitId == null || habitId.isEmpty) {
+      debugPrint('⚠️ No habit ID in notification payload');
+      return;
+    }
 
     try {
+      // Fetch the habit from Supabase
+      final supabase = Supabase.instance.client;
+      final habitData = await supabase
+          .from('habits')
+          .select()
+          .eq('id', habitId)
+          .maybeSingle();
+
+      if (habitData == null) {
+        debugPrint('⚠️ Habit not found: $habitId');
+        return;
+      }
+
+      final habit = Habit.fromSupabaseMap(habitData);
+
+      // Navigate to habit detail screen
+      final context = navigatorKey.currentContext;
+      if (context != null && navigatorKey.currentState != null) {
+        debugPrint('✅ Navigating to habit detail: ${habit.title}');
+        navigatorKey.currentState!.push(
+          MaterialPageRoute(
+            builder: (context) => HabitDetailScreen(habit: habit),
+          ),
+        );
+      } else {
+        debugPrint(
+            '⚠️ Navigator context not available, will retry after app initializes');
+      }
+    } catch (e) {
+      debugPrint('❌ Error handling notification tap: $e');
+    }
+  }
+
+  /// Call this method after the app has fully initialized and navigation is ready
+  Future<void> handleLaunchNotification() async {
+    if (_launchNotification != null) {
+      debugPrint('📱 Handling notification that launched the app');
+      final notification = _launchNotification;
+      _launchNotification = null; // Clear it so we don't handle it again
+
+      // Wait a bit to ensure navigation is ready
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      await _handleNotificationNavigation(notification!);
+    }
+  }
+
+  Future<void> scheduleHabitNotification(
+    Habit habit, {
+    String? localizedTitle,
+    String? localizedBody,
+    bool? playSound,
+    bool? enableVibration,
+  }) async {
+    if (habit.scheduledTime == null) {
+      debugPrint('⚠️ No scheduled time for habit, skipping notification');
+      return;
+    }
+
+    try {
+      debugPrint('🔔 Starting notification scheduling for: ${habit.title}');
+
       await initialize();
 
       if (!_initialized) {
-        debugPrint('Notification service not initialized, skipping scheduling');
+        debugPrint(
+            '❌ Notification service not initialized, skipping scheduling');
         return;
       }
 
@@ -112,13 +197,30 @@ class NotificationService {
       final notificationTime =
           scheduledTime.subtract(const Duration(minutes: 30));
 
-      final notificationDetails = await _getNotificationDetails(habit);
+      debugPrint(
+          '   ⏰ Habit time: ${scheduledTime.hour}:${scheduledTime.minute.toString().padLeft(2, '0')}');
+      debugPrint(
+          '   🔔 Notification time: ${notificationTime.hour}:${notificationTime.minute.toString().padLeft(2, '0')} (30 min before)');
+      debugPrint('   📋 Frequency: ${habit.frequency}');
+      debugPrint(
+          '   🔊 Sound: ${playSound ?? true}, Vibration: ${enableVibration ?? true}');
+
+      final notificationDetails = await _getNotificationDetails(
+        habit,
+        playSound: playSound ?? true,
+        enableVibration: enableVibration ?? true,
+      );
 
       final now = tz.TZDateTime.now(tz.local);
+
+      // Store localized strings for use in notification methods
+      _currentLocalizedTitle = localizedTitle;
+      _currentLocalizedBody = localizedBody;
 
       // Handle different frequency types
       switch (habit.frequency) {
         case HabitFrequency.daily:
+          debugPrint('   📅 Scheduling DAILY recurring notification...');
           await _scheduleDailyNotification(
             habit,
             notificationTime,
@@ -128,6 +230,7 @@ class NotificationService {
           break;
 
         case HabitFrequency.weekly:
+          debugPrint('   📅 Scheduling WEEKLY recurring notification...');
           await _scheduleWeeklyNotification(
             habit,
             notificationTime,
@@ -137,6 +240,7 @@ class NotificationService {
           break;
 
         case HabitFrequency.custom:
+          debugPrint('   📅 Scheduling CUSTOM recurring notifications...');
           await _scheduleCustomNotifications(
             habit,
             notificationTime,
@@ -145,8 +249,14 @@ class NotificationService {
           );
           break;
       }
+
+      // Clear localized strings after use
+      _currentLocalizedTitle = null;
+      _currentLocalizedBody = null;
+
+      debugPrint('✅ Notification scheduling completed for: ${habit.title}');
     } catch (e) {
-      debugPrint('Error scheduling habit notification: $e');
+      debugPrint('❌ Error scheduling habit notification: $e');
       // Don't rethrow - allow app to continue without notifications
     }
   }
@@ -170,7 +280,12 @@ class NotificationService {
       // If time has passed today, schedule for tomorrow
       if (scheduledDate.isBefore(now)) {
         scheduledDate = scheduledDate.add(const Duration(days: 1));
+        debugPrint('   ⏰ Time passed today, scheduling for tomorrow');
       }
+
+      debugPrint('   📆 Daily notification will show at: $scheduledDate');
+      debugPrint(
+          '   🔁 Repeats: Every day at ${notificationTime.hour}:${notificationTime.minute.toString().padLeft(2, '0')}');
 
       await _notifications.zonedSchedule(
         habit.id.hashCode,
@@ -182,9 +297,13 @@ class NotificationService {
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
         matchDateTimeComponents: DateTimeComponents.time, // Repeat daily
+        payload: habit.id, // Include habit ID for navigation
       );
+
+      debugPrint(
+          '   ✅ Daily notification scheduled (ID: ${habit.id.hashCode})');
     } catch (e) {
-      debugPrint('Error scheduling daily notification: $e');
+      debugPrint('   ❌ Error scheduling daily notification: $e');
     }
   }
 
@@ -215,6 +334,7 @@ class NotificationService {
             UILocalNotificationDateInterpretation.absoluteTime,
         matchDateTimeComponents:
             DateTimeComponents.dayOfWeekAndTime, // Repeat weekly
+        payload: habit.id, // Include habit ID for navigation
       );
     } catch (e) {
       debugPrint('Error scheduling weekly notification: $e');
@@ -228,6 +348,18 @@ class NotificationService {
     tz.TZDateTime now,
   ) async {
     try {
+      final dayNames = [
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+        'Sunday'
+      ];
+      debugPrint(
+          '   📅 Scheduling custom notifications for ${habit.customDays.length} days');
+
       // Schedule a notification for each custom day
       for (final dayIndex in habit.customDays) {
         try {
@@ -242,6 +374,9 @@ class NotificationService {
           // Use unique ID for each day
           final notificationId = '${habit.id}_day$dayIndex'.hashCode;
 
+          debugPrint(
+              '   📆 ${dayNames[dayIndex]}: $scheduledDate (ID: $notificationId)');
+
           await _notifications.zonedSchedule(
             notificationId,
             _getNotificationTitle(habit),
@@ -253,13 +388,19 @@ class NotificationService {
                 UILocalNotificationDateInterpretation.absoluteTime,
             matchDateTimeComponents:
                 DateTimeComponents.dayOfWeekAndTime, // Repeat weekly
+            payload: habit.id, // Include habit ID for navigation
           );
+
+          debugPrint('   ✅ Notification scheduled for ${dayNames[dayIndex]}');
         } catch (e) {
-          debugPrint('Error scheduling notification for day $dayIndex: $e');
+          debugPrint(
+              '   ❌ Error scheduling notification for day $dayIndex: $e');
         }
       }
+
+      debugPrint('   🔁 All custom notifications will repeat weekly');
     } catch (e) {
-      debugPrint('Error scheduling custom notifications: $e');
+      debugPrint('   ❌ Error scheduling custom notifications: $e');
     }
   }
 
@@ -287,17 +428,60 @@ class NotificationService {
   }
 
   String _getNotificationTitle(Habit habit) {
-    return '🔔 Time for: ${habit.title}';
+    final icon = _getEmojiFromIconName(habit.icon);
+
+    // Use localized title if provided, otherwise use default
+    if (_currentLocalizedTitle != null) {
+      return '$icon $_currentLocalizedTitle';
+    }
+
+    // Fallback for when no localization provided
+    return '$icon Time for: ${habit.title}';
+  }
+
+  String _getEmojiFromIconName(String? iconName) {
+    // Map icon names to emoji (matching habit_icon_selector.dart)
+    final iconMap = {
+      'fitness': '💪',
+      'book': '📚',
+      'water': '💧',
+      'sleep': '😴',
+      'restaurant': '🍽️',
+      'run': '🏃',
+      'meditation': '🧘',
+      'yoga': '🧘‍♀️',
+      'art': '🎨',
+      'music': '🎵',
+      'work': '💼',
+      'school': '🎓',
+      'heart': '❤️',
+      'walk': '🚶',
+      'bike': '🚴',
+    };
+
+    return iconMap[iconName] ?? '🔔';
   }
 
   String _getNotificationBody(Habit habit) {
+    // Use habit description if available
     if (habit.description != null && habit.description!.isNotEmpty) {
       return habit.description!;
     }
+
+    // Use localized body if provided, otherwise use default
+    if (_currentLocalizedBody != null) {
+      return _currentLocalizedBody!;
+    }
+
+    // Fallback for when no localization provided
     return 'Your habit starts in 30 minutes. Get ready! 💪';
   }
 
-  Future<NotificationDetails> _getNotificationDetails(Habit habit) async {
+  Future<NotificationDetails> _getNotificationDetails(
+    Habit habit, {
+    bool playSound = true,
+    bool enableVibration = true,
+  }) async {
     final androidDetails = AndroidNotificationDetails(
       'habit_reminders',
       'Habit Reminders',
@@ -307,19 +491,22 @@ class NotificationService {
       icon: _getAndroidIconForHabit(habit),
       color: _parseColor(habit.color),
       enableLights: true,
-      enableVibration: true,
-      playSound: true,
+      enableVibration: enableVibration,
+      playSound: playSound,
+      sound: playSound
+          ? const RawResourceAndroidNotificationSound('default')
+          : null,
       styleInformation: BigTextStyleInformation(
         _getNotificationBody(habit),
         contentTitle: _getNotificationTitle(habit),
       ),
     );
 
-    const iosDetails = DarwinNotificationDetails(
+    final iosDetails = DarwinNotificationDetails(
       presentAlert: true,
       presentBadge: true,
-      presentSound: true,
-      sound: 'default',
+      presentSound: playSound,
+      sound: playSound ? 'default' : null,
     );
 
     return NotificationDetails(

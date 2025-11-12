@@ -22,7 +22,10 @@ void main() async {
   );
 
   try {
-    await NotificationService().initialize();
+    final notificationService = NotificationService();
+
+    await notificationService.initialize();
+    await notificationService.requestPermissions();
   } catch (e) {
     debugPrint('Failed to initialize notification service: $e');
   }
@@ -59,12 +62,16 @@ Future<void> _warmupShaders() async {
   return Future.delayed(Duration.zero);
 }
 
+// Global navigation key for accessing navigator from anywhere
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey,
       title: 'Habit Hero',
       debugShowCheckedModeBanner: false,
       localizationsDelegates: const [

@@ -248,6 +248,54 @@ class AppLocalizationsEn extends AppLocalizations {
   String get iconCycling => 'Cycling';
 
   @override
+  String get categoryFitness => 'Fitness';
+
+  @override
+  String get categoryBook => 'Reading';
+
+  @override
+  String get categoryWater => 'Hydration';
+
+  @override
+  String get categorySleep => 'Sleep';
+
+  @override
+  String get categoryRestaurant => 'Nutrition';
+
+  @override
+  String get categoryRun => 'Running';
+
+  @override
+  String get categoryMeditation => 'Meditation';
+
+  @override
+  String get categoryYoga => 'Yoga';
+
+  @override
+  String get categoryArt => 'Art';
+
+  @override
+  String get categoryMusic => 'Music';
+
+  @override
+  String get categoryWork => 'Work';
+
+  @override
+  String get categorySchool => 'Study';
+
+  @override
+  String get categoryHeart => 'Health';
+
+  @override
+  String get categoryWalk => 'Walking';
+
+  @override
+  String get categoryBike => 'Cycling';
+
+  @override
+  String get categoryOther => 'Other';
+
+  @override
   String get selectColor => 'Select Color';
 
   @override
@@ -789,6 +837,51 @@ class AppLocalizationsEn extends AppLocalizations {
   String daysAgo(int count) {
     return '${count}d ago';
   }
+
+  @override
+  String notificationTimeFor(String habitTitle) {
+    return 'Time for: $habitTitle';
+  }
+
+  @override
+  String get notificationHabitStartsSoon =>
+      'Your habit starts in 30 minutes. Get ready! 💪';
+
+  @override
+  String get notificationSettings => 'Notification Settings';
+
+  @override
+  String get enablePushNotifications => 'Push Notifications';
+
+  @override
+  String get receiveHabitReminders => 'Receive reminders for your habits';
+
+  @override
+  String get notificationSound => 'Sound';
+
+  @override
+  String get followDeviceSettings => 'Following device settings';
+
+  @override
+  String get soundAlwaysOn => 'Sound always on';
+
+  @override
+  String get soundAlwaysOff => 'Sound always off';
+
+  @override
+  String get useManualControl => 'Use manual control';
+
+  @override
+  String get useDeviceSettings => 'Use device settings';
+
+  @override
+  String get vibration => 'Vibration';
+
+  @override
+  String get vibrateOnNotifications => 'Vibrate on notifications';
+
+  @override
+  String get vibrationDisabled => 'No vibration';
 
   @override
   String get loading => 'Loading...';

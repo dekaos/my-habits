@@ -1,5 +1,6 @@
 import 'dart:developer' as developer;
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vibration/vibration.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -7,36 +8,51 @@ import 'package:audioplayers/audioplayers.dart';
 class HapticService {
   static final AudioPlayer _audioPlayer = AudioPlayer();
 
-  static Future<void> celebrateSuccess() async {
+  static Future<void> celebrateSuccess({
+    bool enableVibration = true,
+    bool enableSound = true,
+  }) async {
     try {
-      final hasVibrator = await Vibration.hasVibrator();
+      if (enableVibration) {
+        final hasVibrator = await Vibration.hasVibrator();
 
-      if (hasVibrator) {
-        await Vibration.vibrate(
-          pattern: [0, 100, 50, 100, 50, 200],
-          intensities: [0, 128, 0, 128, 0, 255],
-        );
-      } else {
-        await HapticFeedback.mediumImpact();
+        if (hasVibrator == true) {
+          await Vibration.vibrate(
+            pattern: [0, 100, 50, 100, 50, 200],
+            intensities: [0, 128, 0, 128, 0, 255],
+          );
+        } else {
+          await HapticFeedback.mediumImpact();
+        }
       }
 
-      await _playSuccessSound();
+      if (enableSound) {
+        await _playSuccessSound();
+      }
     } catch (e) {
-      await HapticFeedback.mediumImpact();
+      if (enableVibration) {
+        await HapticFeedback.mediumImpact();
+      }
     }
   }
 
-  static Future<void> playUndoHaptic() async {
+  static Future<void> playUndoHaptic({bool enableVibration = true}) async {
+    if (!enableVibration) {
+      return;
+    }
+
     try {
       final hasVibrator = await Vibration.hasVibrator();
 
-      if (hasVibrator) {
+      if (hasVibrator == true) {
         await Vibration.vibrate(duration: 200, amplitude: 200);
       } else {
         await HapticFeedback.heavyImpact();
       }
     } catch (e) {
-      await HapticFeedback.heavyImpact();
+      if (enableVibration) {
+        await HapticFeedback.heavyImpact();
+      }
     }
   }
 

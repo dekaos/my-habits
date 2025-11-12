@@ -45,11 +45,13 @@ class HabitNotifier extends Notifier<HabitState> {
     try {
       state = state.copyWith(isLoading: true);
 
+      // Fetch habits ordered by icon (category) and current_streak descending
       final response = await _supabase
           .from('habits')
           .select()
           .eq('user_id', userId)
-          .order('created_at', ascending: false);
+          .order('icon', ascending: true)
+          .order('current_streak', ascending: false);
 
       final habits = await PerformanceUtils.parseJsonList<Habit>(
         jsonList: response as List,
@@ -487,6 +489,66 @@ class HabitNotifier extends Notifier<HabitState> {
 
       return false;
     }).toList();
+  }
+
+  /// Group habits by category (icon name) for today's habits
+  Map<String, List<Habit>> getTodaysHabitsByCategory() {
+    final todaysHabits = getTodaysHabits();
+    return _groupHabitsByCategory(todaysHabits);
+  }
+
+  /// Group habits by category (icon name) for all habits
+  Map<String, List<Habit>> getAllHabitsByCategory() {
+    return _groupHabitsByCategory(state.habits);
+  }
+
+  /// Group a specific list of habits by category (public method)
+  Map<String, List<Habit>> groupHabitsByCategory(List<Habit> habits) {
+    return _groupHabitsByCategory(habits);
+  }
+
+  /// Get categories ordered by max streak (descending) then alphabetically
+  List<String> getCategoriesOrderedByStreak(Map<String, List<Habit>> grouped) {
+    final categories = grouped.keys.toList();
+
+    // Calculate max streak for each category
+    final categoryStreaks = <String, int>{};
+    for (final category in categories) {
+      final habits = grouped[category]!;
+      final maxStreak = habits.isEmpty
+          ? 0
+          : habits.map((h) => h.currentStreak).reduce((a, b) => a > b ? a : b);
+      categoryStreaks[category] = maxStreak;
+    }
+
+    // Sort: first by max streak (descending), then alphabetically
+    categories.sort((a, b) {
+      final streakA = categoryStreaks[a]!;
+      final streakB = categoryStreaks[b]!;
+
+      if (streakA != streakB) {
+        return streakB.compareTo(streakA); // Descending order
+      }
+
+      return a.compareTo(b); // Alphabetical order
+    });
+
+    return categories;
+  }
+
+  /// Helper method to group habits by category
+  Map<String, List<Habit>> _groupHabitsByCategory(List<Habit> habits) {
+    final grouped = <String, List<Habit>>{};
+
+    for (final habit in habits) {
+      final category = habit.icon ?? 'other';
+      if (!grouped.containsKey(category)) {
+        grouped[category] = [];
+      }
+      grouped[category]!.add(habit);
+    }
+
+    return grouped;
   }
 }
 

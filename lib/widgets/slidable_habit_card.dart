@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import '../models/habit.dart';
 import '../providers/habit_provider.dart';
-
+import '../providers/notification_settings_provider.dart';
 import '../l10n/app_localizations.dart';
 import '../services/haptic_service.dart';
 import 'habit_card.dart';
@@ -52,10 +52,23 @@ class _SlidableHabitCardState extends ConsumerState<SlidableHabitCard>
 
     _isProcessing = true;
 
-    HapticService.celebrateSuccess();
+    final settings = ref.read(notificationSettingsProvider);
+    final settingsNotifier = ref.read(notificationSettingsProvider.notifier);
+    final shouldPlaySound = settingsNotifier.shouldPlaySound();
+    final shouldVibrate = settingsNotifier.shouldVibrate();
+
+    debugPrint(
+        '✅ Complete habit - Sound: ${settings.soundEnabled}, Vibration: ${settings.vibrationEnabled}');
+    debugPrint(
+        '   shouldPlaySound: $shouldPlaySound, shouldVibrate: $shouldVibrate');
 
     if (mounted) {
-      showCelebration(context, habitIcon: currentHabit.icon);
+      showCelebration(
+        context,
+        habitIcon: currentHabit.icon,
+        playSound: shouldPlaySound,
+        enableVibration: shouldVibrate,
+      );
     }
 
     _successController.forward().then((_) => _successController.reverse());
@@ -74,7 +87,17 @@ class _SlidableHabitCardState extends ConsumerState<SlidableHabitCard>
 
     _isProcessing = true;
 
-    HapticService.playUndoHaptic();
+    // Respect vibration settings for undo action
+    final settings = ref.read(notificationSettingsProvider);
+    final settingsNotifier = ref.read(notificationSettingsProvider.notifier);
+    final shouldVibrate = settingsNotifier.shouldVibrate();
+
+    debugPrint(
+        '🔄 Undo habit - Vibration setting: ${settings.vibrationEnabled}, shouldVibrate: $shouldVibrate');
+
+    HapticService.playUndoHaptic(
+      enableVibration: shouldVibrate,
+    );
 
     _successController.forward().then((_) => _successController.reverse());
 

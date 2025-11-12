@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:confetti/confetti.dart';
 import '../l10n/app_localizations.dart';
+import '../services/haptic_service.dart';
 
 /// Animation theme based on habit icon
 class CelebrationTheme {
@@ -27,10 +28,14 @@ class CelebrationTheme {
 class CelebrationAnimation extends StatefulWidget {
   final VoidCallback onComplete;
   final String? habitIcon;
+  final bool playSound;
+  final bool enableVibration;
 
   const CelebrationAnimation({
     required this.onComplete,
     this.habitIcon,
+    this.playSound = true,
+    this.enableVibration = true,
     super.key,
   });
 
@@ -44,13 +49,12 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
   late AnimationController _scaleController;
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
-  late CelebrationTheme _theme;
+  CelebrationTheme? _theme;
+  bool _hasStarted = false;
 
   @override
   void initState() {
     super.initState();
-
-    _theme = _getThemeForIcon(context, widget.habitIcon);
 
     _confettiController = ConfettiController(
       duration: const Duration(seconds: 2),
@@ -74,27 +78,47 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
         curve: const Interval(0.0, 0.3, curve: Curves.easeIn),
       ),
     );
+  }
 
-    // Start animations immediately
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _confettiController.play();
-        _scaleController.forward();
-        debugPrint('🎊 ${_theme.emoji} celebration launched!');
-      }
-    });
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
 
-    // Auto-dismiss after animation
-    Future.delayed(const Duration(milliseconds: 4000), () {
-      if (mounted) {
-        debugPrint('✅ Celebration complete, fading out...');
-        _scaleController.reverse().then((_) {
-          if (mounted) {
-            widget.onComplete();
-          }
-        });
-      }
-    });
+    // Initialize theme with localization (can't do in initState)
+    if (_theme == null) {
+      _theme = _getThemeForIcon(context, widget.habitIcon);
+    }
+
+    // Start animations only once
+    if (!_hasStarted) {
+      _hasStarted = true;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _confettiController.play();
+          _scaleController.forward();
+          debugPrint('🎊 ${_theme!.emoji} celebration launched!');
+
+          // Trigger haptic feedback and sound
+          HapticService.celebrateSuccess(
+            enableVibration: widget.enableVibration,
+            enableSound: widget.playSound,
+          );
+        }
+      });
+
+      // Auto-dismiss after animation
+      Future.delayed(const Duration(milliseconds: 4000), () {
+        if (mounted) {
+          debugPrint('✅ Celebration complete, fading out...');
+          _scaleController.reverse().then((_) {
+            if (mounted) {
+              widget.onComplete();
+            }
+          });
+        }
+      });
+    }
   }
 
   CelebrationTheme _getThemeForIcon(BuildContext context, String? iconName) {
@@ -323,6 +347,11 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
 
   @override
   Widget build(BuildContext context) {
+    // Don't render until theme is initialized
+    if (_theme == null) {
+      return const SizedBox.shrink();
+    }
+
     return Material(
       type: MaterialType.transparency,
       child: SizedBox(
@@ -365,7 +394,7 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
                 emissionFrequency: 0.05,
                 numberOfParticles: 15,
                 gravity: 0.3,
-                colors: _theme.colors,
+                colors: _theme!.colors,
                 createParticlePath: (size) => _drawStar(size),
               ),
             ),
@@ -381,7 +410,7 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
                 emissionFrequency: 0.05,
                 numberOfParticles: 10,
                 gravity: 0.2,
-                colors: _theme.colors,
+                colors: _theme!.colors,
               ),
             ),
 
@@ -396,7 +425,7 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
                 emissionFrequency: 0.05,
                 numberOfParticles: 10,
                 gravity: 0.2,
-                colors: _theme.colors,
+                colors: _theme!.colors,
               ),
             ),
 
@@ -419,20 +448,20 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          _theme.colors.first,
-                          _theme.colors.last,
+                          _theme!.colors.first,
+                          _theme!.colors.last,
                         ],
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: _theme.colors.first.withValues(alpha: 0.5),
+                          color: _theme!.colors.first.withValues(alpha: 0.5),
                           blurRadius: 40,
                           spreadRadius: 10,
                         ),
                       ],
                     ),
                     child: Icon(
-                      _theme.icon,
+                      _theme!.icon,
                       size: 36,
                       color: Colors.white,
                     ),
@@ -449,7 +478,7 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
                 child: Column(
                   children: [
                     Text(
-                      _theme.title,
+                      _theme!.title,
                       style: TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
@@ -465,7 +494,7 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      _theme.subtitle,
+                      _theme!.subtitle,
                       style: TextStyle(
                         fontSize: 18,
                         color: Colors.white.withValues(alpha: 0.9),
@@ -509,6 +538,8 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
   }
 
   Widget _buildFloatingEmoji(int index) {
+    if (_theme == null) return const SizedBox.shrink();
+
     final random = Random(index);
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
@@ -518,7 +549,8 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
     final delay = random.nextInt(1000);
     final duration = 2000 + random.nextInt(1000);
 
-    final particle = _theme.particles[random.nextInt(_theme.particles.length)];
+    final particle =
+        _theme!.particles[random.nextInt(_theme!.particles.length)];
 
     return Positioned(
       left: left,
@@ -558,8 +590,14 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
   }
 }
 
-void showCelebration(BuildContext context, {String? habitIcon}) {
+void showCelebration(
+  BuildContext context, {
+  String? habitIcon,
+  bool playSound = true,
+  bool enableVibration = true,
+}) {
   debugPrint('🎯 showCelebration called with icon: ${habitIcon ?? "default"}');
+  debugPrint('   🔊 Sound: $playSound, 📳 Vibration: $enableVibration');
 
   try {
     final overlay = Navigator.of(context).overlay;
@@ -577,6 +615,8 @@ void showCelebration(BuildContext context, {String? habitIcon}) {
       builder: (context) => Positioned.fill(
         child: CelebrationAnimation(
           habitIcon: habitIcon,
+          playSound: playSound,
+          enableVibration: enableVibration,
           onComplete: () {
             debugPrint('🧹 Removing celebration overlay');
             overlayEntry.remove();

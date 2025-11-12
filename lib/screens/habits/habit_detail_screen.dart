@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../providers/habit_provider.dart';
+import '../../providers/notification_settings_provider.dart';
 import '../../models/habit.dart';
 import '../../models/habit_completion.dart';
 import '../../l10n/app_localizations.dart';
 import '../../widgets/animated_gradient_background.dart';
 import '../../widgets/glass_card.dart';
-import '../../services/haptic_service.dart';
 import '../../widgets/celebration_animation.dart';
 import '../../widgets/share_progress_sheet.dart';
 import 'edit_habit_screen.dart';
@@ -78,10 +78,17 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
 
     _isCompleting = true;
 
-    HapticService.celebrateSuccess();
+    final settingsNotifier = ref.read(notificationSettingsProvider.notifier);
+    final shouldPlaySound = settingsNotifier.shouldPlaySound();
+    final shouldVibrate = settingsNotifier.shouldVibrate();
 
     if (mounted) {
-      showCelebration(context, habitIcon: widget.habit.icon);
+      showCelebration(
+        context,
+        habitIcon: widget.habit.icon,
+        playSound: shouldPlaySound,
+        enableVibration: shouldVibrate,
+      );
     }
 
     final note = _noteController.text.trim().isEmpty

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/habit_provider.dart';
+import '../../providers/notification_settings_provider.dart';
 import '../../models/habit.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/notification_service.dart';
@@ -126,24 +127,25 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
 
     if (habit.scheduledTime != null) {
       try {
-        final notificationService = NotificationService();
-        await notificationService.initialize();
+        final l10n = AppLocalizations.of(context)!;
+        final localizedTitle = l10n.notificationTimeFor(habit.title);
+        final localizedBody = l10n.notificationHabitStartsSoon;
 
-        final permissionGranted =
-            await notificationService.requestPermissions();
+        final notificationSettings = ref.read(notificationSettingsProvider);
+        final settingsNotifier =
+            ref.read(notificationSettingsProvider.notifier);
 
-        if (permissionGranted) {
-          await notificationService.scheduleHabitNotification(habit);
-        } else if (mounted) {
-          final l10n = AppLocalizations.of(context)!;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.notificationPermissionsDenied),
-              duration: const Duration(seconds: 3),
-            ),
+        if (notificationSettings.pushNotificationsEnabled) {
+          await NotificationService().scheduleHabitNotification(
+            habit,
+            localizedTitle: localizedTitle,
+            localizedBody: localizedBody,
+            playSound: settingsNotifier.shouldPlaySound(),
+            enableVibration: settingsNotifier.shouldVibrate(),
           );
         }
       } catch (e) {
+        debugPrint('❌ Failed to schedule notification: $e');
         // Silently fail - notification scheduling is optional
       }
     }

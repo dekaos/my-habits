@@ -536,6 +536,102 @@ abstract class AppLocalizations {
   /// **'Cycling'**
   String get iconCycling;
 
+  /// Fitness category name
+  ///
+  /// In en, this message translates to:
+  /// **'Fitness'**
+  String get categoryFitness;
+
+  /// Reading category name
+  ///
+  /// In en, this message translates to:
+  /// **'Reading'**
+  String get categoryBook;
+
+  /// Hydration category name
+  ///
+  /// In en, this message translates to:
+  /// **'Hydration'**
+  String get categoryWater;
+
+  /// Sleep category name
+  ///
+  /// In en, this message translates to:
+  /// **'Sleep'**
+  String get categorySleep;
+
+  /// Restaurant/Nutrition category name
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrition'**
+  String get categoryRestaurant;
+
+  /// Running category name
+  ///
+  /// In en, this message translates to:
+  /// **'Running'**
+  String get categoryRun;
+
+  /// Meditation category name
+  ///
+  /// In en, this message translates to:
+  /// **'Meditation'**
+  String get categoryMeditation;
+
+  /// Yoga category name
+  ///
+  /// In en, this message translates to:
+  /// **'Yoga'**
+  String get categoryYoga;
+
+  /// Art category name
+  ///
+  /// In en, this message translates to:
+  /// **'Art'**
+  String get categoryArt;
+
+  /// Music category name
+  ///
+  /// In en, this message translates to:
+  /// **'Music'**
+  String get categoryMusic;
+
+  /// Work category name
+  ///
+  /// In en, this message translates to:
+  /// **'Work'**
+  String get categoryWork;
+
+  /// School/Study category name
+  ///
+  /// In en, this message translates to:
+  /// **'Study'**
+  String get categorySchool;
+
+  /// Heart/Health category name
+  ///
+  /// In en, this message translates to:
+  /// **'Health'**
+  String get categoryHeart;
+
+  /// Walking category name
+  ///
+  /// In en, this message translates to:
+  /// **'Walking'**
+  String get categoryWalk;
+
+  /// Cycling category name
+  ///
+  /// In en, this message translates to:
+  /// **'Cycling'**
+  String get categoryBike;
+
+  /// Other category name
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get categoryOther;
+
   /// Color selection label
   ///
   /// In en, this message translates to:
@@ -1495,6 +1591,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count}d ago'**
   String daysAgo(int count);
+
+  /// Notification title
+  ///
+  /// In en, this message translates to:
+  /// **'Time for: {habitTitle}'**
+  String notificationTimeFor(String habitTitle);
+
+  /// Notification body when no description is provided
+  ///
+  /// In en, this message translates to:
+  /// **'Your habit starts in 30 minutes. Get ready! 💪'**
+  String get notificationHabitStartsSoon;
+
+  /// Notification settings title
+  ///
+  /// In en, this message translates to:
+  /// **'Notification Settings'**
+  String get notificationSettings;
+
+  /// Push notifications toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Push Notifications'**
+  String get enablePushNotifications;
+
+  /// Push notifications description
+  ///
+  /// In en, this message translates to:
+  /// **'Receive reminders for your habits'**
+  String get receiveHabitReminders;
+
+  /// Notification sound toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Sound'**
+  String get notificationSound;
+
+  /// Sound following device
+  ///
+  /// In en, this message translates to:
+  /// **'Following device settings'**
+  String get followDeviceSettings;
+
+  /// Sound always enabled
+  ///
+  /// In en, this message translates to:
+  /// **'Sound always on'**
+  String get soundAlwaysOn;
+
+  /// Sound always disabled
+  ///
+  /// In en, this message translates to:
+  /// **'Sound always off'**
+  String get soundAlwaysOff;
+
+  /// Switch to manual sound control
+  ///
+  /// In en, this message translates to:
+  /// **'Use manual control'**
+  String get useManualControl;
+
+  /// Switch to device sound settings
+  ///
+  /// In en, this message translates to:
+  /// **'Use device settings'**
+  String get useDeviceSettings;
+
+  /// Vibration toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Vibration'**
+  String get vibration;
+
+  /// Vibration enabled description
+  ///
+  /// In en, this message translates to:
+  /// **'Vibrate on notifications'**
+  String get vibrateOnNotifications;
+
+  /// Vibration disabled description
+  ///
+  /// In en, this message translates to:
+  /// **'No vibration'**
+  String get vibrationDisabled;
 
   /// Loading indicator text
   ///

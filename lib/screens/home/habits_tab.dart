@@ -8,6 +8,7 @@ import '../habits/habit_detail_screen.dart';
 import '../../widgets/slidable_habit_card.dart';
 import '../../widgets/glass_card.dart';
 import '../../l10n/app_localizations.dart';
+import '../../utils/habit_icons.dart';
 
 class HabitsTab extends ConsumerStatefulWidget {
   const HabitsTab({super.key});
@@ -168,6 +169,14 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
     final completed =
         todaysHabits.where(habitNotifier.isHabitCompletedToday).length;
 
+    final todaysGrouped = habitNotifier.getTodaysHabitsByCategory();
+    final todaysCategories =
+        habitNotifier.getCategoriesOrderedByStreak(todaysGrouped);
+
+    final otherGrouped = habitNotifier.groupHabitsByCategory(otherHabits);
+    final otherCategories =
+        habitNotifier.getCategoriesOrderedByStreak(otherGrouped);
+
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -179,7 +188,6 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
         ),
         const SizedBox(height: 20),
 
-        // Today's habits
         if (todaysHabits.isNotEmpty) ...[
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
@@ -221,41 +229,17 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
             ),
           ),
           const SizedBox(height: 12),
-          ...todaysHabits.asMap().entries.map((entry) {
-            final index = entry.key;
-            final habit = entry.value;
-            return TweenAnimationBuilder<double>(
-              tween: Tween(begin: 0.0, end: 1.0),
-              duration: Duration(milliseconds: 600 + (index * 100)),
-              curve: Curves.easeOutCubic,
-              builder: (context, value, child) {
-                return Transform.translate(
-                  offset: Offset(0, 20 * (1 - value)),
-                  child: Opacity(
-                    opacity: value,
-                    child: child,
-                  ),
-                );
-              },
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: SlidableHabitCard(
-                  habit: habit,
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => HabitDetailScreen(habit: habit),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            );
-          }),
+          ..._buildCategorizedHabits(
+            context,
+            ref,
+            todaysGrouped,
+            todaysCategories,
+            0,
+          ),
           const SizedBox(height: 16),
         ],
 
-        // Other habits
+        // Other habits by category
         if (otherHabits.isNotEmpty) ...[
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
@@ -281,43 +265,165 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
             ),
           ),
           const SizedBox(height: 12),
-          ...otherHabits.asMap().entries.map((entry) {
-            final index = entry.key;
-            final habit = entry.value;
-            final delay = todaysHabits.length + index;
-            return TweenAnimationBuilder<double>(
-              tween: Tween(begin: 0.0, end: 1.0),
-              duration: Duration(milliseconds: 600 + (delay * 100)),
-              curve: Curves.easeOutCubic,
-              builder: (context, value, child) {
-                return Transform.translate(
-                  offset: Offset(0, 20 * (1 - value)),
-                  child: Opacity(
-                    opacity: value,
-                    child: child,
-                  ),
-                );
-              },
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: SlidableHabitCard(
-                  habit: habit,
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => HabitDetailScreen(habit: habit),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            );
-          }),
+          ..._buildCategorizedHabits(
+            context,
+            ref,
+            otherGrouped,
+            otherCategories,
+            todaysHabits.length,
+          ),
         ],
 
         const SizedBox(height: 100),
       ],
     );
+  }
+
+  List<Widget> _buildCategorizedHabits(
+    BuildContext context,
+    WidgetRef ref,
+    Map<String, List<Habit>> grouped,
+    List<String> categories,
+    int startIndex,
+  ) {
+    final widgets = <Widget>[];
+    int habitIndex = startIndex;
+
+    for (final category in categories) {
+      final categoryHabits = grouped[category]!;
+
+      widgets.add(
+        Padding(
+          padding: const EdgeInsets.only(left: 4, right: 4, top: 8, bottom: 8),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withValues(alpha: .1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  HabitIcons.getIcon(category),
+                  size: 18,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                _getCategoryName(context, category),
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .primary
+                          .withValues(alpha: .8),
+                      letterSpacing: -0.2,
+                    ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Container(
+                  height: 1,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Theme.of(context)
+                            .colorScheme
+                            .primary
+                            .withValues(alpha: .3),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      // Category habits
+      for (final habit in categoryHabits) {
+        widgets.add(
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.0, end: 1.0),
+            duration: Duration(milliseconds: 600 + (habitIndex * 100)),
+            curve: Curves.easeOutCubic,
+            builder: (context, value, child) {
+              return Transform.translate(
+                offset: Offset(0, 20 * (1 - value)),
+                child: Opacity(
+                  opacity: value,
+                  child: child,
+                ),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: SlidableHabitCard(
+                habit: habit,
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => HabitDetailScreen(habit: habit),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+        habitIndex++;
+      }
+
+      widgets.add(const SizedBox(height: 8));
+    }
+
+    return widgets;
+  }
+
+  String _getCategoryName(BuildContext context, String iconName) {
+    final l10n = AppLocalizations.of(context)!;
+
+    switch (iconName) {
+      case 'fitness':
+        return l10n.iconFitness;
+      case 'book':
+        return l10n.iconReading;
+      case 'water':
+        return l10n.iconHydration;
+      case 'sleep':
+        return l10n.iconSleep;
+      case 'restaurant':
+        return l10n.iconEating;
+      case 'run':
+        return l10n.iconRunning;
+      case 'meditation':
+        return l10n.iconMeditation;
+      case 'yoga':
+        return l10n.iconYoga;
+      case 'art':
+        return l10n.iconArt;
+      case 'music':
+        return l10n.iconMusic;
+      case 'work':
+        return l10n.iconWork;
+      case 'school':
+        return l10n.iconStudy;
+      case 'heart':
+        return l10n.iconHealth;
+      case 'walk':
+        return l10n.iconWalking;
+      case 'bike':
+        return l10n.iconCycling;
+      case 'other':
+      default:
+        return l10n.categoryOther;
+    }
   }
 
   Widget _buildProgressCard(

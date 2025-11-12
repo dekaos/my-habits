@@ -298,6 +298,41 @@
   "@iconWalking": {"description": "Walking icon label"},
   "iconCycling": "Cycling",
   "@iconCycling": {"description": "Cycling icon label"},
+  
+  "@_CATEGORIES": {},
+  "categoryFitness": "Fitness",
+  "@categoryFitness": {"description": "Fitness category name"},
+  "categoryBook": "Reading",
+  "@categoryBook": {"description": "Reading category name"},
+  "categoryWater": "Hydration",
+  "@categoryWater": {"description": "Hydration category name"},
+  "categorySleep": "Sleep",
+  "@categorySleep": {"description": "Sleep category name"},
+  "categoryRestaurant": "Nutrition",
+  "@categoryRestaurant": {"description": "Restaurant/Nutrition category name"},
+  "categoryRun": "Running",
+  "@categoryRun": {"description": "Running category name"},
+  "categoryMeditation": "Meditation",
+  "@categoryMeditation": {"description": "Meditation category name"},
+  "categoryYoga": "Yoga",
+  "@categoryYoga": {"description": "Yoga category name"},
+  "categoryArt": "Art",
+  "@categoryArt": {"description": "Art category name"},
+  "categoryMusic": "Music",
+  "@categoryMusic": {"description": "Music category name"},
+  "categoryWork": "Work",
+  "@categoryWork": {"description": "Work category name"},
+  "categorySchool": "Study",
+  "@categorySchool": {"description": "School/Study category name"},
+  "categoryHeart": "Health",
+  "@categoryHeart": {"description": "Heart/Health category name"},
+  "categoryWalk": "Walking",
+  "@categoryWalk": {"description": "Walking category name"},
+  "categoryBike": "Cycling",
+  "@categoryBike": {"description": "Cycling category name"},
+  "categoryOther": "Other",
+  "@categoryOther": {"description": "Other category name"},
+  
   "selectColor": "Select Color",
   "@selectColor": {
     "description": "Color selection label"
@@ -1090,6 +1125,46 @@
       }
     }
   },
+
+  "@_NOTIFICATIONS": {},
+  "notificationTimeFor": "Time for: {habitTitle}",
+  "@notificationTimeFor": {
+    "description": "Notification title",
+    "placeholders": {
+      "habitTitle": {
+        "type": "String",
+        "example": "Morning Run"
+      }
+    }
+  },
+  "notificationHabitStartsSoon": "Your habit starts in 30 minutes. Get ready! 💪",
+  "@notificationHabitStartsSoon": {
+    "description": "Notification body when no description is provided"
+  },
+  "notificationSettings": "Notification Settings",
+  "@notificationSettings": {"description": "Notification settings title"},
+  "enablePushNotifications": "Push Notifications",
+  "@enablePushNotifications": {"description": "Push notifications toggle"},
+  "receiveHabitReminders": "Receive reminders for your habits",
+  "@receiveHabitReminders": {"description": "Push notifications description"},
+  "notificationSound": "Sound",
+  "@notificationSound": {"description": "Notification sound toggle"},
+  "followDeviceSettings": "Following device settings",
+  "@followDeviceSettings": {"description": "Sound following device"},
+  "soundAlwaysOn": "Sound always on",
+  "@soundAlwaysOn": {"description": "Sound always enabled"},
+  "soundAlwaysOff": "Sound always off",
+  "@soundAlwaysOff": {"description": "Sound always disabled"},
+  "useManualControl": "Use manual control",
+  "@useManualControl": {"description": "Switch to manual sound control"},
+  "useDeviceSettings": "Use device settings",
+  "@useDeviceSettings": {"description": "Switch to device sound settings"},
+  "vibration": "Vibration",
+  "@vibration": {"description": "Vibration toggle"},
+  "vibrateOnNotifications": "Vibrate on notifications",
+  "@vibrateOnNotifications": {"description": "Vibration enabled description"},
+  "vibrationDisabled": "No vibration",
+  "@vibrationDisabled": {"description": "Vibration disabled description"},
 
   "@_MISC": {},
   "loading": "Loading...",
