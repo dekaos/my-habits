@@ -23,13 +23,24 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
   bool _isLoadingCompletions = false;
   bool _hasLoadedOnce = false;
 
-  // Cached chart data (calculated in isolate)
   TrendChartData? _trendChartData;
   WeeklyPatternData? _weeklyPatternData;
   bool _isCalculatingCharts = false;
 
+  final ScrollController _heatmapScrollController = ScrollController();
+
   @override
   bool get wantKeepAlive => true;
+
+  /// Format date based on locale: EN = month/day, PT = day/month
+  String _formatDate(BuildContext context, DateTime date) {
+    final locale = Localizations.localeOf(context);
+    if (locale.languageCode == 'pt') {
+      return '${date.day}/${date.month}';
+    }
+    // Default to month/day for English and other languages
+    return '${date.month}/${date.day}';
+  }
 
   @override
   void initState() {
@@ -37,6 +48,12 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadAllCompletions();
     });
+  }
+
+  @override
+  void dispose() {
+    _heatmapScrollController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadAllCompletions() async {
@@ -323,10 +340,18 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
     final today = DateTime(now.year, now.month, now.day);
     final startDate = today.subtract(const Duration(days: 89));
 
+    debugPrint('📊 Heatmap calculation:');
+    debugPrint('   Today: $today');
+    debugPrint('   Start Date: $startDate (90 days ago)');
+    debugPrint('   Total habits with completions: ${_allCompletions.length}');
+
     final dateCompletions = <DateTime, int>{};
+    int totalProcessed = 0;
+    int totalInRange = 0;
 
     for (final habitCompletions in _allCompletions.values) {
       for (final completion in habitCompletions) {
+        totalProcessed++;
         final date = DateTime(
           completion.completedAt.year,
           completion.completedAt.month,
@@ -334,13 +359,24 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
         );
         if (!date.isBefore(startDate) && !date.isAfter(today)) {
           dateCompletions[date] = (dateCompletions[date] ?? 0) + 1;
+          totalInRange++;
         }
       }
+    }
+
+    debugPrint('   Total completions processed: $totalProcessed');
+    debugPrint('   Completions in date range: $totalInRange');
+    debugPrint('   Unique dates with completions: ${dateCompletions.length}');
+    if (dateCompletions.isNotEmpty) {
+      debugPrint(
+          '   Date range: ${dateCompletions.keys.reduce((a, b) => a.isBefore(b) ? a : b)} to ${dateCompletions.keys.reduce((a, b) => a.isAfter(b) ? a : b)}');
     }
 
     final maxCompletions = dateCompletions.values.isEmpty
         ? 1
         : dateCompletions.values.reduce((a, b) => a > b ? a : b);
+
+    debugPrint('   Max completions in a day: $maxCompletions');
 
     return RepaintBoundary(
       child: GlassCard(
@@ -397,7 +433,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
                 : Column(
                     children: [
                       _buildHeatmapGrid(
-                          dateCompletions, startDate, maxCompletions),
+                          context, dateCompletions, startDate, maxCompletions),
                       const SizedBox(height: 12),
                       _buildHeatmapLegend(maxCompletions),
                     ],
@@ -409,10 +445,12 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
   }
 
   Widget _buildHeatmapGrid(
+    BuildContext context,
     Map<DateTime, int> completions,
     DateTime startDate,
     int maxCompletions,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     const cellSize = 14.0;
@@ -420,6 +458,8 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
 
     final weeks = <List<DateTime>>[];
     final currentWeek = <DateTime>[];
+    int totalDays = 0;
+    int daysWithCompletions = 0;
 
     for (int i = 0; i <= 90; i++) {
       final rawDate = startDate.add(Duration(days: i));
@@ -427,31 +467,68 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
 
       if (date.isAfter(today)) break;
 
+      totalDays++;
+      if (completions.containsKey(date) && completions[date]! > 0) {
+        daysWithCompletions++;
+      }
+
       currentWeek.add(date);
 
-      if (date.weekday == 7 || i == 90) {
+      if (date.weekday == 7 || i == 90 || date == today) {
         weeks.add(List.from(currentWeek));
         currentWeek.clear();
       }
     }
 
+    debugPrint(
+        '📅 Grid built: $totalDays total days, ${weeks.length} weeks, $daysWithCompletions days with activity');
+
+    // Scroll to the right (most recent) after building
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_heatmapScrollController.hasClients && mounted) {
+        Future.delayed(const Duration(milliseconds: 100), () {
+          if (_heatmapScrollController.hasClients && mounted) {
+            _heatmapScrollController.animateTo(
+              _heatmapScrollController.position.maxScrollExtent,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOut,
+            );
+            debugPrint('📜 Heatmap scrolled to show recent days');
+          }
+        });
+      }
+    });
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
+      controller: _heatmapScrollController,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: weeks.map((week) {
+        children: weeks.asMap().entries.map((entry) {
+          final weekIndex = entry.key;
+          final week = entry.value;
+
           return Padding(
             padding: const EdgeInsets.only(right: cellSpacing),
             child: Column(
-              children: week.map((date) {
+              children: week.asMap().entries.map((dayEntry) {
+                final dayIndex = dayEntry.key;
+                final date = dayEntry.value;
                 final count = completions[date] ?? 0;
                 final intensity =
                     maxCompletions > 0 ? count / maxCompletions : 0;
 
+                // Debug logging for activity cells
+                if (count > 0) {
+                  debugPrint(
+                      '   ✓ ${_formatDate(context, date)} (Week $weekIndex, Day $dayIndex): $count completions (${(intensity * 100).toStringAsFixed(0)}% intensity)');
+                }
+
                 return Padding(
                   padding: const EdgeInsets.only(bottom: cellSpacing),
                   child: Tooltip(
-                    message: '${date.month}/${date.day}: $count',
+                    message: l10n.completionsTooltip(
+                        _formatDate(context, date), count),
                     child: Container(
                       width: cellSize,
                       height: cellSize,
@@ -465,6 +542,15 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
                                 .primary
                                 .withValues(alpha: 0.2 + (intensity * 0.8)),
                         borderRadius: BorderRadius.circular(3),
+                        border: count > 0
+                            ? Border.all(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withValues(alpha: 0.4),
+                                width: 0.5,
+                              )
+                            : null,
                       ),
                     ),
                   ),
@@ -686,7 +772,7 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
                                   return Padding(
                                     padding: const EdgeInsets.only(top: 8),
                                     child: Text(
-                                      '${date.month}/${date.day}',
+                                      _formatDate(context, date),
                                       style: const TextStyle(
                                         fontSize: 10,
                                         fontWeight: FontWeight.w500,
@@ -982,23 +1068,33 @@ class _PerformanceTabState extends ConsumerState<PerformanceTab>
                         children: [
                           Icon(Icons.check_circle, size: 14, color: color),
                           const SizedBox(width: 4),
-                          Text(
-                            l10n.completionsCount(habit.totalCompletions),
-                            style:
-                                Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: Colors.grey,
-                                    ),
+                          Flexible(
+                            child: Text(
+                              l10n.completionsCount(habit.totalCompletions),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: Colors.grey,
+                                  ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: 8),
                           const Icon(Icons.local_fire_department,
                               size: 14, color: Colors.orange),
                           const SizedBox(width: 4),
-                          Text(
-                            l10n.streakCount(habit.currentStreak),
-                            style:
-                                Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: Colors.grey,
-                                    ),
+                          Flexible(
+                            child: Text(
+                              l10n.streakCount(habit.currentStreak),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: Colors.grey,
+                                  ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         ],
                       ),
