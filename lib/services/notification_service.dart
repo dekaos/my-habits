@@ -493,9 +493,6 @@ class NotificationService {
       enableLights: true,
       enableVibration: enableVibration,
       playSound: playSound,
-      sound: playSound
-          ? const RawResourceAndroidNotificationSound('default')
-          : null,
       styleInformation: BigTextStyleInformation(
         _getNotificationBody(habit),
         contentTitle: _getNotificationTitle(habit),
@@ -506,7 +503,6 @@ class NotificationService {
       presentAlert: true,
       presentBadge: true,
       presentSound: playSound,
-      sound: playSound ? 'default' : null,
     );
 
     return NotificationDetails(
@@ -516,8 +512,6 @@ class NotificationService {
   }
 
   String _getAndroidIconForHabit(Habit habit) {
-    // Always use the app launcher icon
-    // Custom drawable icons would need to be added to android/app/src/main/res/drawable/
     return '@mipmap/ic_launcher';
   }
 
@@ -525,20 +519,35 @@ class NotificationService {
     return Color(int.parse(hexColor.substring(1), radix: 16) + 0xFF000000);
   }
 
-  Future<void> rescheduleAllHabitsForToday(List<Habit> habits) async {
+  Future<void> rescheduleAllHabitsForToday(
+    List<Habit> habits, {
+    String Function(String)? localizedTitleGenerator,
+    String? localizedBody,
+    bool? playSound,
+    bool? enableVibration,
+  }) async {
     await cancelAllNotifications();
 
     for (final habit in habits) {
-      await scheduleHabitNotification(habit);
+      if (habit.scheduledTime != null) {
+        final localizedTitle = localizedTitleGenerator != null
+            ? localizedTitleGenerator(habit.title)
+            : null;
+        await scheduleHabitNotification(
+          habit,
+          localizedTitle: localizedTitle,
+          localizedBody: localizedBody,
+          playSound: playSound,
+          enableVibration: enableVibration,
+        );
+      }
     }
   }
 
   Future<void> cancelHabitNotification(String habitId) async {
     try {
-      // Cancel main notification
       await _notifications.cancel(habitId.hashCode);
 
-      // Also cancel custom day notifications (for custom frequency habits)
       for (int i = 0; i < 7; i++) {
         final notificationId = '${habitId}_day$i'.hashCode;
         await _notifications.cancel(notificationId);

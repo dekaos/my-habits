@@ -1,6 +1,5 @@
 {
   "@@locale": "en",
-  
   "@_APP_INFO": {},
   "appTitle": "Habit Hero",
   "@appTitle": {
@@ -14,7 +13,6 @@
   "@buildBetterHabits": {
     "description": "Splash screen tagline"
   },
-
   "@_AUTH": {},
   "welcomeBack": "Welcome Back!",
   "@welcomeBack": {
@@ -72,7 +70,6 @@
   "@signIn": {
     "description": "Sign in button text"
   },
-
   "@_VALIDATION": {},
   "pleaseEnterEmail": "Please enter your email",
   "@pleaseEnterEmail": {
@@ -102,7 +99,10 @@
   "@pleaseEnterHabitTitle": {
     "description": "Habit title validation error"
   },
-
+  "pleaseSelectAtLeastOneDay": "Please select at least one day for custom habits",
+  "@pleaseSelectAtLeastOneDay": {
+    "description": "Custom habit days validation error"
+  },
   "@_AUTH_MESSAGES": {},
   "loginFailed": "Login failed. Please check your credentials.",
   "@loginFailed": {
@@ -112,7 +112,6 @@
   "@signupFailed": {
     "description": "Signup error message"
   },
-
   "@_NAVIGATION": {},
   "habits": "Habits",
   "@habits": {
@@ -130,7 +129,6 @@
   "@profile": {
     "description": "Profile tab title"
   },
-
   "@_HABITS": {},
   "myHabits": "My Habits",
   "@myHabits": {
@@ -238,7 +236,6 @@
   "@readyToBuildHabits": {
     "description": "Message when no habits for today"
   },
-
   "@_HABIT_MANAGEMENT": {},
   "habitTitle": "Habit Title",
   "@habitTitle": {
@@ -269,70 +266,130 @@
     "description": "Icon selector title"
   },
   "iconFitness": "Fitness",
-  "@iconFitness": {"description": "Fitness icon label"},
+  "@iconFitness": {
+    "description": "Fitness icon label"
+  },
   "iconReading": "Reading",
-  "@iconReading": {"description": "Reading icon label"},
+  "@iconReading": {
+    "description": "Reading icon label"
+  },
   "iconHydration": "Hydration",
-  "@iconHydration": {"description": "Hydration icon label"},
+  "@iconHydration": {
+    "description": "Hydration icon label"
+  },
   "iconSleep": "Sleep",
-  "@iconSleep": {"description": "Sleep icon label"},
+  "@iconSleep": {
+    "description": "Sleep icon label"
+  },
   "iconEating": "Eating",
-  "@iconEating": {"description": "Eating icon label"},
+  "@iconEating": {
+    "description": "Eating icon label"
+  },
   "iconRunning": "Running",
-  "@iconRunning": {"description": "Running icon label"},
+  "@iconRunning": {
+    "description": "Running icon label"
+  },
   "iconMeditation": "Meditation",
-  "@iconMeditation": {"description": "Meditation icon label"},
+  "@iconMeditation": {
+    "description": "Meditation icon label"
+  },
   "iconYoga": "Yoga",
-  "@iconYoga": {"description": "Yoga icon label"},
+  "@iconYoga": {
+    "description": "Yoga icon label"
+  },
   "iconArt": "Art",
-  "@iconArt": {"description": "Art icon label"},
+  "@iconArt": {
+    "description": "Art icon label"
+  },
   "iconMusic": "Music",
-  "@iconMusic": {"description": "Music icon label"},
+  "@iconMusic": {
+    "description": "Music icon label"
+  },
   "iconWork": "Work",
-  "@iconWork": {"description": "Work icon label"},
+  "@iconWork": {
+    "description": "Work icon label"
+  },
   "iconStudy": "Study",
-  "@iconStudy": {"description": "Study icon label"},
+  "@iconStudy": {
+    "description": "Study icon label"
+  },
   "iconHealth": "Health",
-  "@iconHealth": {"description": "Health icon label"},
+  "@iconHealth": {
+    "description": "Health icon label"
+  },
   "iconWalking": "Walking",
-  "@iconWalking": {"description": "Walking icon label"},
+  "@iconWalking": {
+    "description": "Walking icon label"
+  },
   "iconCycling": "Cycling",
-  "@iconCycling": {"description": "Cycling icon label"},
-  
+  "@iconCycling": {
+    "description": "Cycling icon label"
+  },
   "@_CATEGORIES": {},
   "categoryFitness": "Fitness",
-  "@categoryFitness": {"description": "Fitness category name"},
+  "@categoryFitness": {
+    "description": "Fitness category name"
+  },
   "categoryBook": "Reading",
-  "@categoryBook": {"description": "Reading category name"},
+  "@categoryBook": {
+    "description": "Reading category name"
+  },
   "categoryWater": "Hydration",
-  "@categoryWater": {"description": "Hydration category name"},
+  "@categoryWater": {
+    "description": "Hydration category name"
+  },
   "categorySleep": "Sleep",
-  "@categorySleep": {"description": "Sleep category name"},
+  "@categorySleep": {
+    "description": "Sleep category name"
+  },
   "categoryRestaurant": "Nutrition",
-  "@categoryRestaurant": {"description": "Restaurant/Nutrition category name"},
+  "@categoryRestaurant": {
+    "description": "Restaurant/Nutrition category name"
+  },
   "categoryRun": "Running",
-  "@categoryRun": {"description": "Running category name"},
+  "@categoryRun": {
+    "description": "Running category name"
+  },
   "categoryMeditation": "Meditation",
-  "@categoryMeditation": {"description": "Meditation category name"},
+  "@categoryMeditation": {
+    "description": "Meditation category name"
+  },
   "categoryYoga": "Yoga",
-  "@categoryYoga": {"description": "Yoga category name"},
+  "@categoryYoga": {
+    "description": "Yoga category name"
+  },
   "categoryArt": "Art",
-  "@categoryArt": {"description": "Art category name"},
+  "@categoryArt": {
+    "description": "Art category name"
+  },
   "categoryMusic": "Music",
-  "@categoryMusic": {"description": "Music category name"},
+  "@categoryMusic": {
+    "description": "Music category name"
+  },
   "categoryWork": "Work",
-  "@categoryWork": {"description": "Work category name"},
+  "@categoryWork": {
+    "description": "Work category name"
+  },
   "categorySchool": "Study",
-  "@categorySchool": {"description": "School/Study category name"},
+  "@categorySchool": {
+    "description": "School/Study category name"
+  },
   "categoryHeart": "Health",
-  "@categoryHeart": {"description": "Heart/Health category name"},
+  "@categoryHeart": {
+    "description": "Heart/Health category name"
+  },
   "categoryWalk": "Walking",
-  "@categoryWalk": {"description": "Walking category name"},
+  "@categoryWalk": {
+    "description": "Walking category name"
+  },
   "categoryBike": "Cycling",
-  "@categoryBike": {"description": "Cycling category name"},
+  "@categoryBike": {
+    "description": "Cycling category name"
+  },
   "categoryOther": "Other",
-  "@categoryOther": {"description": "Other category name"},
-  
+  "@categoryOther": {
+    "description": "Other category name"
+  },
   "selectColor": "Select Color",
   "@selectColor": {
     "description": "Color selection label"
@@ -507,37 +564,63 @@
   "@noCompletionsYet": {
     "description": "Empty state message for no completions"
   },
-
   "@_DAYS": {},
   "monday": "Monday",
-  "@monday": {"description": "Monday"},
+  "@monday": {
+    "description": "Monday"
+  },
   "tuesday": "Tuesday",
-  "@tuesday": {"description": "Tuesday"},
+  "@tuesday": {
+    "description": "Tuesday"
+  },
   "wednesday": "Wednesday",
-  "@wednesday": {"description": "Wednesday"},
+  "@wednesday": {
+    "description": "Wednesday"
+  },
   "thursday": "Thursday",
-  "@thursday": {"description": "Thursday"},
+  "@thursday": {
+    "description": "Thursday"
+  },
   "friday": "Friday",
-  "@friday": {"description": "Friday"},
+  "@friday": {
+    "description": "Friday"
+  },
   "saturday": "Saturday",
-  "@saturday": {"description": "Saturday"},
+  "@saturday": {
+    "description": "Saturday"
+  },
   "sunday": "Sunday",
-  "@sunday": {"description": "Sunday"},
+  "@sunday": {
+    "description": "Sunday"
+  },
   "mon": "Mon",
-  "@mon": {"description": "Monday short"},
+  "@mon": {
+    "description": "Monday short"
+  },
   "tue": "Tue",
-  "@tue": {"description": "Tuesday short"},
+  "@tue": {
+    "description": "Tuesday short"
+  },
   "wed": "Wed",
-  "@wed": {"description": "Wednesday short"},
+  "@wed": {
+    "description": "Wednesday short"
+  },
   "thu": "Thu",
-  "@thu": {"description": "Thursday short"},
+  "@thu": {
+    "description": "Thursday short"
+  },
   "fri": "Fri",
-  "@fri": {"description": "Friday short"},
+  "@fri": {
+    "description": "Friday short"
+  },
   "sat": "Sat",
-  "@sat": {"description": "Saturday short"},
+  "@sat": {
+    "description": "Saturday short"
+  },
   "sun": "Sun",
-  "@sun": {"description": "Sunday short"},
-
+  "@sun": {
+    "description": "Sunday short"
+  },
   "@_SOCIAL": {},
   "noActivityYet": "No Activity Yet",
   "@noActivityYet": {
@@ -721,7 +804,6 @@
       }
     }
   },
-
   "@_PERFORMANCE": {},
   "weeklyOverview": "Weekly Overview",
   "@weeklyOverview": {
@@ -859,7 +941,6 @@
       }
     }
   },
-
   "@_PROFILE": {},
   "myProfile": "My Profile",
   "@myProfile": {
@@ -1031,7 +1112,6 @@
       }
     }
   },
-
   "@_NOTIFICATION_MESSAGES": {},
   "friendRequestFrom": "{name} sent you a friend request",
   "@friendRequestFrom": {
@@ -1091,14 +1171,19 @@
       }
     }
   },
-
   "@_TIME": {},
   "today": "Today",
-  "@today": {"description": "Today label"},
+  "@today": {
+    "description": "Today label"
+  },
   "yesterday": "Yesterday",
-  "@yesterday": {"description": "Yesterday label"},
+  "@yesterday": {
+    "description": "Yesterday label"
+  },
   "now": "Now",
-  "@now": {"description": "Now label"},
+  "@now": {
+    "description": "Now label"
+  },
   "minutesAgo": "{count}m ago",
   "@minutesAgo": {
     "description": "Minutes ago",
@@ -1129,7 +1214,6 @@
       }
     }
   },
-
   "@_NOTIFICATIONS": {},
   "notificationTimeFor": "Time for: {habitTitle}",
   "@notificationTimeFor": {
@@ -1146,53 +1230,98 @@
     "description": "Notification body when no description is provided"
   },
   "notificationSettings": "Notification Settings",
-  "@notificationSettings": {"description": "Notification settings title"},
+  "@notificationSettings": {
+    "description": "Notification settings title"
+  },
   "enablePushNotifications": "Push Notifications",
-  "@enablePushNotifications": {"description": "Push notifications toggle"},
+  "@enablePushNotifications": {
+    "description": "Push notifications toggle"
+  },
   "receiveHabitReminders": "Receive reminders for your habits",
-  "@receiveHabitReminders": {"description": "Push notifications description"},
+  "@receiveHabitReminders": {
+    "description": "Push notifications description"
+  },
   "notificationSound": "Sound",
-  "@notificationSound": {"description": "Notification sound toggle"},
+  "@notificationSound": {
+    "description": "Notification sound toggle"
+  },
   "followDeviceSettings": "Following device settings",
-  "@followDeviceSettings": {"description": "Sound following device"},
+  "@followDeviceSettings": {
+    "description": "Sound following device"
+  },
   "soundAlwaysOn": "Sound always on",
-  "@soundAlwaysOn": {"description": "Sound always enabled"},
+  "@soundAlwaysOn": {
+    "description": "Sound always enabled"
+  },
   "soundAlwaysOff": "Sound always off",
-  "@soundAlwaysOff": {"description": "Sound always disabled"},
+  "@soundAlwaysOff": {
+    "description": "Sound always disabled"
+  },
   "useManualControl": "Use manual control",
-  "@useManualControl": {"description": "Switch to manual sound control"},
+  "@useManualControl": {
+    "description": "Switch to manual sound control"
+  },
   "useDeviceSettings": "Use device settings",
-  "@useDeviceSettings": {"description": "Switch to device sound settings"},
+  "@useDeviceSettings": {
+    "description": "Switch to device sound settings"
+  },
   "vibration": "Vibration",
-  "@vibration": {"description": "Vibration toggle"},
+  "@vibration": {
+    "description": "Vibration toggle"
+  },
   "vibrateOnNotifications": "Vibrate on notifications",
-  "@vibrateOnNotifications": {"description": "Vibration enabled description"},
+  "@vibrateOnNotifications": {
+    "description": "Vibration enabled description"
+  },
   "vibrationDisabled": "No vibration",
-  "@vibrationDisabled": {"description": "Vibration disabled description"},
-
+  "@vibrationDisabled": {
+    "description": "Vibration disabled description"
+  },
   "@_MISC": {},
   "loading": "Loading...",
-  "@loading": {"description": "Loading indicator text"},
+  "@loading": {
+    "description": "Loading indicator text"
+  },
   "error": "Error",
-  "@error": {"description": "Error label"},
+  "@error": {
+    "description": "Error label"
+  },
   "tryAgain": "Try Again",
-  "@tryAgain": {"description": "Try again button text"},
+  "@tryAgain": {
+    "description": "Try again button text"
+  },
   "ok": "OK",
-  "@ok": {"description": "OK button text"},
+  "@ok": {
+    "description": "OK button text"
+  },
   "done": "Done",
-  "@done": {"description": "Done button text"},
+  "@done": {
+    "description": "Done button text"
+  },
   "undo": "Undo",
-  "@undo": {"description": "Undo button text"},
+  "@undo": {
+    "description": "Undo button text"
+  },
   "close": "Close",
-  "@close": {"description": "Close button text"},
+  "@close": {
+    "description": "Close button text"
+  },
   "search": "Search",
-  "@search": {"description": "Search label"},
+  "@search": {
+    "description": "Search label"
+  },
   "noResults": "No results found",
-  "@noResults": {"description": "No search results message"},
+  "@noResults": {
+    "description": "No search results message"
+  },
   "react": "React",
-  "@react": {"description": "React button text"},
+  "@react": {
+    "description": "React button text"
+  },
   "chooseReaction": "Choose a Reaction",
-  "@chooseReaction": {"description": "Reaction picker title"},
+  "@chooseReaction": {
+    "description": "Reaction picker title"
+  },
   "reactionCount": "{count, plural, =1{1 reaction} other{{count} reactions}}",
   "@reactionCount": {
     "description": "Reaction count with pluralization",
@@ -1204,74 +1333,138 @@
     }
   },
   "couldNotLoadUsers": "Could not load users",
-  "@couldNotLoadUsers": {"description": "Error loading users message"},
-
+  "@couldNotLoadUsers": {
+    "description": "Error loading users message"
+  },
   "@_CELEBRATIONS": {},
   "celebrationFitnessTitle": "Beast Mode! 💪",
-  "@celebrationFitnessTitle": {"description": "Fitness celebration title"},
+  "@celebrationFitnessTitle": {
+    "description": "Fitness celebration title"
+  },
   "celebrationFitnessSubtitle": "One step closer to your fitness goal!",
-  "@celebrationFitnessSubtitle": {"description": "Fitness celebration subtitle"},
+  "@celebrationFitnessSubtitle": {
+    "description": "Fitness celebration subtitle"
+  },
   "celebrationBookTitle": "Bookworm! 📚",
-  "@celebrationBookTitle": {"description": "Book celebration title"},
+  "@celebrationBookTitle": {
+    "description": "Book celebration title"
+  },
   "celebrationBookSubtitle": "Knowledge is power!",
-  "@celebrationBookSubtitle": {"description": "Book celebration subtitle"},
+  "@celebrationBookSubtitle": {
+    "description": "Book celebration subtitle"
+  },
   "celebrationWaterTitle": "Hydrated! 💧",
-  "@celebrationWaterTitle": {"description": "Water celebration title"},
+  "@celebrationWaterTitle": {
+    "description": "Water celebration title"
+  },
   "celebrationWaterSubtitle": "Stay refreshed and healthy!",
-  "@celebrationWaterSubtitle": {"description": "Water celebration subtitle"},
+  "@celebrationWaterSubtitle": {
+    "description": "Water celebration subtitle"
+  },
   "celebrationSleepTitle": "Sweet Dreams! 😴",
-  "@celebrationSleepTitle": {"description": "Sleep celebration title"},
+  "@celebrationSleepTitle": {
+    "description": "Sleep celebration title"
+  },
   "celebrationSleepSubtitle": "Rest well, you earned it!",
-  "@celebrationSleepSubtitle": {"description": "Sleep celebration subtitle"},
+  "@celebrationSleepSubtitle": {
+    "description": "Sleep celebration subtitle"
+  },
   "celebrationFoodTitle": "Delicious! 🍽️",
-  "@celebrationFoodTitle": {"description": "Food celebration title"},
+  "@celebrationFoodTitle": {
+    "description": "Food celebration title"
+  },
   "celebrationFoodSubtitle": "Healthy eating habits!",
-  "@celebrationFoodSubtitle": {"description": "Food celebration subtitle"},
+  "@celebrationFoodSubtitle": {
+    "description": "Food celebration subtitle"
+  },
   "celebrationRunTitle": "On the Move! 🏃",
-  "@celebrationRunTitle": {"description": "Run celebration title"},
+  "@celebrationRunTitle": {
+    "description": "Run celebration title"
+  },
   "celebrationRunSubtitle": "Keep running towards your goals!",
-  "@celebrationRunSubtitle": {"description": "Run celebration subtitle"},
+  "@celebrationRunSubtitle": {
+    "description": "Run celebration subtitle"
+  },
   "celebrationMeditationTitle": "Inner Peace! 🧘",
-  "@celebrationMeditationTitle": {"description": "Meditation celebration title"},
+  "@celebrationMeditationTitle": {
+    "description": "Meditation celebration title"
+  },
   "celebrationMeditationSubtitle": "Mindfulness achieved!",
-  "@celebrationMeditationSubtitle": {"description": "Meditation celebration subtitle"},
+  "@celebrationMeditationSubtitle": {
+    "description": "Meditation celebration subtitle"
+  },
   "celebrationYogaTitle": "Namaste! 🧘‍♀️",
-  "@celebrationYogaTitle": {"description": "Yoga celebration title"},
+  "@celebrationYogaTitle": {
+    "description": "Yoga celebration title"
+  },
   "celebrationYogaSubtitle": "Balance and flexibility!",
-  "@celebrationYogaSubtitle": {"description": "Yoga celebration subtitle"},
+  "@celebrationYogaSubtitle": {
+    "description": "Yoga celebration subtitle"
+  },
   "celebrationArtTitle": "Creative! 🎨",
-  "@celebrationArtTitle": {"description": "Art celebration title"},
+  "@celebrationArtTitle": {
+    "description": "Art celebration title"
+  },
   "celebrationArtSubtitle": "Express yourself!",
-  "@celebrationArtSubtitle": {"description": "Art celebration subtitle"},
+  "@celebrationArtSubtitle": {
+    "description": "Art celebration subtitle"
+  },
   "celebrationMusicTitle": "Harmony! 🎵",
-  "@celebrationMusicTitle": {"description": "Music celebration title"},
+  "@celebrationMusicTitle": {
+    "description": "Music celebration title"
+  },
   "celebrationMusicSubtitle": "Keep the rhythm going!",
-  "@celebrationMusicSubtitle": {"description": "Music celebration subtitle"},
+  "@celebrationMusicSubtitle": {
+    "description": "Music celebration subtitle"
+  },
   "celebrationWorkTitle": "Productive! 💼",
-  "@celebrationWorkTitle": {"description": "Work celebration title"},
+  "@celebrationWorkTitle": {
+    "description": "Work celebration title"
+  },
   "celebrationWorkSubtitle": "Crushing those tasks!",
-  "@celebrationWorkSubtitle": {"description": "Work celebration subtitle"},
+  "@celebrationWorkSubtitle": {
+    "description": "Work celebration subtitle"
+  },
   "celebrationSchoolTitle": "Smart! 🎓",
-  "@celebrationSchoolTitle": {"description": "School celebration title"},
+  "@celebrationSchoolTitle": {
+    "description": "School celebration title"
+  },
   "celebrationSchoolSubtitle": "Learning never stops!",
-  "@celebrationSchoolSubtitle": {"description": "School celebration subtitle"},
+  "@celebrationSchoolSubtitle": {
+    "description": "School celebration subtitle"
+  },
   "celebrationHeartTitle": "Healthy! ❤️",
-  "@celebrationHeartTitle": {"description": "Heart/health celebration title"},
+  "@celebrationHeartTitle": {
+    "description": "Heart/health celebration title"
+  },
   "celebrationHeartSubtitle": "Taking care of yourself!",
-  "@celebrationHeartSubtitle": {"description": "Heart/health celebration subtitle"},
+  "@celebrationHeartSubtitle": {
+    "description": "Heart/health celebration subtitle"
+  },
   "celebrationWalkTitle": "Step by Step! 🚶",
-  "@celebrationWalkTitle": {"description": "Walk celebration title"},
+  "@celebrationWalkTitle": {
+    "description": "Walk celebration title"
+  },
   "celebrationWalkSubtitle": "Every step counts!",
-  "@celebrationWalkSubtitle": {"description": "Walk celebration subtitle"},
+  "@celebrationWalkSubtitle": {
+    "description": "Walk celebration subtitle"
+  },
   "celebrationBikeTitle": "Pedal Power! 🚴",
-  "@celebrationBikeTitle": {"description": "Bike celebration title"},
+  "@celebrationBikeTitle": {
+    "description": "Bike celebration title"
+  },
   "celebrationBikeSubtitle": "Rolling towards success!",
-  "@celebrationBikeSubtitle": {"description": "Bike celebration subtitle"},
+  "@celebrationBikeSubtitle": {
+    "description": "Bike celebration subtitle"
+  },
   "celebrationDefaultTitle": "🎉 Great Job! 🎉",
-  "@celebrationDefaultTitle": {"description": "Default celebration title"},
+  "@celebrationDefaultTitle": {
+    "description": "Default celebration title"
+  },
   "celebrationDefaultSubtitle": "Keep up the great work!",
-  "@celebrationDefaultSubtitle": {"description": "Default celebration subtitle"},
-
+  "@celebrationDefaultSubtitle": {
+    "description": "Default celebration subtitle"
+  },
   "@_HABIT_CARD": {},
   "habitCompleted": "{habit} completed! 🎉",
   "@habitCompleted": {
@@ -1314,39 +1507,70 @@
     }
   },
   "consistency": "Consistency",
-  "@consistency": {"description": "Consistency label"},
+  "@consistency": {
+    "description": "Consistency label"
+  },
   "onFire": "On Fire! 🔥",
-  "@onFire": {"description": "On fire status"},
+  "@onFire": {
+    "description": "On fire status"
+  },
   "keepBuilding": "Keep Building",
-  "@keepBuilding": {"description": "Keep building encouragement"},
-
+  "@keepBuilding": {
+    "description": "Keep building encouragement"
+  },
   "@_SHARE": {},
   "shareProgress": "Share Progress",
-  "@shareProgress": {"description": "Share progress title"},
+  "@shareProgress": {
+    "description": "Share progress title"
+  },
   "inspireYourFriends": "Inspire your friends!",
-  "@inspireYourFriends": {"description": "Share progress subtitle"},
+  "@inspireYourFriends": {
+    "description": "Share progress subtitle"
+  },
   "dayStreak": "Day Streak",
-  "@dayStreak": {"description": "Day streak label"},
+  "@dayStreak": {
+    "description": "Day streak label"
+  },
   "completed": "Completed",
-  "@completed": {"description": "Completed label"},
+  "@completed": {
+    "description": "Completed label"
+  },
   "shareAsImage": "Share as Image",
-  "@shareAsImage": {"description": "Share as image option"},
+  "@shareAsImage": {
+    "description": "Share as image option"
+  },
   "generating": "Generating...",
-  "@generating": {"description": "Generating status"},
+  "@generating": {
+    "description": "Generating status"
+  },
   "progressReport": "Progress Report",
-  "@progressReport": {"description": "Progress report label"},
+  "@progressReport": {
+    "description": "Progress report label"
+  },
   "buildingBetterHabits": "Building better habits",
-  "@buildingBetterHabits": {"description": "Default habit description"},
+  "@buildingBetterHabits": {
+    "description": "Default habit description"
+  },
   "dayStreakLabel": "Day\nStreak",
-  "@dayStreakLabel": {"description": "Day streak label for share card"},
+  "@dayStreakLabel": {
+    "description": "Day streak label for share card"
+  },
   "bestStreakLabel": "Best\nStreak",
-  "@bestStreakLabel": {"description": "Best streak label for share card"},
+  "@bestStreakLabel": {
+    "description": "Best streak label for share card"
+  },
   "totalDoneLabel": "Total\nDone",
-  "@totalDoneLabel": {"description": "Total done label for share card"},
+  "@totalDoneLabel": {
+    "description": "Total done label for share card"
+  },
   "keepBuildingBetterHabits": "💪  Keep building better habits!",
-  "@keepBuildingBetterHabits": {"description": "Share card footer message"},
+  "@keepBuildingBetterHabits": {
+    "description": "Share card footer message"
+  },
   "myHabitsHashtag": "#MyHabits",
-  "@myHabitsHashtag": {"description": "Hashtag for sharing"},
+  "@myHabitsHashtag": {
+    "description": "Hashtag for sharing"
+  },
   "myHabitProgress": "🎯 My {habit} Progress! #MyHabits",
   "@myHabitProgress": {
     "description": "Share text with habit name",
@@ -1368,4 +1592,3 @@
     }
   }
 }
-

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../services/notification_service.dart';
+import '../models/habit.dart';
 
 class NotificationSettings {
   final bool pushNotificationsEnabled;
@@ -64,7 +66,6 @@ class NotificationSettingsNotifier extends Notifier<NotificationSettings> {
       final json = prefs.getString(_prefsKey);
 
       if (json != null) {
-        // Parse JSON manually
         final parts = json.split(',');
         if (parts.length >= 4) {
           final settings = NotificationSettings(
@@ -95,15 +96,44 @@ class NotificationSettingsNotifier extends Notifier<NotificationSettings> {
       final json =
           '${state.pushNotificationsEnabled},${state.soundEnabled},${state.vibrationEnabled},${state.useDeviceSound}';
       await prefs.setString(_prefsKey, json);
-      debugPrint('💾 Saved notification settings');
     } catch (e) {
       debugPrint('Error saving notification settings: $e');
     }
   }
 
-  Future<void> setPushNotificationsEnabled(bool enabled) async {
+  Future<void> setPushNotificationsEnabled(
+    bool enabled, {
+    List<Habit>? habits,
+    String Function(String)? localizedTitleGenerator,
+    String? localizedBody,
+  }) async {
+    final wasEnabled = state.pushNotificationsEnabled;
+
     state = state.copyWith(pushNotificationsEnabled: enabled);
+
     await _saveSettings();
+
+    if (enabled && !wasEnabled && habits != null && habits.isNotEmpty) {
+      try {
+        debugPrint('📅 Rescheduling all habit notifications after enabling...');
+        await NotificationService().rescheduleAllHabitsForToday(
+          habits,
+          localizedTitleGenerator: localizedTitleGenerator,
+          localizedBody: localizedBody,
+          playSound: shouldPlaySound(),
+          enableVibration: shouldVibrate(),
+        );
+      } catch (e) {
+        debugPrint('❌ Error rescheduling notifications: $e');
+      }
+    } else if (!enabled && wasEnabled) {
+      try {
+        await NotificationService().cancelAllNotifications();
+        debugPrint('✅ All notifications canceled');
+      } catch (e) {
+        debugPrint('❌ Error canceling notifications: $e');
+      }
+    }
   }
 
   Future<void> setSoundEnabled(bool enabled) async {
@@ -125,7 +155,6 @@ class NotificationSettingsNotifier extends Notifier<NotificationSettings> {
     await _saveSettings();
   }
 
-  /// Check if sound should play based on settings and device state
   bool shouldPlaySound() {
     final result = state.pushNotificationsEnabled &&
         (state.useDeviceSound || state.soundEnabled);
@@ -134,7 +163,6 @@ class NotificationSettingsNotifier extends Notifier<NotificationSettings> {
     return result;
   }
 
-  /// Check if vibration should happen
   bool shouldVibrate() {
     final result = state.pushNotificationsEnabled && state.vibrationEnabled;
     debugPrint(

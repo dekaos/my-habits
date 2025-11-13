@@ -83,6 +83,10 @@ class AppLocalizationsPt extends AppLocalizations {
       'Por favor, insira um título para o hábito';
 
   @override
+  String get pleaseSelectAtLeastOneDay =>
+      'Por favor, selecione pelo menos um dia para hábitos personalizados';
+
+  @override
   String get loginFailed =>
       'Login falhou. Por favor, verifique suas credenciais.';
 

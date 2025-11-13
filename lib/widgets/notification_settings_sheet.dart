@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/notification_settings_provider.dart';
+import '../providers/habit_provider.dart';
 import '../l10n/app_localizations.dart';
 import 'glass_card.dart';
 
@@ -12,6 +13,7 @@ class NotificationSettingsSheet extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final settings = ref.watch(notificationSettingsProvider);
     final settingsNotifier = ref.read(notificationSettingsProvider.notifier);
+    final habitState = ref.watch(habitProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
@@ -71,7 +73,13 @@ class NotificationSettingsSheet extends ConsumerWidget {
                       subtitle: l10n.receiveHabitReminders,
                       value: settings.pushNotificationsEnabled,
                       onChanged: (value) {
-                        settingsNotifier.setPushNotificationsEnabled(value);
+                        settingsNotifier.setPushNotificationsEnabled(
+                          value,
+                          habits: habitState.habits,
+                          localizedTitleGenerator: (title) =>
+                              l10n.notificationTimeFor(title),
+                          localizedBody: l10n.notificationHabitStartsSoon,
+                        );
                       },
                     ),
 
@@ -89,34 +97,30 @@ class NotificationSettingsSheet extends ConsumerWidget {
                       value: settings.useDeviceSound
                           ? true
                           : settings.soundEnabled,
-                      onChanged: settings.pushNotificationsEnabled
-                          ? (value) {
-                              if (settings.useDeviceSound) {
-                                // Switch to manual control
-                                settingsNotifier.setUseDeviceSound(false);
-                                settingsNotifier.setSoundEnabled(value);
-                              } else {
-                                settingsNotifier.setSoundEnabled(value);
-                              }
-                            }
-                          : null,
-                      trailing: settings.pushNotificationsEnabled
-                          ? IconButton(
-                              icon: Icon(
-                                settings.useDeviceSound
-                                    ? Icons.phone_android
-                                    : Icons.settings,
-                                size: 20,
-                              ),
-                              tooltip: settings.useDeviceSound
-                                  ? l10n.useManualControl
-                                  : l10n.useDeviceSettings,
-                              onPressed: () {
-                                settingsNotifier.setUseDeviceSound(
-                                    !settings.useDeviceSound);
-                              },
-                            )
-                          : null,
+                      onChanged: (value) {
+                        if (settings.useDeviceSound) {
+                          // Switch to manual control
+                          settingsNotifier.setUseDeviceSound(false);
+                          settingsNotifier.setSoundEnabled(value);
+                        } else {
+                          settingsNotifier.setSoundEnabled(value);
+                        }
+                      },
+                      trailing: IconButton(
+                        icon: Icon(
+                          settings.useDeviceSound
+                              ? Icons.phone_android
+                              : Icons.settings,
+                          size: 20,
+                        ),
+                        tooltip: settings.useDeviceSound
+                            ? l10n.useManualControl
+                            : l10n.useDeviceSettings,
+                        onPressed: () {
+                          settingsNotifier
+                              .setUseDeviceSound(!settings.useDeviceSound);
+                        },
+                      ),
                     ),
 
                     _buildDivider(),
@@ -129,11 +133,9 @@ class NotificationSettingsSheet extends ConsumerWidget {
                           ? l10n.vibrateOnNotifications
                           : l10n.vibrationDisabled,
                       value: settings.vibrationEnabled,
-                      onChanged: settings.pushNotificationsEnabled
-                          ? (value) {
-                              settingsNotifier.setVibrationEnabled(value);
-                            }
-                          : null,
+                      onChanged: (value) {
+                        settingsNotifier.setVibrationEnabled(value);
+                      },
                     ),
                   ],
                 ),

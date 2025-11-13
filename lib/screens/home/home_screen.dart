@@ -6,6 +6,7 @@ import '../../providers/habit_provider.dart';
 import '../../providers/social_provider.dart';
 import '../../providers/notification_provider.dart';
 import '../../providers/messaging_provider.dart';
+import '../../providers/notification_settings_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../widgets/animated_gradient_background.dart';
 import '../../services/notification_service.dart';
@@ -82,10 +83,47 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       ref.read(messagingProvider.notifier).subscribeToMessages(userId);
       debugPrint('🏠 HomeScreen - Realtime subscriptions requested');
 
-      debugPrint('✅ HomeScreen - Data loaded successfully');
+      await _rescheduleHabitNotifications();
     } catch (e) {
       debugPrint('❌ HomeScreen - Error loading data: $e');
       _hasLoadedData = false;
+    }
+  }
+
+  Future<void> _rescheduleHabitNotifications() async {
+    try {
+      final notificationSettings = ref.read(notificationSettingsProvider);
+      if (!notificationSettings.pushNotificationsEnabled) {
+        return;
+      }
+
+      final habitState = ref.read(habitProvider);
+      final habitsWithSchedule =
+          habitState.habits.where((h) => h.scheduledTime != null).toList();
+
+      if (habitsWithSchedule.isEmpty) {
+        return;
+      }
+
+      final l10n = AppLocalizations.of(context);
+
+      if (l10n != null) {
+        final settingsNotifier =
+            ref.read(notificationSettingsProvider.notifier);
+        await NotificationService().rescheduleAllHabitsForToday(
+          habitsWithSchedule,
+          localizedTitleGenerator: (title) => l10n.notificationTimeFor(title),
+          localizedBody: l10n.notificationHabitStartsSoon,
+          playSound: settingsNotifier.shouldPlaySound(),
+          enableVibration: settingsNotifier.shouldVibrate(),
+        );
+      } else {
+        await NotificationService().rescheduleAllHabitsForToday(
+          habitsWithSchedule,
+        );
+      }
+    } catch (e) {
+      debugPrint('❌ Error rescheduling habit notifications: $e');
     }
   }
 

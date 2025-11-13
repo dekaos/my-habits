@@ -242,6 +242,12 @@ abstract class AppLocalizations {
   /// **'Please enter a habit title'**
   String get pleaseEnterHabitTitle;
 
+  /// Custom habit days validation error
+  ///
+  /// In en, this message translates to:
+  /// **'Please select at least one day for custom habits'**
+  String get pleaseSelectAtLeastOneDay;
+
   /// Login error message
   ///
   /// In en, this message translates to:

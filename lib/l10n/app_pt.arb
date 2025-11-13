@@ -1,11 +1,9 @@
 {
   "@@locale": "pt",
-  
   "@_APP_INFO": {},
   "appTitle": "Habit Hero",
   "myHabitsTitle": "Meus Hábitos",
   "buildBetterHabits": "Construa Hábitos Melhores Juntos",
-  
   "@_AUTH": {},
   "welcomeBack": "Bem-vindo de Volta!",
   "signInToContinue": "Entre para continuar sua jornada de hábitos",
@@ -21,7 +19,6 @@
   "confirmPassword": "Confirmar Senha",
   "alreadyHaveAccount": "Já tem uma conta?",
   "signIn": "Entrar",
-  
   "@_VALIDATION": {},
   "pleaseEnterEmail": "Por favor, insira seu e-mail",
   "pleaseEnterValidEmail": "Por favor, insira um e-mail válido",
@@ -30,17 +27,15 @@
   "pleaseEnterName": "Por favor, insira seu nome",
   "passwordsDoNotMatch": "As senhas não correspondem",
   "pleaseEnterHabitTitle": "Por favor, insira um título para o hábito",
-  
+  "pleaseSelectAtLeastOneDay": "Por favor, selecione pelo menos um dia para hábitos personalizados",
   "@_AUTH_MESSAGES": {},
   "loginFailed": "Login falhou. Por favor, verifique suas credenciais.",
   "signupFailed": "Cadastro falhou. Por favor, tente novamente.",
-  
   "@_NAVIGATION": {},
   "habits": "Hábitos",
   "social": "Social",
   "performance": "Desempenho",
   "profile": "Perfil",
-  
   "@_HABITS": {},
   "myHabits": "Meus Hábitos",
   "newHabit": "Novo Hábito",
@@ -63,7 +58,6 @@
   "greatMomentum": "Ótimo ritmo! Continue construindo!",
   "everyStepCounts": "Cada passo conta. Continue assim!",
   "readyToBuildHabits": "Pronto para construir novos hábitos?",
-  
   "@_HABIT_MANAGEMENT": {},
   "habitTitle": "Título do Hábito",
   "habitTitlePlaceholder": "ex: Exercício Matinal",
@@ -87,7 +81,6 @@
   "iconHealth": "Saúde",
   "iconWalking": "Caminhada",
   "iconCycling": "Ciclismo",
-  
   "@_CATEGORIES": {},
   "categoryFitness": "Fitness",
   "categoryBook": "Leitura",
@@ -105,7 +98,6 @@
   "categoryWalk": "Caminhada",
   "categoryBike": "Ciclismo",
   "categoryOther": "Outros",
-  
   "selectColor": "Selecionar Cor",
   "chooseColor": "Escolha uma Cor",
   "frequency": "Frequência",
@@ -148,7 +140,6 @@
   "total": "Total",
   "recentCompletions": "Conclusões Recentes",
   "noCompletionsYet": "Ainda sem conclusões.\nComece sua sequência hoje!",
-  
   "@_DAYS": {},
   "monday": "Segunda-feira",
   "tuesday": "Terça-feira",
@@ -164,7 +155,6 @@
   "fri": "Sex",
   "sat": "Sáb",
   "sun": "Dom",
-  
   "@_SOCIAL": {},
   "noActivityYet": "Ainda Sem Atividade",
   "connectWithFriends": "Conecte-se com amigos para ver o progresso deles\ne se manter motivado juntos!",
@@ -201,7 +191,6 @@
   "startConversation": "Inicie uma conversa!",
   "sayHelloTo": "Diga olá para {name}",
   "failedToSendMessage": "Falha ao enviar mensagem: {error}",
-  
   "@_PERFORMANCE": {},
   "weeklyOverview": "Visão Semanal",
   "completionRate": "Taxa de Conclusão",
@@ -230,7 +219,6 @@
   "streakCount": "{count} sequência",
   "weeklyPattern": "Padrão Semanal",
   "completionsTooltip": "{date}: {count} conclusões",
-  
   "@_PROFILE": {},
   "myProfile": "Meu Perfil",
   "editProfile": "Editar Perfil",
@@ -264,14 +252,12 @@
   "errorOpeningChat": "Erro ao abrir chat: {error}",
   "justNow": "Agora mesmo",
   "weeksAgo": "{count}sem atrás",
-  
   "@_NOTIFICATION_MESSAGES": {},
   "friendRequestFrom": "{name} enviou uma solicitação de amizade",
   "friendRequestAccepted": "{name} aceitou sua solicitação de amizade",
   "habitCompletedBy": "{name} concluiu \"{habit}\"",
   "reactionReceived": "{name} reagiu {emoji}",
   "newMessage": "{name} enviou uma mensagem",
-  
   "@_TIME": {},
   "today": "Hoje",
   "yesterday": "Ontem",
@@ -279,7 +265,6 @@
   "minutesAgo": "{count}min atrás",
   "hoursAgo": "{count}h atrás",
   "daysAgo": "{count}d atrás",
-  
   "@_NOTIFICATIONS": {},
   "notificationTimeFor": "Hora de: {habitTitle}",
   "notificationHabitStartsSoon": "Seu hábito começa em 30 minutos. Prepare-se! 💪",
@@ -295,7 +280,6 @@
   "vibration": "Vibração",
   "vibrateOnNotifications": "Vibrar nas notificações",
   "vibrationDisabled": "Sem vibração",
-
   "@_MISC": {},
   "loading": "Carregando...",
   "error": "Erro",
@@ -310,7 +294,6 @@
   "chooseReaction": "Escolha uma Reação",
   "reactionCount": "{count, plural, =1{1 reação} other{{count} reações}}",
   "couldNotLoadUsers": "Não foi possível carregar usuários",
-
   "@_CELEBRATIONS": {},
   "celebrationFitnessTitle": "Modo Fera! 💪",
   "celebrationFitnessSubtitle": "Mais um passo para sua meta de fitness!",
@@ -344,7 +327,6 @@
   "celebrationBikeSubtitle": "Pedalando rumo ao sucesso!",
   "celebrationDefaultTitle": "🎉 Ótimo Trabalho! 🎉",
   "celebrationDefaultSubtitle": "Continue com o ótimo trabalho!",
-
   "@_HABIT_CARD": {},
   "habitCompleted": "{habit} concluído! 🎉",
   "habitMarkedIncomplete": "{habit} marcado como incompleto",
@@ -353,7 +335,6 @@
   "consistency": "Consistência",
   "onFire": "Arrasando! 🔥",
   "keepBuilding": "Continue Construindo",
-
   "@_SHARE": {},
   "shareProgress": "Compartilhar Progresso",
   "inspireYourFriends": "Inspire seus amigos!",
@@ -371,4 +352,3 @@
   "myHabitProgress": "🎯 Meu Progresso em {habit}! #MeusHábitos",
   "failedToGenerateImage": "Falha ao gerar imagem: {error}"
 }
-

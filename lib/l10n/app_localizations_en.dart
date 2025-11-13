@@ -81,6 +81,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pleaseEnterHabitTitle => 'Please enter a habit title';
 
   @override
+  String get pleaseSelectAtLeastOneDay =>
+      'Please select at least one day for custom habits';
+
+  @override
   String get loginFailed => 'Login failed. Please check your credentials.';
 
   @override

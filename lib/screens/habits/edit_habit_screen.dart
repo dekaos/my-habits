@@ -72,6 +72,18 @@ class _EditHabitScreenState extends ConsumerState<EditHabitScreen> {
     if (!_formKey.currentState!.validate()) return;
     if (_isSaving) return;
 
+    final l10n = AppLocalizations.of(context)!;
+
+    if (_frequency == HabitFrequency.custom && _customDays.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.pleaseSelectAtLeastOneDay),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     setState(() {
       _isSaving = true;
     });
