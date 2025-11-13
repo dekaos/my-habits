@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!--
+    If you are serving your web app in a path other than the root, change the
+    href value below to reflect the base path you are serving from.
+
+    The path provided below has to start and end with a slash "/" in order for
+    it to work correctly.
+
+    For more details:
+    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+
+    This is a placeholder for base href that will be replaced by the value of
+    the `--base-href` argument provided to `flutter build`.
+  -->
+    <base href="$FLUTTER_BASE_HREF">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+
+    <!-- Primary Meta Tags -->
+    <title>Habit Hero - Build Better Habits Together</title>
+    <meta name="title" content="Habit Hero - Build Better Habits Together">
+    <meta name="description"
+        content="Join thousands building better habits with social accountability, beautiful progress tracking, and real-time motivation from friends. Available on iOS and Android.">
+    <meta name="keywords"
+        content="habit tracker, habit building, productivity app, social accountability, habit goals, daily habits, iOS app, Android app">
+    <meta name="author" content="Habit Hero">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://habithero.app/">
+    <meta property="og:title" content="Habit Hero - Build Better Habits Together">
+    <meta property="og:description"
+        content="Join thousands building better habits with social accountability, beautiful progress tracking, and real-time motivation from friends.">
+    <meta property="og:image" content="https://habithero.app/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://habithero.app/">
+    <meta property="twitter:title" content="Habit Hero - Build Better Habits Together">
+    <meta property="twitter:description"
+        content="Join thousands building better habits with social accountability, beautiful progress tracking, and real-time motivation from friends.">
+    <meta property="twitter:image" content="https://habithero.app/og-image.png">
+
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#6366F1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Habit Hero">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+    <!-- Manifest -->
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Preconnect to important resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Critical CSS for initial load -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #EC4899 100%);
+        }
+
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #EC4899 100%);
+            z-index: 9999;
+            transition: opacity 0.3s ease-out;
+        }
+
+        #loading.loaded {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-text {
+            margin-top: 24px;
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .loading-logo {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 32px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .loading-logo::before {
+            content: "💪";
+            font-size: 40px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        /* Prevent flash of unstyled content */
+        flutter-view {
+            opacity: 0;
+            transition: opacity 0.3s ease-in;
+        }
+
+        flutter-view.ready {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Loading screen -->
+    <div id="loading">
+        <div class="loading-logo"></div>
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading Habit Hero...</div>
+    </div>
+
+    <!-- Flutter app will render here -->
+    <script>
+        // Service Worker registration with update handling
+        window.addEventListener('load', function () {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('flutter_service_worker.js?v=1')
+                    .then(function (registration) {
+                        console.log('Service Worker registered successfully');
+
+                        // Handle updates
+                        registration.addEventListener('updatefound', function () {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', function () {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // New service worker available, prompt user to refresh
+                                    console.log('New version available! Please refresh.');
+                                }
+                            });
+                        });
+                    })
+                    .catch(function (error) {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            }
+        });
+
+        // Hide loading screen when Flutter is ready
+        window.addEventListener('flutter-first-frame', function () {
+            const loading = document.getElementById('loading');
+            const flutterView = document.querySelector('flutter-view');
+
+            if (loading) {
+                loading.classList.add('loaded');
+                setTimeout(function () {
+                    loading.remove();
+                }, 300);
+            }
+
+            if (flutterView) {
+                flutterView.classList.add('ready');
+            }
+        });
+
+        // Performance monitoring
+        if (typeof PerformanceObserver !== 'undefined') {
+            const observer = new PerformanceObserver(function (list) {
+                for (const entry of list.getEntries()) {
+                    if (entry.entryType === 'largest-contentful-paint') {
+                        console.log('LCP:', entry.renderTime || entry.loadTime);
+                    }
+                }
+            });
+
+            try {
+                observer.observe({ entryTypes: ['largest-contentful-paint'] });
+            } catch (e) {
+                // Browser doesn't support LCP
+            }
+        }
+    </script>
+
+    <!-- Flutter initialization -->
+    <script src="flutter_bootstrap.js" async></script>
+</body>
+
+</html>
