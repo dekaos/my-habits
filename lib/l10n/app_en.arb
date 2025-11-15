@@ -1,6 +1,5 @@
 {
   "@@locale": "en",
-  "@_APP_INFO": {},
   "appTitle": "Habit Hero",
   "@appTitle": {
     "description": "The name of the application"
@@ -13,7 +12,6 @@
   "@buildBetterHabits": {
     "description": "Splash screen tagline"
   },
-  "@_AUTH": {},
   "welcomeBack": "Welcome Back!",
   "@welcomeBack": {
     "description": "Login screen greeting"
@@ -70,7 +68,6 @@
   "@signIn": {
     "description": "Sign in button text"
   },
-  "@_VALIDATION": {},
   "pleaseEnterEmail": "Please enter your email",
   "@pleaseEnterEmail": {
     "description": "Email validation error"
@@ -103,7 +100,6 @@
   "@pleaseSelectAtLeastOneDay": {
     "description": "Custom habit days validation error"
   },
-  "@_AUTH_MESSAGES": {},
   "loginFailed": "Login failed. Please check your credentials.",
   "@loginFailed": {
     "description": "Login error message"
@@ -112,7 +108,6 @@
   "@signupFailed": {
     "description": "Signup error message"
   },
-  "@_NAVIGATION": {},
   "habits": "Habits",
   "@habits": {
     "description": "Habits tab title"
@@ -129,7 +124,6 @@
   "@profile": {
     "description": "Profile tab title"
   },
-  "@_HABITS": {},
   "myHabits": "My Habits",
   "@myHabits": {
     "description": "Habits tab app bar title"
@@ -236,7 +230,6 @@
   "@readyToBuildHabits": {
     "description": "Message when no habits for today"
   },
-  "@_HABIT_MANAGEMENT": {},
   "habitTitle": "Habit Title",
   "@habitTitle": {
     "description": "Habit title input label"
@@ -325,7 +318,10 @@
   "@iconCycling": {
     "description": "Cycling icon label"
   },
-  "@_CATEGORIES": {},
+  "iconMedication": "Medicine",
+  "@iconMedication": {
+    "description": "Medicine icon label"
+  },
   "categoryFitness": "Fitness",
   "@categoryFitness": {
     "description": "Fitness category name"
@@ -385,6 +381,10 @@
   "categoryBike": "Cycling",
   "@categoryBike": {
     "description": "Cycling category name"
+  },
+  "categoryMedication": "Medicine",
+  "@categoryMedication": {
+    "description": "Medicine category name"
   },
   "categoryOther": "Other",
   "@categoryOther": {
@@ -564,7 +564,6 @@
   "@noCompletionsYet": {
     "description": "Empty state message for no completions"
   },
-  "@_DAYS": {},
   "monday": "Monday",
   "@monday": {
     "description": "Monday"
@@ -621,7 +620,6 @@
   "@sun": {
     "description": "Sunday short"
   },
-  "@_SOCIAL": {},
   "noActivityYet": "No Activity Yet",
   "@noActivityYet": {
     "description": "Empty state title for social feed"
@@ -804,7 +802,6 @@
       }
     }
   },
-  "@_PERFORMANCE": {},
   "weeklyOverview": "Weekly Overview",
   "@weeklyOverview": {
     "description": "Performance chart section title"
@@ -941,7 +938,6 @@
       }
     }
   },
-  "@_PROFILE": {},
   "myProfile": "My Profile",
   "@myProfile": {
     "description": "Profile tab title"
@@ -1112,7 +1108,6 @@
       }
     }
   },
-  "@_NOTIFICATION_MESSAGES": {},
   "friendRequestFrom": "{name} sent you a friend request",
   "@friendRequestFrom": {
     "description": "Friend request notification",
@@ -1171,7 +1166,6 @@
       }
     }
   },
-  "@_TIME": {},
   "today": "Today",
   "@today": {
     "description": "Today label"
@@ -1214,7 +1208,6 @@
       }
     }
   },
-  "@_NOTIFICATIONS": {},
   "notificationTimeFor": "Time for: {habitTitle}",
   "@notificationTimeFor": {
     "description": "Notification title",
@@ -1228,6 +1221,42 @@
   "notificationHabitStartsSoon": "Your habit starts in 30 minutes. Get ready! 💪",
   "@notificationHabitStartsSoon": {
     "description": "Notification body when no description is provided"
+  },
+  "notificationDailyGoal": "Daily goal: {count} times. Get ready! 💪",
+  "@notificationDailyGoal": {
+    "description": "Notification body with daily goal count",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "scheduledTimesOptional": "Scheduled Times (optional)",
+  "@scheduledTimesOptional": {
+    "description": "Multiple scheduled times label"
+  },
+  "setTimeForEachCompletion": "Set a reminder time for each completion",
+  "@setTimeForEachCompletion": {
+    "description": "Subtitle for multiple scheduled times"
+  },
+  "completionNumber": "Completion #{number}",
+  "@completionNumber": {
+    "description": "Completion number label",
+    "placeholders": {
+      "number": {
+        "type": "int",
+        "example": "1"
+      }
+    }
+  },
+  "tapToSetTime": "Tap to set time",
+  "@tapToSetTime": {
+    "description": "Placeholder for unset time"
+  },
+  "addAnotherTime": "Add Another Time",
+  "@addAnotherTime": {
+    "description": "Button to add another scheduled time"
   },
   "notificationSettings": "Notification Settings",
   "@notificationSettings": {
@@ -1277,7 +1306,6 @@
   "@vibrationDisabled": {
     "description": "Vibration disabled description"
   },
-  "@_MISC": {},
   "loading": "Loading...",
   "@loading": {
     "description": "Loading indicator text"
@@ -1336,7 +1364,6 @@
   "@couldNotLoadUsers": {
     "description": "Error loading users message"
   },
-  "@_CELEBRATIONS": {},
   "celebrationFitnessTitle": "Beast Mode! 💪",
   "@celebrationFitnessTitle": {
     "description": "Fitness celebration title"
@@ -1457,6 +1484,14 @@
   "@celebrationBikeSubtitle": {
     "description": "Bike celebration subtitle"
   },
+  "celebrationMedicationTitle": "Taken! 💊",
+  "@celebrationMedicationTitle": {
+    "description": "Medication celebration title"
+  },
+  "celebrationMedicationSubtitle": "Taking care of your health!",
+  "@celebrationMedicationSubtitle": {
+    "description": "Medication celebration subtitle"
+  },
   "celebrationDefaultTitle": "🎉 Great Job! 🎉",
   "@celebrationDefaultTitle": {
     "description": "Default celebration title"
@@ -1465,7 +1500,6 @@
   "@celebrationDefaultSubtitle": {
     "description": "Default celebration subtitle"
   },
-  "@_HABIT_CARD": {},
   "habitCompleted": "{habit} completed! 🎉",
   "@habitCompleted": {
     "description": "Habit completed message",
@@ -1518,7 +1552,6 @@
   "@keepBuilding": {
     "description": "Keep building encouragement"
   },
-  "@_SHARE": {},
   "shareProgress": "Share Progress",
   "@shareProgress": {
     "description": "Share progress title"
@@ -1588,6 +1621,58 @@
       "error": {
         "type": "String",
         "example": "Network error"
+      }
+    }
+  },
+  "dailyGoal": "Daily Goal",
+  "@dailyGoal": {
+    "description": "Daily goal section title"
+  },
+  "timesPerDay": "times per day",
+  "@timesPerDay": {
+    "description": "Times per day label"
+  },
+  "howManyTimes": "How many times per day?",
+  "@howManyTimes": {
+    "description": "Target count picker question"
+  },
+  "timesSingular": "time",
+  "@timesSingular": {
+    "description": "Time singular"
+  },
+  "timesPlural": "times",
+  "@timesPlural": {
+    "description": "Times plural"
+  },
+  "completedXOfY": "{completed} of {target}",
+  "@completedXOfY": {
+    "description": "Progress indicator X of Y",
+    "placeholders": {
+      "completed": {
+        "type": "int",
+        "example": "2"
+      },
+      "target": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "dailyGoalReached": "Daily goal reached! 🎉",
+  "@dailyGoalReached": {
+    "description": "Message when daily goal is reached"
+  },
+  "completionXOfY": "Completion {current} of {target}",
+  "@completionXOfY": {
+    "description": "Completion number of target",
+    "placeholders": {
+      "current": {
+        "type": "int",
+        "example": "2"
+      },
+      "target": {
+        "type": "int",
+        "example": "5"
       }
     }
   }
