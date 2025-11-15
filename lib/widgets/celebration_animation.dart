@@ -28,12 +28,14 @@ class CelebrationTheme {
 class CelebrationAnimation extends StatefulWidget {
   final VoidCallback onComplete;
   final String? habitIcon;
+  final String? habitColor;
   final bool playSound;
   final bool enableVibration;
 
   const CelebrationAnimation({
     required this.onComplete,
     this.habitIcon,
+    this.habitColor,
     this.playSound = true,
     this.enableVibration = true,
     super.key,
@@ -86,7 +88,7 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
 
     // Initialize theme with localization (can't do in initState)
     if (_theme == null) {
-      _theme = _getThemeForIcon(context, widget.habitIcon);
+      _theme = _getThemeForIcon(context, widget.habitIcon, widget.habitColor);
     }
 
     // Start animations only once
@@ -121,17 +123,43 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
     }
   }
 
-  CelebrationTheme _getThemeForIcon(BuildContext context, String? iconName) {
+  CelebrationTheme _getThemeForIcon(
+      BuildContext context, String? iconName, String? habitColor) {
     final l10n = AppLocalizations.of(context)!;
+
+    // Parse user's habit color or use default
+    List<Color> userColors;
+    if (habitColor != null && habitColor.startsWith('#')) {
+      try {
+        final baseColor =
+            Color(int.parse(habitColor.substring(1), radix: 16) + 0xFF000000);
+        // Create gradient variations of the user's color
+        userColors = [
+          baseColor,
+          Color.lerp(baseColor, Colors.white, 0.2)!,
+          Color.lerp(baseColor, Colors.white, 0.4)!,
+        ];
+      } catch (e) {
+        // Fallback to default colors if parsing fails
+        userColors = const [
+          Color(0xFF6366F1),
+          Color(0xFFEC4899),
+          Color(0xFFF59E0B),
+        ];
+      }
+    } else {
+      // Default gradient colors
+      userColors = const [
+        Color(0xFF6366F1),
+        Color(0xFFEC4899),
+        Color(0xFFF59E0B),
+      ];
+    }
 
     switch (iconName) {
       case 'fitness':
         return CelebrationTheme(
-          colors: const [
-            Color(0xFFEF4444),
-            Color(0xFFF97316),
-            Color(0xFFFBBF24)
-          ],
+          colors: userColors,
           emoji: '💪',
           title: l10n.celebrationFitnessTitle,
           subtitle: l10n.celebrationFitnessSubtitle,
@@ -140,11 +168,7 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
         );
       case 'book':
         return CelebrationTheme(
-          colors: const [
-            Color(0xFF6366F1),
-            Color(0xFF8B5CF6),
-            Color(0xFFA78BFA)
-          ],
+          colors: userColors,
           emoji: '📚',
           title: l10n.celebrationBookTitle,
           subtitle: l10n.celebrationBookSubtitle,
@@ -153,11 +177,7 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
         );
       case 'water':
         return CelebrationTheme(
-          colors: const [
-            Color(0xFF06B6D4),
-            Color(0xFF0EA5E9),
-            Color(0xFF3B82F6)
-          ],
+          colors: userColors,
           emoji: '💧',
           title: l10n.celebrationWaterTitle,
           subtitle: l10n.celebrationWaterSubtitle,
@@ -166,11 +186,7 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
         );
       case 'sleep':
         return CelebrationTheme(
-          colors: const [
-            Color(0xFF8B5CF6),
-            Color(0xFF6366F1),
-            Color(0xFF4F46E5)
-          ],
+          colors: userColors,
           emoji: '😴',
           title: l10n.celebrationSleepTitle,
           subtitle: l10n.celebrationSleepSubtitle,
@@ -179,11 +195,7 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
         );
       case 'restaurant':
         return CelebrationTheme(
-          colors: const [
-            Color(0xFFF59E0B),
-            Color(0xFFFBBF24),
-            Color(0xFFFDE68A)
-          ],
+          colors: userColors,
           emoji: '🍽️',
           title: l10n.celebrationFoodTitle,
           subtitle: l10n.celebrationFoodSubtitle,
@@ -192,11 +204,7 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
         );
       case 'run':
         return CelebrationTheme(
-          colors: const [
-            Color(0xFF10B981),
-            Color(0xFF34D399),
-            Color(0xFF6EE7B7)
-          ],
+          colors: userColors,
           emoji: '🏃',
           title: l10n.celebrationRunTitle,
           subtitle: l10n.celebrationRunSubtitle,
@@ -205,11 +213,7 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
         );
       case 'meditation':
         return CelebrationTheme(
-          colors: const [
-            Color(0xFF8B5CF6),
-            Color(0xFFA78BFA),
-            Color(0xFFC4B5FD)
-          ],
+          colors: userColors,
           emoji: '🧘',
           title: l10n.celebrationMeditationTitle,
           subtitle: l10n.celebrationMeditationSubtitle,
@@ -218,11 +222,7 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
         );
       case 'yoga':
         return CelebrationTheme(
-          colors: const [
-            Color(0xFFEC4899),
-            Color(0xFFF472B6),
-            Color(0xFFFBBCDA)
-          ],
+          colors: userColors,
           emoji: '🧘‍♀️',
           title: l10n.celebrationYogaTitle,
           subtitle: l10n.celebrationYogaSubtitle,
@@ -231,11 +231,7 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
         );
       case 'art':
         return CelebrationTheme(
-          colors: const [
-            Color(0xFFEC4899),
-            Color(0xFFF59E0B),
-            Color(0xFF8B5CF6)
-          ],
+          colors: userColors,
           emoji: '🎨',
           title: l10n.celebrationArtTitle,
           subtitle: l10n.celebrationArtSubtitle,
@@ -244,11 +240,7 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
         );
       case 'music':
         return CelebrationTheme(
-          colors: const [
-            Color(0xFF6366F1),
-            Color(0xFFEC4899),
-            Color(0xFF8B5CF6)
-          ],
+          colors: userColors,
           emoji: '🎵',
           title: l10n.celebrationMusicTitle,
           subtitle: l10n.celebrationMusicSubtitle,
@@ -257,11 +249,7 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
         );
       case 'work':
         return CelebrationTheme(
-          colors: const [
-            Color(0xFF6366F1),
-            Color(0xFF3B82F6),
-            Color(0xFF60A5FA)
-          ],
+          colors: userColors,
           emoji: '💼',
           title: l10n.celebrationWorkTitle,
           subtitle: l10n.celebrationWorkSubtitle,
@@ -270,11 +258,7 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
         );
       case 'school':
         return CelebrationTheme(
-          colors: const [
-            Color(0xFFF59E0B),
-            Color(0xFFFBBF24),
-            Color(0xFF10B981)
-          ],
+          colors: userColors,
           emoji: '🎓',
           title: l10n.celebrationSchoolTitle,
           subtitle: l10n.celebrationSchoolSubtitle,
@@ -283,11 +267,7 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
         );
       case 'heart':
         return CelebrationTheme(
-          colors: const [
-            Color(0xFFEF4444),
-            Color(0xFFF87171),
-            Color(0xFFFCA5A5)
-          ],
+          colors: userColors,
           emoji: '❤️',
           title: l10n.celebrationHeartTitle,
           subtitle: l10n.celebrationHeartSubtitle,
@@ -296,11 +276,7 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
         );
       case 'walk':
         return CelebrationTheme(
-          colors: const [
-            Color(0xFF10B981),
-            Color(0xFF059669),
-            Color(0xFF34D399)
-          ],
+          colors: userColors,
           emoji: '🚶',
           title: l10n.celebrationWalkTitle,
           subtitle: l10n.celebrationWalkSubtitle,
@@ -309,11 +285,7 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
         );
       case 'bike':
         return CelebrationTheme(
-          colors: const [
-            Color(0xFF0EA5E9),
-            Color(0xFF06B6D4),
-            Color(0xFF22D3EE)
-          ],
+          colors: userColors,
           emoji: '🚴',
           title: l10n.celebrationBikeTitle,
           subtitle: l10n.celebrationBikeSubtitle,
@@ -322,11 +294,7 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
         );
       case 'medication':
         return CelebrationTheme(
-          colors: const [
-            Color(0xFFEF4444),
-            Color(0xFFF87171),
-            Color(0xFFFCA5A5)
-          ],
+          colors: userColors,
           emoji: '💊',
           title: l10n.celebrationMedicationTitle,
           subtitle: l10n.celebrationMedicationSubtitle,
@@ -335,13 +303,7 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
         );
       default:
         return CelebrationTheme(
-          colors: const [
-            Color(0xFF6366F1),
-            Color(0xFFEC4899),
-            Color(0xFFF59E0B),
-            Color(0xFF10B981),
-            Color(0xFF8B5CF6),
-          ],
+          colors: userColors,
           emoji: '🎉',
           title: l10n.celebrationDefaultTitle,
           subtitle: l10n.celebrationDefaultSubtitle,
@@ -606,6 +568,7 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
 void showCelebration(
   BuildContext context, {
   String? habitIcon,
+  String? habitColor,
   bool playSound = true,
   bool enableVibration = true,
 }) {
@@ -628,6 +591,7 @@ void showCelebration(
       builder: (context) => Positioned.fill(
         child: CelebrationAnimation(
           habitIcon: habitIcon,
+          habitColor: habitColor,
           playSound: playSound,
           enableVibration: enableVibration,
           onComplete: () {

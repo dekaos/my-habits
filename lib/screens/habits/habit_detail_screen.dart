@@ -84,6 +84,12 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
 
     _isCompleting = true;
 
+    final habitState = ref.read(habitProvider);
+    final currentHabit = habitState.habits.firstWhere(
+      (h) => h.id == widget.habit.id,
+      orElse: () => widget.habit,
+    );
+
     final settingsNotifier = ref.read(notificationSettingsProvider.notifier);
     final shouldPlaySound = settingsNotifier.shouldPlaySound();
     final shouldVibrate = settingsNotifier.shouldVibrate();
@@ -91,7 +97,8 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
     if (mounted) {
       showCelebration(
         context,
-        habitIcon: widget.habit.icon,
+        habitIcon: currentHabit.icon,
+        habitColor: currentHabit.color,
         playSound: shouldPlaySound,
         enableVibration: shouldVibrate,
       );
@@ -101,11 +108,6 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
         ? null
         : _noteController.text.trim();
 
-    final habitState = ref.read(habitProvider);
-    final currentHabit = habitState.habits.firstWhere(
-      (h) => h.id == widget.habit.id,
-      orElse: () => widget.habit,
-    );
     ref
         .read(habitProvider.notifier)
         .completeHabit(currentHabit, note: note)

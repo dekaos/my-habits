@@ -88,6 +88,7 @@ class _SlidableHabitCardState extends ConsumerState<SlidableHabitCard>
       showCelebration(
         context,
         habitIcon: currentHabit.icon,
+        habitColor: currentHabit.color,
         playSound: shouldPlaySound,
         enableVibration: shouldVibrate,
       );
