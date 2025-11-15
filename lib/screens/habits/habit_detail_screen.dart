@@ -10,6 +10,7 @@ import '../../widgets/animated_gradient_background.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/celebration_animation.dart';
 import '../../widgets/share_progress_sheet.dart';
+import '../../utils/habit_icons.dart';
 import 'edit_habit_screen.dart';
 
 class HabitDetailScreen extends ConsumerStatefulWidget {
@@ -211,6 +212,70 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    // Habit Icon and Category Label
+                    TweenAnimationBuilder<double>(
+                      tween: Tween(begin: 0.0, end: 1.0),
+                      duration: const Duration(milliseconds: 500),
+                      curve: Curves.easeOutCubic,
+                      builder: (context, value, child) {
+                        return Transform.translate(
+                          offset: Offset(0, 20 * (1 - value)),
+                          child: Opacity(
+                            opacity: value,
+                            child: child,
+                          ),
+                        );
+                      },
+                      child: Center(
+                        child: Column(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                color: Color(int.parse(
+                                            currentHabit.color.substring(1),
+                                            radix: 16) +
+                                        0xFF000000)
+                                    .withValues(alpha: 0.2),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Color(int.parse(
+                                          currentHabit.color.substring(1),
+                                          radix: 16) +
+                                      0xFF000000),
+                                  width: 3,
+                                ),
+                              ),
+                              child: Icon(
+                                HabitIcons.getIcon(currentHabit.icon),
+                                size: 48,
+                                color: Color(int.parse(
+                                        currentHabit.color.substring(1),
+                                        radix: 16) +
+                                    0xFF000000),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              _getCategoryName(context, currentHabit.icon),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleSmall
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(int.parse(
+                                            currentHabit.color.substring(1),
+                                            radix: 16) +
+                                        0xFF000000),
+                                    letterSpacing: 0.5,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
                     TweenAnimationBuilder<double>(
                       tween: Tween(begin: 0.0, end: 1.0),
                       duration: const Duration(milliseconds: 600),
@@ -912,5 +977,47 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
         ],
       ),
     );
+  }
+
+  String _getCategoryName(BuildContext context, String? iconName) {
+    final l10n = AppLocalizations.of(context)!;
+
+    switch (iconName) {
+      case 'fitness':
+        return l10n.iconFitness;
+      case 'book':
+        return l10n.iconReading;
+      case 'water':
+        return l10n.iconHydration;
+      case 'sleep':
+        return l10n.iconSleep;
+      case 'restaurant':
+        return l10n.iconEating;
+      case 'run':
+        return l10n.iconRunning;
+      case 'meditation':
+        return l10n.iconMeditation;
+      case 'yoga':
+        return l10n.iconYoga;
+      case 'art':
+        return l10n.iconArt;
+      case 'music':
+        return l10n.iconMusic;
+      case 'work':
+        return l10n.iconWork;
+      case 'school':
+        return l10n.iconStudy;
+      case 'heart':
+        return l10n.iconHealth;
+      case 'walk':
+        return l10n.iconWalking;
+      case 'bike':
+        return l10n.iconCycling;
+      case 'medication':
+        return l10n.iconMedication;
+      case 'other':
+      default:
+        return l10n.categoryOther;
+    }
   }
 }
