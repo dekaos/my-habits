@@ -256,6 +256,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get iconCycling => 'Ciclismo';
 
   @override
+  String get iconMedication => 'Medicine';
+
+  @override
   String get categoryFitness => 'Fitness';
 
   @override
@@ -299,6 +302,9 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get categoryBike => 'Ciclismo';
+
+  @override
+  String get categoryMedication => 'Medicine';
 
   @override
   String get categoryOther => 'Outros';
@@ -860,6 +866,29 @@ class AppLocalizationsPt extends AppLocalizations {
       'Seu hábito começa em 30 minutos. Prepare-se! 💪';
 
   @override
+  String notificationDailyGoal(int count) {
+    return 'Daily goal: $count times. Get ready! 💪';
+  }
+
+  @override
+  String get scheduledTimesOptional => 'Scheduled Times (optional)';
+
+  @override
+  String get setTimeForEachCompletion =>
+      'Set a reminder time for each completion';
+
+  @override
+  String completionNumber(int number) {
+    return 'Completion #$number';
+  }
+
+  @override
+  String get tapToSetTime => 'Tap to set time';
+
+  @override
+  String get addAnotherTime => 'Add Another Time';
+
+  @override
   String get notificationSettings => 'Configurações de Notificação';
 
   @override
@@ -1035,6 +1064,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get celebrationBikeSubtitle => 'Pedalando rumo ao sucesso!';
 
   @override
+  String get celebrationMedicationTitle => 'Taken! 💊';
+
+  @override
+  String get celebrationMedicationSubtitle => 'Taking care of your health!';
+
+  @override
   String get celebrationDefaultTitle => '🎉 Ótimo Trabalho! 🎉';
 
   @override
@@ -1123,5 +1158,33 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String failedToGenerateImage(String error) {
     return 'Falha ao gerar imagem: $error';
+  }
+
+  @override
+  String get dailyGoal => 'Daily Goal';
+
+  @override
+  String get timesPerDay => 'times per day';
+
+  @override
+  String get howManyTimes => 'How many times per day?';
+
+  @override
+  String get timesSingular => 'time';
+
+  @override
+  String get timesPlural => 'times';
+
+  @override
+  String completedXOfY(int completed, int target) {
+    return '$completed of $target';
+  }
+
+  @override
+  String get dailyGoalReached => 'Daily goal reached! 🎉';
+
+  @override
+  String completionXOfY(int current, int target) {
+    return 'Completion $current of $target';
   }
 }

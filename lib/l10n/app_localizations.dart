@@ -542,6 +542,12 @@ abstract class AppLocalizations {
   /// **'Cycling'**
   String get iconCycling;
 
+  /// Medicine icon label
+  ///
+  /// In en, this message translates to:
+  /// **'Medicine'**
+  String get iconMedication;
+
   /// Fitness category name
   ///
   /// In en, this message translates to:
@@ -631,6 +637,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cycling'**
   String get categoryBike;
+
+  /// Medicine category name
+  ///
+  /// In en, this message translates to:
+  /// **'Medicine'**
+  String get categoryMedication;
 
   /// Other category name
   ///
@@ -1616,6 +1628,42 @@ abstract class AppLocalizations {
   /// **'Your habit starts in 30 minutes. Get ready! 💪'**
   String get notificationHabitStartsSoon;
 
+  /// Notification body with daily goal count
+  ///
+  /// In en, this message translates to:
+  /// **'Daily goal: {count} times. Get ready! 💪'**
+  String notificationDailyGoal(int count);
+
+  /// Multiple scheduled times label
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled Times (optional)'**
+  String get scheduledTimesOptional;
+
+  /// Subtitle for multiple scheduled times
+  ///
+  /// In en, this message translates to:
+  /// **'Set a reminder time for each completion'**
+  String get setTimeForEachCompletion;
+
+  /// Completion number label
+  ///
+  /// In en, this message translates to:
+  /// **'Completion #{number}'**
+  String completionNumber(int number);
+
+  /// Placeholder for unset time
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to set time'**
+  String get tapToSetTime;
+
+  /// Button to add another scheduled time
+  ///
+  /// In en, this message translates to:
+  /// **'Add Another Time'**
+  String get addAnotherTime;
+
   /// Notification settings title
   ///
   /// In en, this message translates to:
@@ -1946,6 +1994,18 @@ abstract class AppLocalizations {
   /// **'Rolling towards success!'**
   String get celebrationBikeSubtitle;
 
+  /// Medication celebration title
+  ///
+  /// In en, this message translates to:
+  /// **'Taken! 💊'**
+  String get celebrationMedicationTitle;
+
+  /// Medication celebration subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Taking care of your health!'**
+  String get celebrationMedicationSubtitle;
+
   /// Default celebration title
   ///
   /// In en, this message translates to:
@@ -2089,6 +2149,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to generate image: {error}'**
   String failedToGenerateImage(String error);
+
+  /// Daily goal section title
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Goal'**
+  String get dailyGoal;
+
+  /// Times per day label
+  ///
+  /// In en, this message translates to:
+  /// **'times per day'**
+  String get timesPerDay;
+
+  /// Target count picker question
+  ///
+  /// In en, this message translates to:
+  /// **'How many times per day?'**
+  String get howManyTimes;
+
+  /// Time singular
+  ///
+  /// In en, this message translates to:
+  /// **'time'**
+  String get timesSingular;
+
+  /// Times plural
+  ///
+  /// In en, this message translates to:
+  /// **'times'**
+  String get timesPlural;
+
+  /// Progress indicator X of Y
+  ///
+  /// In en, this message translates to:
+  /// **'{completed} of {target}'**
+  String completedXOfY(int completed, int target);
+
+  /// Message when daily goal is reached
+  ///
+  /// In en, this message translates to:
+  /// **'Daily goal reached! 🎉'**
+  String get dailyGoalReached;
+
+  /// Completion number of target
+  ///
+  /// In en, this message translates to:
+  /// **'Completion {current} of {target}'**
+  String completionXOfY(int current, int target);
 }
 
 class _AppLocalizationsDelegate

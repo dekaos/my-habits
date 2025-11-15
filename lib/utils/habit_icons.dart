@@ -20,6 +20,7 @@ class HabitIcons {
     'water': Icons.water_drop,
     'heart': Icons.favorite,
     'health': Icons.health_and_safety,
+    'medication': Icons.medication,
 
     // Food & Nutrition
     'restaurant': Icons.restaurant,

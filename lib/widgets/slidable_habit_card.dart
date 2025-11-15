@@ -28,6 +28,7 @@ class _SlidableHabitCardState extends ConsumerState<SlidableHabitCard>
   late AnimationController _successController;
   late Animation<double> _scaleAnimation;
   bool _isProcessing = false;
+  int? _todayCompletionCount;
 
   @override
   void initState() {
@@ -39,6 +40,32 @@ class _SlidableHabitCardState extends ConsumerState<SlidableHabitCard>
     _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
       CurvedAnimation(parent: _successController, curve: Curves.easeInOut),
     );
+
+    if (widget.habit.targetCount > 1) {
+      _loadTodayCompletionCount();
+    }
+  }
+
+  @override
+  void didUpdateWidget(SlidableHabitCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.habit.id != widget.habit.id ||
+        oldWidget.habit.targetCount != widget.habit.targetCount) {
+      if (widget.habit.targetCount > 1) {
+        _loadTodayCompletionCount();
+      }
+    }
+  }
+
+  Future<void> _loadTodayCompletionCount() async {
+    final count = await ref
+        .read(habitProvider.notifier)
+        .getTodayCompletionCount(widget.habit.id);
+    if (mounted) {
+      setState(() {
+        _todayCompletionCount = count;
+      });
+    }
   }
 
   @override
@@ -52,15 +79,10 @@ class _SlidableHabitCardState extends ConsumerState<SlidableHabitCard>
 
     _isProcessing = true;
 
-    final settings = ref.read(notificationSettingsProvider);
     final settingsNotifier = ref.read(notificationSettingsProvider.notifier);
     final shouldPlaySound = settingsNotifier.shouldPlaySound();
     final shouldVibrate = settingsNotifier.shouldVibrate();
-
-    debugPrint(
-        '✅ Complete habit - Sound: ${settings.soundEnabled}, Vibration: ${settings.vibrationEnabled}');
-    debugPrint(
-        '   shouldPlaySound: $shouldPlaySound, shouldVibrate: $shouldVibrate');
+    final habitNotifier = ref.read(habitProvider.notifier);
 
     if (mounted) {
       showCelebration(
@@ -73,13 +95,22 @@ class _SlidableHabitCardState extends ConsumerState<SlidableHabitCard>
 
     _successController.forward().then((_) => _successController.reverse());
 
-    final habitNotifier = ref.read(habitProvider.notifier);
+    await habitNotifier.completeHabit(currentHabit);
 
-    habitNotifier.completeHabit(currentHabit).then((_) {
+    if (currentHabit.targetCount > 1) {
+      final newCount =
+          await habitNotifier.getTodayCompletionCount(currentHabit.id);
+      if (mounted) {
+        setState(() {
+          _todayCompletionCount = newCount;
+          _isProcessing = false;
+        });
+      }
+    } else {
       if (mounted) {
         setState(() => _isProcessing = false);
       }
-    });
+    }
   }
 
   Future<void> _handleUndo(Habit currentHabit) async {
@@ -87,13 +118,9 @@ class _SlidableHabitCardState extends ConsumerState<SlidableHabitCard>
 
     _isProcessing = true;
 
-    // Respect vibration settings for undo action
-    final settings = ref.read(notificationSettingsProvider);
     final settingsNotifier = ref.read(notificationSettingsProvider.notifier);
     final shouldVibrate = settingsNotifier.shouldVibrate();
-
-    debugPrint(
-        '🔄 Undo habit - Vibration setting: ${settings.vibrationEnabled}, shouldVibrate: $shouldVibrate');
+    final habitNotifier = ref.read(habitProvider.notifier);
 
     HapticService.playUndoHaptic(
       enableVibration: shouldVibrate,
@@ -101,34 +128,46 @@ class _SlidableHabitCardState extends ConsumerState<SlidableHabitCard>
 
     _successController.forward().then((_) => _successController.reverse());
 
-    final habitNotifier = ref.read(habitProvider.notifier);
-    habitNotifier.uncompleteHabit(currentHabit).then((_) {
+    await habitNotifier.uncompleteHabit(currentHabit);
+
+    if (currentHabit.targetCount > 1) {
+      final newCount =
+          await habitNotifier.getTodayCompletionCount(currentHabit.id);
+      if (mounted) {
+        setState(() {
+          _todayCompletionCount = newCount;
+          _isProcessing = false;
+        });
+      }
+    } else {
       if (mounted) {
         setState(() => _isProcessing = false);
-
-        final l10n = AppLocalizations.of(context)!;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.undo_rounded, color: Colors.white),
-                const SizedBox(width: 12),
-                Text(
-                  l10n.habitMarkedIncomplete(currentHabit.title),
-                  style: const TextStyle(fontWeight: FontWeight.w500),
-                ),
-              ],
-            ),
-            backgroundColor: Colors.orange.shade600,
-            behavior: SnackBarBehavior.floating,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            duration: const Duration(seconds: 2),
-            margin: const EdgeInsets.all(16),
-          ),
-        );
       }
-    });
+    }
+
+    if (mounted) {
+      final l10n = AppLocalizations.of(context)!;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.undo_rounded, color: Colors.white),
+              const SizedBox(width: 12),
+              Text(
+                l10n.habitMarkedIncomplete(currentHabit.title),
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.orange.shade600,
+          behavior: SnackBarBehavior.floating,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          duration: const Duration(seconds: 2),
+          margin: const EdgeInsets.all(16),
+        ),
+      );
+    }
   }
 
   @override
@@ -143,6 +182,10 @@ class _SlidableHabitCardState extends ConsumerState<SlidableHabitCard>
     );
     final isCompleted = habitNotifier.isHabitCompletedToday(currentHabit);
 
+    final isGoalReached = currentHabit.targetCount > 1
+        ? (_todayCompletionCount ?? 0) >= currentHabit.targetCount
+        : isCompleted;
+
     return ScaleTransition(
       scale: _scaleAnimation,
       child: Slidable(
@@ -152,7 +195,7 @@ class _SlidableHabitCardState extends ConsumerState<SlidableHabitCard>
           motion: const StretchMotion(),
           extentRatio: 0.25,
           children: [
-            if (isCompleted)
+            if (isGoalReached)
               CustomSlidableAction(
                 onPressed: (context) => _handleUndo(currentHabit),
                 backgroundColor: Colors.transparent,
@@ -207,7 +250,7 @@ class _SlidableHabitCardState extends ConsumerState<SlidableHabitCard>
                   ),
                 ),
               )
-            else
+            else if (!isGoalReached)
               CustomSlidableAction(
                 onPressed: (context) => _handleComplete(currentHabit),
                 backgroundColor: Colors.transparent,

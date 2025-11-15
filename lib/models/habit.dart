@@ -17,7 +17,9 @@ class Habit {
   final DateTime createdAt;
   final bool isPublic; // Share with friends
   final DateTime?
-      scheduledTime; // Optional time when habit should be done (hour and minute only)
+      scheduledTime; // Optional time when habit should be done (hour and minute only) - DEPRECATED, use scheduledTimes
+  final List<DateTime>
+      scheduledTimes; // Multiple scheduled times for recurring habits
   final List<String> accountabilityPartners; // User IDs
   int currentStreak;
   int longestStreak;
@@ -37,6 +39,7 @@ class Habit {
     this.targetCount = 1,
     this.isPublic = false,
     this.scheduledTime,
+    this.scheduledTimes = const [],
     this.accountabilityPartners = const [],
     this.currentStreak = 0,
     this.longestStreak = 0,
@@ -62,6 +65,11 @@ class Habit {
       scheduledTime: map['scheduled_time'] != null
           ? DateTime.parse(map['scheduled_time'])
           : null,
+      scheduledTimes: map['scheduled_times'] != null
+          ? (map['scheduled_times'] as List)
+              .map((e) => DateTime.parse(e as String))
+              .toList()
+          : [],
       accountabilityPartners:
           List<String>.from(map['accountability_partners'] ?? []),
       currentStreak: map['current_streak'] ?? 0,
@@ -87,6 +95,8 @@ class Habit {
       'created_at': createdAt.toIso8601String(),
       'is_public': isPublic,
       'scheduled_time': scheduledTime?.toIso8601String(),
+      'scheduled_times':
+          scheduledTimes.map((t) => t.toIso8601String()).toList(),
       'accountability_partners': accountabilityPartners,
       'current_streak': currentStreak,
       'longest_streak': longestStreak,
@@ -106,6 +116,7 @@ class Habit {
     bool? isPublic,
     DateTime? scheduledTime,
     bool clearScheduledTime = false,
+    List<DateTime>? scheduledTimes,
     List<String>? accountabilityPartners,
     int? currentStreak,
     int? longestStreak,
@@ -127,6 +138,7 @@ class Habit {
       isPublic: isPublic ?? this.isPublic,
       scheduledTime:
           clearScheduledTime ? null : (scheduledTime ?? this.scheduledTime),
+      scheduledTimes: scheduledTimes ?? this.scheduledTimes,
       accountabilityPartners:
           accountabilityPartners ?? this.accountabilityPartners,
       currentStreak: currentStreak ?? this.currentStreak,

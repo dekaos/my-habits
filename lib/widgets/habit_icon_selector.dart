@@ -27,6 +27,7 @@ class HabitIconSelector extends StatelessWidget {
     {'name': 'heart', 'icon': Icons.favorite},
     {'name': 'walk', 'icon': Icons.directions_walk},
     {'name': 'bike', 'icon': Icons.directions_bike},
+    {'name': 'medication', 'icon': Icons.medication},
   ];
 
   List<Map<String, dynamic>> _getIconOptions(BuildContext context) {
@@ -62,6 +63,11 @@ class HabitIconSelector extends StatelessWidget {
         'name': 'bike',
         'icon': Icons.directions_bike,
         'label': l10n.iconCycling
+      },
+      {
+        'name': 'medication',
+        'icon': Icons.medication,
+        'label': l10n.iconMedication
       },
     ];
   }

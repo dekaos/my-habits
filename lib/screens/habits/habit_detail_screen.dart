@@ -26,6 +26,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
   List<HabitCompletion> _completions = [];
   final _noteController = TextEditingController();
   bool _isCompleting = false;
+  int _todayCompletionCount = 0;
   late AnimationController _entranceController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
@@ -68,8 +69,12 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
     final completions = await ref
         .read(habitProvider.notifier)
         .getHabitCompletions(widget.habit.id);
+    final todayCount = await ref
+        .read(habitProvider.notifier)
+        .getTodayCompletionCount(widget.habit.id);
     setState(() {
       _completions = completions;
+      _todayCompletionCount = todayCount;
     });
   }
 
@@ -125,8 +130,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
       orElse: () => widget.habit,
     );
 
-    final habitNotifier = ref.read(habitProvider.notifier);
-    final isCompletedToday = habitNotifier.isHabitCompletedToday(currentHabit);
+    final isGoalReached = _todayCompletionCount >= currentHabit.targetCount;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -224,7 +228,126 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
                     ),
                     const SizedBox(height: 16),
 
-                    if (!isCompletedToday) ...[
+                    if (currentHabit.targetCount > 1) ...[
+                      TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0.0, end: 1.0),
+                        duration: const Duration(milliseconds: 650),
+                        curve: Curves.easeOutCubic,
+                        builder: (context, value, child) {
+                          return Transform.scale(
+                            scale: 0.9 + (value * 0.1),
+                            child: Opacity(
+                              opacity: value,
+                              child: child,
+                            ),
+                          );
+                        },
+                        child: GlassCard(
+                          padding: const EdgeInsets.all(20),
+                          enableGlow: false,
+                          color: isGoalReached
+                              ? Colors.green.withValues(alpha: 0.1)
+                              : Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withValues(alpha: 0.1),
+                          border: Border.all(
+                            color: isGoalReached
+                                ? Colors.green.withValues(alpha: 0.4)
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withValues(alpha: 0.3),
+                            width: 2,
+                          ),
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    isGoalReached
+                                        ? Icons.check_circle
+                                        : Icons.track_changes,
+                                    color: isGoalReached
+                                        ? Colors.green
+                                        : Theme.of(context).colorScheme.primary,
+                                    size: 28,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          l10n.dailyGoal,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          isGoalReached
+                                              ? l10n.dailyGoalReached
+                                              : l10n.completedXOfY(
+                                                  _todayCompletionCount,
+                                                  currentHabit.targetCount,
+                                                ),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.copyWith(
+                                                color: isGoalReached
+                                                    ? Colors.green.shade700
+                                                    : null,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Text(
+                                    '$_todayCompletionCount/${currentHabit.targetCount}',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: isGoalReached
+                                              ? Colors.green
+                                              : Theme.of(context)
+                                                  .colorScheme
+                                                  .primary,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: LinearProgressIndicator(
+                                  value: _todayCompletionCount /
+                                      currentHabit.targetCount,
+                                  minHeight: 8,
+                                  backgroundColor:
+                                      Colors.grey.withValues(alpha: 0.2),
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    isGoalReached
+                                        ? Colors.green
+                                        : Theme.of(context).colorScheme.primary,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+
+                    if (!isGoalReached) ...[
                       TweenAnimationBuilder<double>(
                         tween: Tween(begin: 0.0, end: 1.0),
                         duration: const Duration(milliseconds: 700),
@@ -273,15 +396,37 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
                               ),
                               const SizedBox(width: 16),
                               Expanded(
-                                child: Text(
-                                  l10n.completedToday,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.green.shade700,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      currentHabit.targetCount > 1
+                                          ? l10n.dailyGoalReached
+                                          : l10n.completedToday,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.green.shade700,
+                                          ),
+                                    ),
+                                    if (currentHabit.targetCount > 1) ...[
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        l10n.completedXOfY(
+                                          _todayCompletionCount,
+                                          currentHabit.targetCount,
+                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
+                                              color: Colors.green.shade600,
+                                            ),
                                       ),
+                                    ],
+                                  ],
                                 ),
                               ),
                             ],
@@ -432,6 +577,11 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
 
   Widget _buildCheckInSection(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final habitState = ref.watch(habitProvider);
+    final currentHabit = habitState.habits.firstWhere(
+      (h) => h.id == widget.habit.id,
+      orElse: () => widget.habit,
+    );
 
     return RepaintBoundary(
       child: GlassCard(
@@ -439,12 +589,41 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              l10n.checkIn,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: -0.5,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  l10n.checkIn,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: -0.5,
+                      ),
+                ),
+                if (currentHabit.targetCount > 1)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .primary
+                          .withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      l10n.completionXOfY(
+                        _todayCompletionCount + 1,
+                        currentHabit.targetCount,
+                      ),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                    ),
                   ),
+              ],
             ),
             const SizedBox(height: 16),
             GlassCard(

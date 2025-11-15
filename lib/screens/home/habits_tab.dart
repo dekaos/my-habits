@@ -365,6 +365,8 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
             child: Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: SlidableHabitCard(
+                key: ValueKey(
+                    '${habit.id}-${habit.totalCompletions}-${habit.lastCompletedDate}'),
                 habit: habit,
                 onTap: () {
                   Navigator.of(context).push(
@@ -420,6 +422,8 @@ class _HabitsTabState extends ConsumerState<HabitsTab> {
         return l10n.iconWalking;
       case 'bike':
         return l10n.iconCycling;
+      case 'medication':
+        return l10n.iconMedication;
       case 'other':
       default:
         return l10n.categoryOther;

@@ -24,6 +24,7 @@ class HabitCard extends ConsumerStatefulWidget {
 class _HabitCardState extends ConsumerState<HabitCard> {
   bool _isCompleting = false;
   late Color _color;
+  int? _todayCompletionCount;
 
   @override
   void initState() {
@@ -34,6 +35,30 @@ class _HabitCardState extends ConsumerState<HabitCard> {
     } catch (e) {
       debugPrint('Error parsing color ${widget.habit.color}: $e');
       _color = Colors.blue; // Fallback color
+    }
+
+    if (widget.habit.targetCount > 1) {
+      _loadTodayCompletionCount();
+    }
+  }
+
+  @override
+  void didUpdateWidget(HabitCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.habit.targetCount > 1) {
+      _loadTodayCompletionCount();
+    }
+  }
+
+  Future<void> _loadTodayCompletionCount() async {
+    final count = await ref
+        .read(habitProvider.notifier)
+        .getTodayCompletionCount(widget.habit.id);
+    if (mounted) {
+      setState(() {
+        _todayCompletionCount = count;
+      });
     }
   }
 
@@ -54,18 +79,31 @@ class _HabitCardState extends ConsumerState<HabitCard> {
     final habitNotifier = ref.read(habitProvider.notifier);
 
     if (isCompleted) {
-      // Uncomplete the habit
       await habitNotifier.uncompleteHabit(widget.habit);
     } else {
       // Complete the habit
       await habitNotifier.completeHabit(widget.habit);
     }
 
-    if (mounted) {
-      setState(() {
-        _isCompleting = false;
-      });
+    if (widget.habit.targetCount > 1) {
+      final newCount = await ref
+          .read(habitProvider.notifier)
+          .getTodayCompletionCount(widget.habit.id);
+      if (mounted) {
+        setState(() {
+          _todayCompletionCount = newCount;
+          _isCompleting = false;
+        });
+      }
+    } else {
+      if (mounted) {
+        setState(() {
+          _isCompleting = false;
+        });
+      }
+    }
 
+    if (mounted) {
       final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -90,10 +128,40 @@ class _HabitCardState extends ConsumerState<HabitCard> {
       orElse: () => widget.habit,
     );
 
+    ref.listen<HabitState>(habitProvider, (previous, next) {
+      final prevHabit = previous?.habits.firstWhere(
+        (h) => h.id == widget.habit.id,
+        orElse: () => widget.habit,
+      );
+      final nextHabit = next.habits.firstWhere(
+        (h) => h.id == widget.habit.id,
+        orElse: () => widget.habit,
+      );
+
+      if (prevHabit?.totalCompletions != nextHabit.totalCompletions ||
+          prevHabit?.lastCompletedDate != nextHabit.lastCompletedDate) {
+        if (nextHabit.targetCount > 1) {
+          _loadTodayCompletionCount();
+        }
+      }
+    });
+
     final isCompleted = habitNotifier.isHabitCompletedToday(currentHabit);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final streakProgress = currentHabit.currentStreak /
         (currentHabit.longestStreak > 0 ? currentHabit.longestStreak : 1);
+
+    final isGoalReached = currentHabit.targetCount > 1
+        ? (_todayCompletionCount ?? 0) >= currentHabit.targetCount
+        : isCompleted;
+    final completionProgress = currentHabit.targetCount > 1
+        ? (_todayCompletionCount ?? 0) / currentHabit.targetCount
+        : (isCompleted ? 1.0 : 0.0);
+
+    final shouldShowIconBadge = isGoalReached ||
+        (currentHabit.targetCount > 1 &&
+            (_todayCompletionCount ?? 0) > 0 &&
+            !isGoalReached);
 
     return RepaintBoundary(
       child: GestureDetector(
@@ -101,7 +169,7 @@ class _HabitCardState extends ConsumerState<HabitCard> {
         child: GlassCard(
           padding: const EdgeInsets.all(20),
           enableGlow: false,
-          color: isCompleted
+          color: isGoalReached
               ? Colors.green.withValues(alpha: isDark ? 0.1 : 0.05)
               : null,
           child: Column(
@@ -127,20 +195,20 @@ class _HabitCardState extends ConsumerState<HabitCard> {
                         ),
                       GestureDetector(
                         onTap: () async {
-                          if (!_isCompleting) {
-                            await _handleComplete(isCompleted);
+                          if (!_isCompleting && !isGoalReached) {
+                            await _handleComplete(false);
                           }
                         },
                         child: Container(
                           width: 56,
                           height: 56,
                           decoration: BoxDecoration(
-                            color: isCompleted
+                            color: isGoalReached
                                 ? Colors.green.withValues(alpha: 0.2)
                                 : _getColor().withValues(alpha: 0.15),
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: isCompleted
+                              color: isGoalReached
                                   ? Colors.green
                                   : _getColor().withValues(alpha: 0.5),
                               width: 2,
@@ -156,17 +224,63 @@ class _HabitCardState extends ConsumerState<HabitCard> {
                                     ),
                                   ),
                                 )
-                              : isCompleted
+                              : isGoalReached
                                   ? const Icon(
                                       Icons.check,
                                       color: Colors.green,
                                       size: 28,
                                     )
-                                  : Icon(
-                                      _getIcon(),
-                                      color: _getColor(),
-                                      size: 28,
-                                    ),
+                                  : currentHabit.targetCount > 1 &&
+                                          _todayCompletionCount != null &&
+                                          _todayCompletionCount! > 0
+                                      ? Stack(
+                                          alignment: Alignment.center,
+                                          children: [
+                                            SizedBox(
+                                              width: 48,
+                                              height: 48,
+                                              child: CircularProgressIndicator(
+                                                value: completionProgress,
+                                                strokeWidth: 3,
+                                                backgroundColor: _getColor()
+                                                    .withValues(alpha: 0.2),
+                                                valueColor:
+                                                    AlwaysStoppedAnimation<
+                                                        Color>(
+                                                  _getColor(),
+                                                ),
+                                              ),
+                                            ),
+                                            Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  '$_todayCompletionCount',
+                                                  style: TextStyle(
+                                                    color: _getColor(),
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 16,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  '/${currentHabit.targetCount}',
+                                                  style: TextStyle(
+                                                    color: _getColor()
+                                                        .withValues(alpha: 0.6),
+                                                    fontWeight: FontWeight.w600,
+                                                    fontSize: 10,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        )
+                                      : Icon(
+                                          _getIcon(),
+                                          color: _getColor(),
+                                          size: 28,
+                                        ),
                         ),
                       ),
                     ],
@@ -178,6 +292,25 @@ class _HabitCardState extends ConsumerState<HabitCard> {
                       children: [
                         Row(
                           children: [
+                            if (shouldShowIconBadge) ...[
+                              Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: isGoalReached
+                                      ? Colors.green.withValues(alpha: 0.15)
+                                      : _getColor().withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  _getIcon(),
+                                  size: 16,
+                                  color: isGoalReached
+                                      ? Colors.green
+                                      : _getColor(),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                            ],
                             Expanded(
                               child: Text(
                                 currentHabit.title,

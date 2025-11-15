@@ -170,6 +170,68 @@ class NotificationService {
     }
   }
 
+  Future<void> scheduleHabitNotificationWithId(
+    Habit habit, {
+    required DateTime scheduledTime,
+    required String notificationId,
+    String? localizedTitle,
+    String? localizedBody,
+    bool? playSound,
+    bool? enableVibration,
+  }) async {
+    try {
+      await initialize();
+
+      if (!_initialized) {
+        return;
+      }
+
+      final notificationTime =
+          scheduledTime.subtract(const Duration(minutes: 30));
+
+      final notificationDetails = await _getNotificationDetails(
+        habit,
+        playSound: playSound ?? true,
+        enableVibration: enableVibration ?? true,
+      );
+
+      _currentLocalizedTitle = localizedTitle;
+      _currentLocalizedBody = localizedBody;
+
+      final now = tz.TZDateTime.now(tz.local);
+      var scheduledDate = tz.TZDateTime(
+        tz.local,
+        scheduledTime.year,
+        scheduledTime.month,
+        scheduledTime.day,
+        notificationTime.hour,
+        notificationTime.minute,
+      );
+
+      if (scheduledDate.isBefore(now)) {
+        scheduledDate = scheduledDate.add(const Duration(days: 1));
+      }
+
+      await _notifications.zonedSchedule(
+        notificationId.hashCode,
+        _getNotificationTitle(habit),
+        _getNotificationBody(habit),
+        scheduledDate,
+        notificationDetails,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.time, // Repeat daily
+        payload: habit.id, // Include habit ID for navigation
+      );
+
+      _currentLocalizedTitle = null;
+      _currentLocalizedBody = null;
+    } catch (e) {
+      debugPrint('Error scheduling notification with ID: $e');
+    }
+  }
+
   Future<void> scheduleHabitNotification(
     Habit habit, {
     String? localizedTitle,
@@ -550,6 +612,11 @@ class NotificationService {
 
       for (int i = 0; i < 7; i++) {
         final notificationId = '${habitId}_day$i'.hashCode;
+        await _notifications.cancel(notificationId);
+      }
+
+      for (int i = 0; i < 5; i++) {
+        final notificationId = '${habitId}_completion_$i'.hashCode;
         await _notifications.cancel(notificationId);
       }
     } catch (e) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/habit_provider.dart';
+import '../../providers/notification_settings_provider.dart';
 import '../../models/habit.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/notification_service.dart';
@@ -28,7 +29,9 @@ class _EditHabitScreenState extends ConsumerState<EditHabitScreen> {
   late String _selectedColor;
   String? _selectedIcon;
   late bool _isPublic;
+  late int _targetCount;
   TimeOfDay? _selectedTime;
+  List<TimeOfDay?> _scheduledTimes = []; // Multiple times for recurring habits
 
   final List<String> _colorOptions = [
     '#6366F1', // Indigo
@@ -53,11 +56,20 @@ class _EditHabitScreenState extends ConsumerState<EditHabitScreen> {
     _selectedColor = widget.habit.color;
     _selectedIcon = widget.habit.icon;
     _isPublic = widget.habit.isPublic;
+    _targetCount = widget.habit.targetCount;
 
     // Convert DateTime to TimeOfDay if scheduled time exists
     if (widget.habit.scheduledTime != null) {
       final time = widget.habit.scheduledTime!;
       _selectedTime = TimeOfDay(hour: time.hour, minute: time.minute);
+    }
+
+    if (widget.habit.scheduledTimes.isNotEmpty) {
+      _scheduledTimes = widget.habit.scheduledTimes.map<TimeOfDay?>((dateTime) {
+        return TimeOfDay(hour: dateTime.hour, minute: dateTime.minute);
+      }).toList();
+    } else {
+      _scheduledTimes = List<TimeOfDay?>.filled(_targetCount, null);
     }
   }
 
@@ -88,9 +100,29 @@ class _EditHabitScreenState extends ConsumerState<EditHabitScreen> {
       _isSaving = true;
     });
 
+    final now = DateTime.now();
     DateTime? scheduledTime;
-    if (_selectedTime != null) {
-      final now = DateTime.now();
+    final List<DateTime> scheduledTimes = [];
+
+    if (_targetCount > 1 && _scheduledTimes.isNotEmpty) {
+      for (var timeOfDay in _scheduledTimes) {
+        if (timeOfDay != null) {
+          var tempTime = DateTime(
+            now.year,
+            now.month,
+            now.day,
+            timeOfDay.hour,
+            timeOfDay.minute,
+          );
+
+          if (tempTime.isBefore(now)) {
+            tempTime = tempTime.add(const Duration(days: 1));
+          }
+
+          scheduledTimes.add(tempTime);
+        }
+      }
+    } else if (_targetCount == 1 && _selectedTime != null) {
       var tempTime = DateTime(
         now.year,
         now.month,
@@ -132,6 +164,7 @@ class _EditHabitScreenState extends ConsumerState<EditHabitScreen> {
       frequency: _frequency,
       customDays: _customDays,
       isPublic: _isPublic,
+      targetCount: _targetCount,
     );
 
     final habitWithTime = Habit(
@@ -147,6 +180,7 @@ class _EditHabitScreenState extends ConsumerState<EditHabitScreen> {
       createdAt: updatedHabit.createdAt,
       isPublic: updatedHabit.isPublic,
       scheduledTime: scheduledTime,
+      scheduledTimes: scheduledTimes,
       accountabilityPartners: updatedHabit.accountabilityPartners,
       currentStreak: updatedHabit.currentStreak,
       longestStreak: updatedHabit.longestStreak,
@@ -156,12 +190,56 @@ class _EditHabitScreenState extends ConsumerState<EditHabitScreen> {
 
     await ref.read(habitProvider.notifier).updateHabit(habitWithTime);
 
-    if (widget.habit.scheduledTime != null && scheduledTime == null) {
-      try {
-        await NotificationService().cancelHabitNotification(widget.habit.id);
-      } catch (e) {
-        debugPrint('Error cancelling notification: $e');
+    try {
+      final notificationService = NotificationService();
+      final notificationSettings = ref.read(notificationSettingsProvider);
+
+      if (notificationSettings.pushNotificationsEnabled) {
+        await notificationService.cancelHabitNotification(widget.habit.id);
+
+        if (habitWithTime.scheduledTimes.isNotEmpty) {
+          final l10n = AppLocalizations.of(context)!;
+          final settingsNotifier =
+              ref.read(notificationSettingsProvider.notifier);
+
+          for (int i = 0; i < habitWithTime.scheduledTimes.length; i++) {
+            final scheduledTime = habitWithTime.scheduledTimes[i];
+            final completionNumber = i + 1;
+
+            final localizedTitle =
+                l10n.notificationTimeFor(habitWithTime.title);
+            final localizedBody = l10n.completionXOfY(
+                completionNumber, habitWithTime.targetCount);
+
+            await notificationService.scheduleHabitNotificationWithId(
+              habitWithTime,
+              scheduledTime: scheduledTime,
+              notificationId: '${habitWithTime.id}_completion_$i',
+              localizedTitle: localizedTitle,
+              localizedBody: localizedBody,
+              playSound: settingsNotifier.shouldPlaySound(),
+              enableVibration: settingsNotifier.shouldVibrate(),
+            );
+          }
+        } else if (habitWithTime.scheduledTime != null) {
+          final l10n = AppLocalizations.of(context)!;
+          final settingsNotifier =
+              ref.read(notificationSettingsProvider.notifier);
+
+          final localizedTitle = l10n.notificationTimeFor(habitWithTime.title);
+          final localizedBody = l10n.notificationHabitStartsSoon;
+
+          await notificationService.scheduleHabitNotification(
+            habitWithTime,
+            localizedTitle: localizedTitle,
+            localizedBody: localizedBody,
+            playSound: settingsNotifier.shouldPlaySound(),
+            enableVibration: settingsNotifier.shouldVibrate(),
+          );
+        }
       }
+    } catch (e) {
+      debugPrint('Error updating notifications: $e');
     }
 
     if (mounted) {
@@ -466,128 +544,471 @@ class _EditHabitScreenState extends ConsumerState<EditHabitScreen> {
 
                 const SizedBox(height: 16),
 
-                // Time picker
                 GlassCard(
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                l10n.scheduledTime,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                l10n.optional,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(
-                                      color: Colors.grey.shade600,
-                                    ),
-                              ),
-                            ],
-                          ),
-                          if (_selectedTime != null)
-                            IconButton(
-                              icon:
-                                  const Icon(Icons.clear, color: Colors.white),
-                              onPressed: () {
-                                setState(() {
-                                  _selectedTime = null;
-                                });
-                              },
-                              tooltip: l10n.clearTime,
+                      Text(
+                        l10n.dailyGoal,
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        l10n.howManyTimes,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.grey.shade600,
                             ),
-                        ],
                       ),
                       const SizedBox(height: 16),
-                      InkWell(
-                        onTap: () async {
-                          final TimeOfDay? picked = await showTimePicker(
-                            context: context,
-                            initialTime: _selectedTime ?? TimeOfDay.now(),
-                          );
-                          if (picked != null) {
-                            setState(() {
-                              _selectedTime = picked;
-                            });
-                          }
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          IconButton(
+                            onPressed: _targetCount > 1
+                                ? () {
+                                    setState(() {
+                                      _targetCount--;
+                                      if (_scheduledTimes.length >
+                                          _targetCount) {
+                                        _scheduledTimes.removeLast();
+                                      }
+                                    });
+                                  }
+                                : null,
+                            icon: const Icon(Icons.remove_circle_outline),
+                            iconSize: 32,
+                            color: _targetCount > 1
+                                ? Theme.of(context).colorScheme.primary
+                                : Colors.grey,
                           ),
-                          decoration: BoxDecoration(
-                            color:
-                                Theme.of(context).brightness == Brightness.dark
-                                    ? Colors.white.withValues(alpha: 0.05)
-                                    : Colors.white.withValues(alpha: 0.3),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: _selectedTime != null
-                                  ? Theme.of(context).colorScheme.primary
-                                  : (Theme.of(context).brightness ==
-                                          Brightness.dark
-                                      ? Colors.white.withValues(alpha: 0.2)
-                                      : Colors.grey.withValues(alpha: 0.3)),
-                              width: _selectedTime != null ? 2 : 1,
+                          const SizedBox(width: 24),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withValues(alpha: 0.3),
+                                width: 2,
+                              ),
+                            ),
+                            child: Column(
+                              children: [
+                                Text(
+                                  '$_targetCount',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineLarge
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                      ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  _targetCount == 1
+                                      ? l10n.timesSingular
+                                      : l10n.timesPlural,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary
+                                            .withValues(alpha: 0.8),
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                ),
+                              ],
                             ),
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
+                          const SizedBox(width: 24),
+                          IconButton(
+                            onPressed: _targetCount < 5
+                                ? () {
+                                    setState(() {
+                                      _targetCount++;
+                                      while (_scheduledTimes.length <
+                                          _targetCount) {
+                                        _scheduledTimes.add(null);
+                                      }
+                                    });
+                                  }
+                                : null,
+                            icon: const Icon(Icons.add_circle_outline),
+                            iconSize: 32,
+                            color: _targetCount < 5
+                                ? Theme.of(context).colorScheme.primary
+                                : Colors.grey,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                if (_targetCount > 1) ...[
+                  GlassCard(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.schedule,
+                              color: Theme.of(context).colorScheme.primary,
+                              size: 24,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Icon(
-                                    Icons.access_time,
-                                    color: _selectedTime != null
-                                        ? Theme.of(context).colorScheme.primary
-                                        : Colors.white,
-                                  ),
-                                  const SizedBox(width: 12),
                                   Text(
-                                    _selectedTime != null
-                                        ? _selectedTime!.format(context)
-                                        : l10n.selectTime,
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: _selectedTime != null
-                                          ? FontWeight.w600
-                                          : FontWeight.normal,
+                                    l10n.scheduledTimesOptional,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    l10n.setTimeForEachCompletion,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.copyWith(
+                                          color: Colors.grey.shade600,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        ...List.generate(_targetCount, (index) {
+                          while (_scheduledTimes.length <= index) {
+                            _scheduledTimes.add(null);
+                          }
+
+                          final timeOfDay = _scheduledTimes[index];
+                          final isSet = timeOfDay != null;
+
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            child: InkWell(
+                              onTap: () async {
+                                final TimeOfDay? picked = await showTimePicker(
+                                  context: context,
+                                  initialTime: timeOfDay ?? TimeOfDay.now(),
+                                );
+                                if (picked != null) {
+                                  setState(() {
+                                    _scheduledTimes[index] = picked;
+                                  });
+                                }
+                              },
+                              borderRadius: BorderRadius.circular(12),
+                              child: Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: isSet
+                                      ? Theme.of(context)
+                                          .colorScheme
+                                          .primary
+                                          .withValues(alpha: 0.1)
+                                      : Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? Colors.white.withValues(alpha: 0.05)
+                                          : Colors.white.withValues(alpha: 0.3),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: isSet
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Theme.of(context).brightness ==
+                                                Brightness.dark
+                                            ? Colors.white
+                                                .withValues(alpha: 0.2)
+                                            : Colors.grey
+                                                .withValues(alpha: 0.3),
+                                    width: isSet ? 2 : 1,
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 32,
+                                      height: 32,
+                                      decoration: BoxDecoration(
+                                        color: isSet
+                                            ? Theme.of(context)
+                                                .colorScheme
+                                                .primary
+                                            : Colors.grey
+                                                .withValues(alpha: 0.3),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          '${index + 1}',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            l10n.completionNumber(index + 1),
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall
+                                                ?.copyWith(
+                                                  color: isSet
+                                                      ? Theme.of(context)
+                                                          .colorScheme
+                                                          .primary
+                                                      : Colors.grey,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            isSet
+                                                ? timeOfDay.format(context)
+                                                : l10n.tapToSetTime,
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: isSet
+                                                  ? FontWeight.bold
+                                                  : FontWeight.normal,
+                                              color: isSet
+                                                  ? Theme.of(context)
+                                                      .colorScheme
+                                                      .primary
+                                                  : Colors.grey,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: Icon(
+                                        isSet
+                                            ? Icons.close
+                                            : Icons.add_circle_outline,
+                                        size: 20,
+                                      ),
+                                      color: isSet
+                                          ? Colors.red
+                                          : Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                      onPressed: () {
+                                        if (isSet && _targetCount > 1) {
+                                          setState(() {
+                                            _scheduledTimes.removeAt(index);
+                                            _targetCount--;
+                                          });
+                                        } else if (!isSet) {
+                                          showTimePicker(
+                                            context: context,
+                                            initialTime: TimeOfDay.now(),
+                                          ).then((picked) {
+                                            if (picked != null) {
+                                              setState(() {
+                                                _scheduledTimes[index] = picked;
+                                              });
+                                            }
+                                          });
+                                        }
+                                      },
+                                      tooltip: isSet ? l10n.remove : l10n.add,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        }),
+                        const SizedBox(height: 16),
+                        if (_targetCount < 5)
+                          Center(
+                            child: TextButton.icon(
+                              onPressed: () {
+                                setState(() {
+                                  _targetCount++;
+                                  _scheduledTimes.add(null);
+                                });
+                              },
+                              icon: const Icon(Icons.add_circle_outline),
+                              label: Text(l10n.addAnotherTime),
+                              style: TextButton.styleFrom(
+                                foregroundColor:
+                                    Theme.of(context).colorScheme.primary,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+
+                if (_targetCount == 1) ...[
+                  GlassCard(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l10n.scheduledTime,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  l10n.optional,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
+                                        color: Colors.grey.shade600,
+                                      ),
+                                ),
+                              ],
+                            ),
+                            if (_selectedTime != null)
+                              IconButton(
+                                icon: const Icon(Icons.clear,
+                                    color: Colors.white),
+                                onPressed: () {
+                                  setState(() {
+                                    _selectedTime = null;
+                                  });
+                                },
+                                tooltip: l10n.clearTime,
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        InkWell(
+                          onTap: () async {
+                            final TimeOfDay? picked = await showTimePicker(
+                              context: context,
+                              initialTime: _selectedTime ?? TimeOfDay.now(),
+                            );
+                            if (picked != null) {
+                              setState(() {
+                                _selectedTime = picked;
+                              });
+                            }
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? Colors.white.withValues(alpha: 0.05)
+                                  : Colors.white.withValues(alpha: 0.3),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: _selectedTime != null
+                                    ? Theme.of(context).colorScheme.primary
+                                    : (Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? Colors.white.withValues(alpha: 0.2)
+                                        : Colors.grey.withValues(alpha: 0.3)),
+                                width: _selectedTime != null ? 2 : 1,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.access_time,
                                       color: _selectedTime != null
                                           ? Theme.of(context)
                                               .colorScheme
                                               .primary
                                           : Colors.white,
                                     ),
-                                  ),
-                                ],
-                              ),
-                              const Icon(
-                                Icons.arrow_drop_down,
-                                color: Colors.white,
-                              ),
-                            ],
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      _selectedTime != null
+                                          ? _selectedTime!.format(context)
+                                          : l10n.selectTime,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: _selectedTime != null
+                                            ? FontWeight.w600
+                                            : FontWeight.normal,
+                                        color: _selectedTime != null
+                                            ? Theme.of(context)
+                                                .colorScheme
+                                                .primary
+                                            : Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const Icon(
+                                  Icons.arrow_drop_down,
+                                  color: Colors.white,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
+                ],
 
                 const SizedBox(height: 16),
 

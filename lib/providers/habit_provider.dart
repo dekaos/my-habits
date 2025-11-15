@@ -142,9 +142,11 @@ class HabitNotifier extends Notifier<HabitState> {
 
       int newStreak = habit.currentStreak;
       final lastCompleted = habit.lastCompletedDate;
+      bool isFirstCompletionToday = false;
 
       if (lastCompleted == null) {
         newStreak = 1;
+        isFirstCompletionToday = true;
       } else {
         final lastDate = DateTime(
           lastCompleted.year,
@@ -155,10 +157,12 @@ class HabitNotifier extends Notifier<HabitState> {
 
         if (difference == 1) {
           newStreak += 1;
+          isFirstCompletionToday = true;
         } else if (difference == 0) {
-          return;
+          isFirstCompletionToday = false;
         } else {
           newStreak = 1;
+          isFirstCompletionToday = true;
         }
       }
 
@@ -181,13 +185,13 @@ class HabitNotifier extends Notifier<HabitState> {
 
       state = state.copyWith(habits: updatedHabits);
 
-      debugPrint('📢 About to create habit activity...');
-      try {
-        await _createHabitActivity(habit, updatedHabit);
-      } catch (e) {
-        debugPrint('❌ Error creating activity: $e');
+      if (isFirstCompletionToday) {
+        try {
+          await _createHabitActivity(habit, updatedHabit);
+        } catch (e) {
+          debugPrint('Error creating activity: $e');
+        }
       }
-      debugPrint('📢 Finished creating habit activity');
 
       _updateUserStreakStats(habit.userId).catchError((e) {
         debugPrint('Error updating user streak stats: $e');
@@ -357,18 +361,15 @@ class HabitNotifier extends Notifier<HabitState> {
       final todayStart = today.toIso8601String();
       final todayEnd = today.add(const Duration(days: 1)).toIso8601String();
 
-      final optimisticHabit = habit.copyWith(
-        clearLastCompletedDate: true,
-        currentStreak: habit.currentStreak > 0 ? habit.currentStreak - 1 : 0,
-        totalCompletions:
-            habit.totalCompletions > 0 ? habit.totalCompletions - 1 : 0,
-      );
+      final todayCompletionsResponse = await _supabase
+          .from('habit_completions')
+          .select()
+          .eq('habit_id', habit.id)
+          .eq('user_id', habit.userId)
+          .gte('completed_at', todayStart)
+          .lt('completed_at', todayEnd);
 
-      final optimisticHabits = state.habits.map((h) {
-        return h.id == habit.id ? optimisticHabit : h;
-      }).toList();
-
-      state = state.copyWith(habits: optimisticHabits);
+      final completionsToDelete = (todayCompletionsResponse as List).length;
 
       await _supabase
           .from('habit_completions')
@@ -377,6 +378,20 @@ class HabitNotifier extends Notifier<HabitState> {
           .eq('user_id', habit.userId)
           .gte('completed_at', todayStart)
           .lt('completed_at', todayEnd);
+
+      final optimisticHabit = habit.copyWith(
+        clearLastCompletedDate: true,
+        currentStreak: habit.currentStreak > 0 ? habit.currentStreak - 1 : 0,
+        totalCompletions: habit.totalCompletions > completionsToDelete
+            ? habit.totalCompletions - completionsToDelete
+            : 0,
+      );
+
+      final optimisticHabits = state.habits.map((h) {
+        return h.id == habit.id ? optimisticHabit : h;
+      }).toList();
+
+      state = state.copyWith(habits: optimisticHabits);
 
       final previousCompletions = await _supabase
           .from('habit_completions')
@@ -453,6 +468,26 @@ class HabitNotifier extends Notifier<HabitState> {
     } catch (e) {
       debugPrint('Error loading all user completions: $e');
       return [];
+    }
+  }
+
+  Future<int> getTodayCompletionCount(String habitId) async {
+    try {
+      final now = DateTime.now();
+      final startOfDay = DateTime(now.year, now.month, now.day);
+      final endOfDay = startOfDay.add(const Duration(days: 1));
+
+      final response = await _supabase
+          .from('habit_completions')
+          .select()
+          .eq('habit_id', habitId)
+          .gte('completed_at', startOfDay.toIso8601String())
+          .lt('completed_at', endOfDay.toIso8601String());
+
+      return (response as List).length;
+    } catch (e) {
+      debugPrint('Error getting today completion count: $e');
+      return 0;
     }
   }
 

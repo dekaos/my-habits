@@ -320,6 +320,19 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
           icon: Icons.directions_bike,
           particles: const ['🚴', '💨', '⚡', '🌟'],
         );
+      case 'medication':
+        return CelebrationTheme(
+          colors: const [
+            Color(0xFFEF4444),
+            Color(0xFFF87171),
+            Color(0xFFFCA5A5)
+          ],
+          emoji: '💊',
+          title: l10n.celebrationMedicationTitle,
+          subtitle: l10n.celebrationMedicationSubtitle,
+          icon: Icons.medication,
+          particles: const ['💊', '💉', '🏥', '✨'],
+        );
       default:
         return CelebrationTheme(
           colors: const [
