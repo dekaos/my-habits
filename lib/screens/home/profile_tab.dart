@@ -228,21 +228,10 @@ class _ProfileTabState extends ConsumerState<ProfileTab>
           padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
           child: Column(
             children: [
-              TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0.0, end: 1.0),
-                duration: const Duration(milliseconds: 1000),
-                curve: Curves.elasticOut,
-                builder: (context, value, child) {
-                  return Transform.scale(
-                    scale: value,
-                    child: child,
-                  );
-                },
-                child: Icon(
-                  icon,
-                  size: 28,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+              Icon(
+                icon,
+                size: 28,
+                color: Theme.of(context).colorScheme.primary,
               ),
               const SizedBox(height: 8),
               Text(
@@ -253,14 +242,20 @@ class _ProfileTabState extends ConsumerState<ProfileTab>
                     ),
               ),
               const SizedBox(height: 4),
-              Text(
-                label,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: isDark ? Colors.grey[400] : Colors.grey[600],
-                      fontWeight: FontWeight.w500,
-                    ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              SizedBox(
+                height: 32, // Fixed height for 2 lines
+                child: Center(
+                  child: Text(
+                    label,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: isDark ? Colors.grey[400] : Colors.grey[600],
+                          fontWeight: FontWeight.w500,
+                        ),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
               ),
             ],
           ),
