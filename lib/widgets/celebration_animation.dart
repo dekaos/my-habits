@@ -87,9 +87,7 @@ class _CelebrationAnimationState extends State<CelebrationAnimation>
     super.didChangeDependencies();
 
     // Initialize theme with localization (can't do in initState)
-    if (_theme == null) {
-      _theme = _getThemeForIcon(context, widget.habitIcon, widget.habitColor);
-    }
+    _theme ??= _getThemeForIcon(context, widget.habitIcon, widget.habitColor);
 
     // Start animations only once
     if (!_hasStarted) {
