@@ -120,8 +120,8 @@ class NotificationSettingsNotifier extends Notifier<NotificationSettings> {
           habits,
           localizedTitleGenerator: localizedTitleGenerator,
           localizedBody: localizedBody,
-          playSound: shouldPlaySound(),
-          enableVibration: shouldVibrate(),
+          playSound: shouldNotificationPlaySound(),
+          enableVibration: shouldNotificationVibrate(),
         );
       } catch (e) {
         debugPrint('❌ Error rescheduling notifications: $e');
@@ -156,18 +156,20 @@ class NotificationSettingsNotifier extends Notifier<NotificationSettings> {
   }
 
   bool shouldPlaySound() {
-    final result = state.pushNotificationsEnabled &&
-        (state.useDeviceSound || state.soundEnabled);
-    debugPrint(
-        '🔊 shouldPlaySound: $result (push: ${state.pushNotificationsEnabled}, useDevice: ${state.useDeviceSound}, sound: ${state.soundEnabled})');
-    return result;
+    return state.useDeviceSound || state.soundEnabled;
   }
 
   bool shouldVibrate() {
-    final result = state.pushNotificationsEnabled && state.vibrationEnabled;
-    debugPrint(
-        '📳 shouldVibrate: $result (push: ${state.pushNotificationsEnabled}, vibration: ${state.vibrationEnabled})');
-    return result;
+    return state.vibrationEnabled;
+  }
+
+  bool shouldNotificationPlaySound() {
+    return state.pushNotificationsEnabled &&
+        (state.useDeviceSound || state.soundEnabled);
+  }
+
+  bool shouldNotificationVibrate() {
+    return state.pushNotificationsEnabled && state.vibrationEnabled;
   }
 }
 

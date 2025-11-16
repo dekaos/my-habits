@@ -114,8 +114,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           habitsWithSchedule,
           localizedTitleGenerator: (title) => l10n.notificationTimeFor(title),
           localizedBody: l10n.notificationHabitStartsSoon,
-          playSound: settingsNotifier.shouldPlaySound(),
-          enableVibration: settingsNotifier.shouldVibrate(),
+          playSound: settingsNotifier.shouldNotificationPlaySound(),
+          enableVibration: settingsNotifier.shouldNotificationVibrate(),
         );
       } else {
         await NotificationService().rescheduleAllHabitsForToday(

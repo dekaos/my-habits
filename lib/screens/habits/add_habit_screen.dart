@@ -181,8 +181,8 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
                 notificationId: '${habit.id}_completion_$i',
                 localizedTitle: localizedTitle,
                 localizedBody: localizedBody,
-                playSound: settingsNotifier.shouldPlaySound(),
-                enableVibration: settingsNotifier.shouldVibrate(),
+                playSound: settingsNotifier.shouldNotificationPlaySound(),
+                enableVibration: settingsNotifier.shouldNotificationVibrate(),
               );
             }
           } else if (habit.scheduledTime != null) {
@@ -193,8 +193,8 @@ class _AddHabitScreenState extends ConsumerState<AddHabitScreen> {
               habit,
               localizedTitle: localizedTitle,
               localizedBody: localizedBody,
-              playSound: settingsNotifier.shouldPlaySound(),
-              enableVibration: settingsNotifier.shouldVibrate(),
+              playSound: settingsNotifier.shouldNotificationPlaySound(),
+              enableVibration: settingsNotifier.shouldNotificationVibrate(),
             );
           }
         }
