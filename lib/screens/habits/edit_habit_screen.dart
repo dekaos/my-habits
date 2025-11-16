@@ -69,7 +69,8 @@ class _EditHabitScreenState extends ConsumerState<EditHabitScreen> {
         return TimeOfDay(hour: dateTime.hour, minute: dateTime.minute);
       }).toList();
     } else {
-      _scheduledTimes = List<TimeOfDay?>.filled(_targetCount, null);
+      _scheduledTimes =
+          List<TimeOfDay?>.generate(_targetCount, (_) => null, growable: true);
     }
   }
 
