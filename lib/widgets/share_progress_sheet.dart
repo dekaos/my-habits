@@ -737,10 +737,10 @@ class _ShareProgressSheetState extends State<ShareProgressSheet>
 
   Widget _buildShareOption(
     BuildContext context, {
+    required VoidCallback? onTap,
     required IconData icon,
     required String title,
     String? subtitle,
-    required VoidCallback? onTap,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
