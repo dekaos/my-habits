@@ -1,0 +1,67 @@
+{
+    "name": "Habit Hero - Build Better Habits Together",
+    "short_name": "Habit Hero",
+    "description": "Join thousands building better habits with social accountability, beautiful progress tracking, and real-time motivation from friends.",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#6366F1",
+    "theme_color": "#6366F1",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "icons/Icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "icons/Icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "icons/Icon-maskable-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "icons/Icon-maskable-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ],
+    "categories": [
+        "productivity",
+        "lifestyle",
+        "health"
+    ],
+    "screenshots": [
+        {
+            "src": "screenshots/screenshot1.png",
+            "type": "image/png",
+            "sizes": "540x720"
+        },
+        {
+            "src": "screenshots/screenshot2.png",
+            "type": "image/png",
+            "sizes": "540x720"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Add Habit",
+            "short_name": "Add",
+            "description": "Quickly add a new habit",
+            "url": "/add-habit",
+            "icons": [
+                {
+                    "src": "icons/Icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        }
+    ]
+}
